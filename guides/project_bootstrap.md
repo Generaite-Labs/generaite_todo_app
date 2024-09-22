@@ -150,6 +150,55 @@
      }
      ```
 
+* Use core Identity:
+  - Add Identity to Infrastructure:
+  ```bash
+  dotnet add ToDo.Infrastructure package Microsoft.AspNetCore.Identity
+  ```
+  - Add Identity and configuration to InfrastructureModule.cs:
+  ```csharp
+    using Microsoft.AspNetCore.Identity;
+    using ToDo.Domain.Entities;
+    ...
+    services.AddIdentity<ApplicationUser, IdentityRole>()
+        .AddEntityFrameworkStores<TodoDbContext>()
+        .AddDefaultTokenProviders();
+
+    services.Configure<IdentityOptions>(options =>
+    {
+      // Password settings
+      options.Password.RequireDigit = true;
+      options.Password.RequireLowercase = true;
+      options.Password.RequireNonAlphanumeric = true;
+      options.Password.RequireUppercase = true;
+      options.Password.RequiredLength = 6;
+      options.Password.RequiredUniqueChars = 1;
+
+      // Lockout settings
+      options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
+      options.Lockout.MaxFailedAccessAttempts = 5;
+      options.Lockout.AllowedForNewUsers = true;
+
+      // User settings
+      options.User.AllowedUserNameCharacters =
+                  "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
+      options.User.RequireUniqueEmail = false;
+    });
+    ```
+  - Make ToDoDbContext depend on IdentityDbContext
+    ```csharp
+    using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+    using Microsoft.EntityFrameworkCore;
+    using ToDo.Domain.Entities;
+
+    namespace ToDo.Infrastructure;
+
+    public class TodoDbContext : IdentityDbContext<ApplicationUser>
+    {
+      public TodoDbContext(DbContextOptions<TodoDbContext> options) : base(options) { }
+    }
+    ```
+
 1. Configure Blazor WebAssembly:
    - Update ToDo.Client/Program.cs:
      ```csharp

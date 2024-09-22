@@ -1,8 +1,10 @@
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using ToDo.Domain.Entities;
 
 namespace ToDo.Infrastructure;
 
-public class TodoDbContext : DbContext
+public class TodoDbContext : IdentityDbContext<ApplicationUser>
 {
   public TodoDbContext(DbContextOptions<TodoDbContext> options) : base(options) { }
 
