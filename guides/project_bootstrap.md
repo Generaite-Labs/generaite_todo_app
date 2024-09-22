@@ -199,23 +199,26 @@
     }
     ```
 
-1. Configure Blazor WebAssembly:
-   - Update ToDo.Client/Program.cs:
-     ```csharp
-     builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
-     ```
+#  Set up the initial API controller:
+  - Add these lines to your ToDo.Api Program.cs:
+    ```csharp
+    ...
+    builder.Services.AddControllers();
+    ...
+    app.MapControllers();
+    ```
+  - Create ApiController.cs in ToDo.Api/Controllers:
+    ```csharp
+    using Microsoft.AspNetCore.Mvc;
 
-2.  Set up the initial API controller:
-    - Create ApiController.cs in ToDo.Api/Controllers:
-      ```csharp
-      [ApiController]
-      [Route("api/[controller]")]
-      public abstract class ApiController : ControllerBase
-      {
-      }
-      ```
+    [ApiController]
+    [Route("api/[controller]")]
+    public abstract class ApiController : ControllerBase
+    {
+    }
+    ```
 
-3.  Configure CORS:
+1.  Configure CORS:
     - In ToDo.Api/Program.cs:
       ```csharp
       builder.Services.AddCors(options =>
@@ -230,11 +233,11 @@
       app.UseCors("AllowBlazorOrigin");
       ```
 
-4.  Set up initial Blazor components:
+2.  Set up initial Blazor components:
     - Create MainLayout.razor in ToDo.Client/Shared
     - Create Index.razor in ToDo.Client/Pages
 
-5.  Configure SignalR:
+3.  Configure SignalR:
     - Add SignalR client-side library to ToDo.Client:
       ```
       dotnet add ToDo.Client package Microsoft.AspNetCore.SignalR.Client
@@ -244,7 +247,7 @@
       builder.Services.AddSignalR();
       ```
 
-6.  Set up the test project:
+4.  Set up the test project:
     ```
     dotnet new xunit -n ToDo.Tests
     dotnet sln add ToDo.Tests/ToDo.Tests.csproj
@@ -253,7 +256,7 @@
     dotnet add ToDo.Tests package FluentAssertions
     ```
 
-7.  Update ToDo.Api/Program.cs to use InfrastructureModule and handle environment variables:
+5.  Update ToDo.Api/Program.cs to use InfrastructureModule and handle environment variables:
     ```csharp
     builder.Configuration.AddEnvironmentVariables();
 
