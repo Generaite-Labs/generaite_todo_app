@@ -65,17 +65,33 @@
 # Set up Entity Framework Core:
    - In ToDo.Infrastructure, create DatabaseConfig.cs:
      ```csharp
-     public class DatabaseConfig
-     {
-         public string ConnectionString { get; set; }
-     }
+      namespace ToDo.Infrastructure;
+
+      public class DatabaseConfig
+      {
+        public required string ConnectionString { get; set; }
+      }
      ```
    - Create TodoDbContext.cs in ToDo.Infrastructure:
      ```csharp
-     public class TodoDbContext : IdentityDbContext<ApplicationUser>
-     {
-         public TodoDbContext(DbContextOptions<TodoDbContext> options) : base(options) { }
-     }
+      using Microsoft.EntityFrameworkCore;
+
+      namespace ToDo.Infrastructure;
+
+      public class TodoDbContext : DbContext
+      {
+        public TodoDbContext(DbContextOptions<TodoDbContext> options) : base(options) { }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+          base.OnModelCreating(modelBuilder);
+          // Add any additional model configurations here
+        }
+
+        // Add DbSet properties for your entities here as you create them
+        // For example:
+        // public DbSet<TodoItem> TodoItems { get; set; }
+      }
      ```
    - Create InfrastructureModule.cs in ToDo.Infrastructure:
      ```csharp
