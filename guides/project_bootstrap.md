@@ -252,14 +252,3 @@
     dotnet add ToDo.Tests package FluentAssertions
     ```
 
-1.  Update ToDo.Api/Program.cs to use InfrastructureModule and handle environment variables:
-    ```csharp
-    builder.Configuration.AddEnvironmentVariables();
-
-    var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-    connectionString = connectionString.Replace("__TODO_DB_CONNECTION__", 
-        Environment.GetEnvironmentVariable("TODO_DB_CONNECTION") ?? connectionString);
-
-    builder.Services.Configure<DatabaseConfig>(options => options.ConnectionString = connectionString);
-    builder.Services.AddInfrastructureServices(builder.Configuration);
-    ```
