@@ -218,7 +218,7 @@
     }
     ```
 
-1.  Configure CORS:
+*  Configure CORS:
     - In ToDo.Api/Program.cs:
       ```csharp
       builder.Services.AddCors(options =>
@@ -233,21 +233,17 @@
       app.UseCors("AllowBlazorOrigin");
       ```
 
-2.  Set up initial Blazor components:
-    - Create MainLayout.razor in ToDo.Client/Shared
-    - Create Index.razor in ToDo.Client/Pages
-
-3.  Configure SignalR:
+*  Configure SignalR:
     - Add SignalR client-side library to ToDo.Client:
       ```
-      dotnet add ToDo.Client package Microsoft.AspNetCore.SignalR.Client
+      dotnet add ToDo.WebClient package Microsoft.AspNetCore.SignalR.Client
       ```
     - In ToDo.Api/Program.cs:
       ```csharp
       builder.Services.AddSignalR();
       ```
 
-4.  Set up the test project:
+3.  Set up the test project:
     ```
     dotnet new xunit -n ToDo.Tests
     dotnet sln add ToDo.Tests/ToDo.Tests.csproj
@@ -256,7 +252,7 @@
     dotnet add ToDo.Tests package FluentAssertions
     ```
 
-5.  Update ToDo.Api/Program.cs to use InfrastructureModule and handle environment variables:
+4.  Update ToDo.Api/Program.cs to use InfrastructureModule and handle environment variables:
     ```csharp
     builder.Configuration.AddEnvironmentVariables();
 
