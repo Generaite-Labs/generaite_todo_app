@@ -15,21 +15,21 @@
    - Add projects to the solution:
      ```
      dotnet sln add ToDo.Api/ToDo.Api.csproj
-     dotnet sln add ToDo.Client/ToDo.WebClient.csproj
+     dotnet sln add ToDo.WebClient/ToDo.WebClient.csproj
      dotnet sln add ToDo.Domain/ToDo.Domain.csproj
      dotnet sln add ToDo.Application/ToDo.Application.csproj
      dotnet sln add ToDo.Infrastructure/ToDo.Infrastructure.csproj
      ```
 
-1. Set up project dependencies:
-   - Add project references:
-     ```
-     dotnet add ToDo.Api reference ToDo.Application ToDo.Infrastructure
-     dotnet add ToDo.Application reference ToDo.Domain
-     dotnet add ToDo.Infrastructure reference ToDo.Application
-     ```
+# Set up project dependencies:
+  - Add project references:
+    ```
+    dotnet add ToDo.Api reference ToDo.Application ToDo.Infrastructure
+    dotnet add ToDo.Application reference ToDo.Domain
+    dotnet add ToDo.Infrastructure reference ToDo.Domain
+    ```
 
-2. Install necessary NuGet packages:
+# Install necessary NuGet packages:
    - For ToDo.Api:
      ```
      dotnet add ToDo.Api package Microsoft.EntityFrameworkCore.Design
@@ -47,7 +47,7 @@
      dotnet add ToDo.Application package FluentValidation.DependencyInjectionExtensions
      ```
 
-3. Configure the database connection:
+2. Configure the database connection:
    - In ToDo.Api, update appsettings.json with your PostgreSQL connection string:
      ```json
      {
@@ -57,7 +57,7 @@
      }
      ```
 
-4. Set up Entity Framework Core:
+3. Set up Entity Framework Core:
    - Create a DbContext in ToDo.Infrastructure:
      ```csharp
      public class TodoDbContext : DbContext
@@ -71,7 +71,7 @@
          options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
      ```
 
-5. Configure Serilog for logging:
+4. Configure Serilog for logging:
    - Update ToDo.Api/Program.cs to use Serilog:
      ```csharp
      using Serilog;
@@ -83,7 +83,7 @@
      builder.Host.UseSerilog();
      ```
 
-6. Set up ASP.NET Core Identity:
+5. Set up ASP.NET Core Identity:
    - Add Identity packages to ToDo.Infrastructure:
      ```
      dotnet add ToDo.Infrastructure package Microsoft.AspNetCore.Identity.EntityFrameworkCore
@@ -97,13 +97,13 @@
          .AddDefaultTokenProviders();
      ```
 
-7. Configure Blazor WebAssembly:
+6. Configure Blazor WebAssembly:
    - Update ToDo.Client/Program.cs to add necessary services:
      ```csharp
      builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
      ```
 
-8.  Set up the initial API controller:
+7.  Set up the initial API controller:
     - Create a base ApiController in ToDo.Api/Controllers:
       ```csharp
       [ApiController]
@@ -113,7 +113,7 @@
       }
       ```
 
-9.  Configure CORS:
+8.  Configure CORS:
     - In ToDo.Api/Program.cs, add CORS configuration:
       ```csharp
       builder.Services.AddCors(options =>
@@ -128,11 +128,11 @@
       app.UseCors("AllowBlazorOrigin");
       ```
 
-10. Set up initial Blazor components:
+9.  Set up initial Blazor components:
     - Create a MainLayout.razor in ToDo.Client/Shared
     - Create an Index.razor in ToDo.Client/Pages
 
-11. Configure SignalR (for real-time updates):
+10. Configure SignalR (for real-time updates):
     - Add SignalR client-side library to ToDo.Client:
       ```
       dotnet add ToDo.Client package Microsoft.AspNetCore.SignalR.Client
@@ -142,7 +142,7 @@
       builder.Services.AddSignalR();
       ```
 
-12. Set up the test project:
+11. Set up the test project:
     - Create a new xUnit test project:
       ```
       dotnet new xunit -n ToDo.Tests
