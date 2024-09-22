@@ -243,7 +243,7 @@
       builder.Services.AddSignalR();
       ```
 
-3.  Set up the test project:
+* Set up the test project:
     ```
     dotnet new xunit -n ToDo.Tests
     dotnet sln add ToDo.Tests/ToDo.Tests.csproj
@@ -252,7 +252,7 @@
     dotnet add ToDo.Tests package FluentAssertions
     ```
 
-4.  Update ToDo.Api/Program.cs to use InfrastructureModule and handle environment variables:
+1.  Update ToDo.Api/Program.cs to use InfrastructureModule and handle environment variables:
     ```csharp
     builder.Configuration.AddEnvironmentVariables();
 
@@ -263,11 +263,3 @@
     builder.Services.Configure<DatabaseConfig>(options => options.ConnectionString = connectionString);
     builder.Services.AddInfrastructureServices(builder.Configuration);
     ```
-
-This updated guide incorporates all the changes we've discussed, including:
-- Using environment variables (and user secrets for development) for the database connection string
-- Moving database configuration to the Infrastructure layer
-- Updating project dependencies to align with DDD principles
-- Setting up ASP.NET Core Identity in the Infrastructure layer
-
-Remember to never commit sensitive information like connection strings to version control. For production environments, you'll need to set up the TODO_DB_CONNECTION environment variable with the appropriate connection string.
