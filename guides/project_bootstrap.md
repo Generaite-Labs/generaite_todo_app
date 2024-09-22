@@ -137,7 +137,11 @@
      builder.Host.UseSerilog();
      ```
 
-1. Set up ASP.NET Core Identity:
+* Set up ASP.NET Core Identity:
+  - Install identity in Domain and Infrastructure:
+    ```bash
+    dotnet add package Microsoft.AspNetCore.Identity.EntityFrameworkCore
+    ```
    - Create ApplicationUser.cs in ToDo.Domain:
      ```csharp
      public class ApplicationUser : IdentityUser
@@ -146,13 +150,13 @@
      }
      ```
 
-2. Configure Blazor WebAssembly:
+1. Configure Blazor WebAssembly:
    - Update ToDo.Client/Program.cs:
      ```csharp
      builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
      ```
 
-3.  Set up the initial API controller:
+2.  Set up the initial API controller:
     - Create ApiController.cs in ToDo.Api/Controllers:
       ```csharp
       [ApiController]
@@ -162,7 +166,7 @@
       }
       ```
 
-4.  Configure CORS:
+3.  Configure CORS:
     - In ToDo.Api/Program.cs:
       ```csharp
       builder.Services.AddCors(options =>
@@ -177,11 +181,11 @@
       app.UseCors("AllowBlazorOrigin");
       ```
 
-5.  Set up initial Blazor components:
+4.  Set up initial Blazor components:
     - Create MainLayout.razor in ToDo.Client/Shared
     - Create Index.razor in ToDo.Client/Pages
 
-6.  Configure SignalR:
+5.  Configure SignalR:
     - Add SignalR client-side library to ToDo.Client:
       ```
       dotnet add ToDo.Client package Microsoft.AspNetCore.SignalR.Client
@@ -191,7 +195,7 @@
       builder.Services.AddSignalR();
       ```
 
-7.  Set up the test project:
+6.  Set up the test project:
     ```
     dotnet new xunit -n ToDo.Tests
     dotnet sln add ToDo.Tests/ToDo.Tests.csproj
@@ -200,7 +204,7 @@
     dotnet add ToDo.Tests package FluentAssertions
     ```
 
-8.  Update ToDo.Api/Program.cs to use InfrastructureModule and handle environment variables:
+7.  Update ToDo.Api/Program.cs to use InfrastructureModule and handle environment variables:
     ```csharp
     builder.Configuration.AddEnvironmentVariables();
 
