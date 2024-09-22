@@ -47,32 +47,64 @@
      dotnet add ToDo.Application package FluentValidation.DependencyInjectionExtensions
      ```
 
-2. Configure the database connection:
-   - In ToDo.Api, update appsettings.json with your PostgreSQL connection string:
+# Configure the database connection:
+   - In ToDo.Api, update appsettings.json:
      ```json
      {
        "ConnectionStrings": {
-         "DefaultConnection": "Host=localhost;Database=todo_db;Username=your_username;Password=your_password"
+         "DefaultConnection": "__TODO_DB_CONNECTION__"
        }
      }
      ```
+   - Set up a user secret for development:
+     ```
+     dotnet user-secrets init --project ToDo.Api
+     dotnet user-secrets set "ConnectionStrings:DefaultConnection" "Host=localhost;Database=ToDo;Username=postgres;Password=postgres" --project ToDo.Api
+     ```
 
-3. Set up Entity Framework Core:
-   - Create a DbContext in ToDo.Infrastructure:
+# Set up Entity Framework Core:
+   - In ToDo.Infrastructure, create DatabaseConfig.cs:
      ```csharp
-     public class TodoDbContext : DbContext
+     public class DatabaseConfig
+     {
+         public string ConnectionString { get; set; }
+     }
+     ```
+   - Create TodoDbContext.cs in ToDo.Infrastructure:
+     ```csharp
+     public class TodoDbContext : IdentityDbContext<ApplicationUser>
      {
          public TodoDbContext(DbContextOptions<TodoDbContext> options) : base(options) { }
      }
      ```
-   - Add DbContext configuration in ToDo.Api/Program.cs:
+   - Create InfrastructureModule.cs in ToDo.Infrastructure:
      ```csharp
-     builder.Services.AddDbContext<TodoDbContext>(options =>
-         options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+     public static class InfrastructureModule
+     {
+         public static IServiceCollection AddInfrastructureServices(this IServiceCollection services, IConfiguration configuration)
+         {
+             services.Configure<DatabaseConfig>(options => 
+                 options.ConnectionString = configuration.GetConnectionString("DefaultConnection"));
+             
+             services.AddDbContext<TodoDbContext>((serviceProvider, options) =>
+             {
+                 var dbConfig = serviceProvider.GetRequiredService<IOptions<DatabaseConfig>>();
+                 options.UseNpgsql(dbConfig.Value.ConnectionString);
+             });
+
+             services.AddIdentity<ApplicationUser, IdentityRole>()
+                 .AddEntityFrameworkStores<TodoDbContext>()
+                 .AddDefaultTokenProviders();
+
+             // Register other infrastructure services...
+
+             return services;
+         }
+     }
      ```
 
-4. Configure Serilog for logging:
-   - Update ToDo.Api/Program.cs to use Serilog:
+7. Configure Serilog for logging:
+   - Update ToDo.Api/Program.cs:
      ```csharp
      using Serilog;
 
@@ -83,28 +115,23 @@
      builder.Host.UseSerilog();
      ```
 
-5. Set up ASP.NET Core Identity:
-   - Add Identity packages to ToDo.Infrastructure:
-     ```
-     dotnet add ToDo.Infrastructure package Microsoft.AspNetCore.Identity.EntityFrameworkCore
-     ```
-   - Create an ApplicationUser class in ToDo.Domain
-   - Update TodoDbContext to inherit from IdentityDbContext<ApplicationUser>
-   - Configure Identity in ToDo.Api/Program.cs:
+8. Set up ASP.NET Core Identity:
+   - Create ApplicationUser.cs in ToDo.Domain:
      ```csharp
-     builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
-         .AddEntityFrameworkStores<TodoDbContext>()
-         .AddDefaultTokenProviders();
+     public class ApplicationUser : IdentityUser
+     {
+         // Add custom user properties here
+     }
      ```
 
-6. Configure Blazor WebAssembly:
-   - Update ToDo.Client/Program.cs to add necessary services:
+9. Configure Blazor WebAssembly:
+   - Update ToDo.Client/Program.cs:
      ```csharp
      builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
      ```
 
-7.  Set up the initial API controller:
-    - Create a base ApiController in ToDo.Api/Controllers:
+10. Set up the initial API controller:
+    - Create ApiController.cs in ToDo.Api/Controllers:
       ```csharp
       [ApiController]
       [Route("api/[controller]")]
@@ -113,8 +140,8 @@
       }
       ```
 
-8.  Configure CORS:
-    - In ToDo.Api/Program.cs, add CORS configuration:
+11. Configure CORS:
+    - In ToDo.Api/Program.cs:
       ```csharp
       builder.Services.AddCors(options =>
       {
@@ -128,31 +155,45 @@
       app.UseCors("AllowBlazorOrigin");
       ```
 
-9.  Set up initial Blazor components:
-    - Create a MainLayout.razor in ToDo.Client/Shared
-    - Create an Index.razor in ToDo.Client/Pages
+12. Set up initial Blazor components:
+    - Create MainLayout.razor in ToDo.Client/Shared
+    - Create Index.razor in ToDo.Client/Pages
 
-10. Configure SignalR (for real-time updates):
+13. Configure SignalR:
     - Add SignalR client-side library to ToDo.Client:
       ```
       dotnet add ToDo.Client package Microsoft.AspNetCore.SignalR.Client
       ```
-    - In ToDo.Api/Program.cs, add SignalR services:
+    - In ToDo.Api/Program.cs:
       ```csharp
       builder.Services.AddSignalR();
       ```
 
-11. Set up the test project:
-    - Create a new xUnit test project:
-      ```
-      dotnet new xunit -n ToDo.Tests
-      dotnet sln add ToDo.Tests/ToDo.Tests.csproj
-      ```
-    - Add necessary test packages:
-      ```
-      dotnet add ToDo.Tests package bUnit
-      dotnet add ToDo.Tests package AutoFixture
-      dotnet add ToDo.Tests package FluentAssertions
-      ```
+14. Set up the test project:
+    ```
+    dotnet new xunit -n ToDo.Tests
+    dotnet sln add ToDo.Tests/ToDo.Tests.csproj
+    dotnet add ToDo.Tests package bUnit
+    dotnet add ToDo.Tests package AutoFixture
+    dotnet add ToDo.Tests package FluentAssertions
+    ```
 
-This setup provides a solid foundation for your To-Do application based on the architectural decisions made. You now have a basic project structure with the necessary dependencies and configurations in place. The next steps would involve creating specific domain models, implementing repositories, services, and setting up API endpoints and Blazor components. However, as per your request, I've focused on getting the project bootstrapped without delving into those specifics.
+15. Update ToDo.Api/Program.cs to use InfrastructureModule and handle environment variables:
+    ```csharp
+    builder.Configuration.AddEnvironmentVariables();
+
+    var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+    connectionString = connectionString.Replace("__TODO_DB_CONNECTION__", 
+        Environment.GetEnvironmentVariable("TODO_DB_CONNECTION") ?? connectionString);
+
+    builder.Services.Configure<DatabaseConfig>(options => options.ConnectionString = connectionString);
+    builder.Services.AddInfrastructureServices(builder.Configuration);
+    ```
+
+This updated guide incorporates all the changes we've discussed, including:
+- Using environment variables (and user secrets for development) for the database connection string
+- Moving database configuration to the Infrastructure layer
+- Updating project dependencies to align with DDD principles
+- Setting up ASP.NET Core Identity in the Infrastructure layer
+
+Remember to never commit sensitive information like connection strings to version control. For production environments, you'll need to set up the TODO_DB_CONNECTION environment variable with the appropriate connection string.
