@@ -118,8 +118,14 @@
          }
      }
      ```
+  - Add Infrastructure Services to your API Program.cs:
+    ```csharp
+    using ToDo.Infrastructure;
+    ...
+    builder.Services.AddInfrastructureServices(builder.Configuration);
+    ```
 
-7. Configure Serilog for logging:
+* Configure Serilog for logging:
    - Update ToDo.Api/Program.cs:
      ```csharp
      using Serilog;
@@ -131,7 +137,7 @@
      builder.Host.UseSerilog();
      ```
 
-8. Set up ASP.NET Core Identity:
+1. Set up ASP.NET Core Identity:
    - Create ApplicationUser.cs in ToDo.Domain:
      ```csharp
      public class ApplicationUser : IdentityUser
@@ -140,13 +146,13 @@
      }
      ```
 
-9. Configure Blazor WebAssembly:
+2. Configure Blazor WebAssembly:
    - Update ToDo.Client/Program.cs:
      ```csharp
      builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
      ```
 
-10. Set up the initial API controller:
+3.  Set up the initial API controller:
     - Create ApiController.cs in ToDo.Api/Controllers:
       ```csharp
       [ApiController]
@@ -156,7 +162,7 @@
       }
       ```
 
-11. Configure CORS:
+4.  Configure CORS:
     - In ToDo.Api/Program.cs:
       ```csharp
       builder.Services.AddCors(options =>
@@ -171,11 +177,11 @@
       app.UseCors("AllowBlazorOrigin");
       ```
 
-12. Set up initial Blazor components:
+5.  Set up initial Blazor components:
     - Create MainLayout.razor in ToDo.Client/Shared
     - Create Index.razor in ToDo.Client/Pages
 
-13. Configure SignalR:
+6.  Configure SignalR:
     - Add SignalR client-side library to ToDo.Client:
       ```
       dotnet add ToDo.Client package Microsoft.AspNetCore.SignalR.Client
@@ -185,7 +191,7 @@
       builder.Services.AddSignalR();
       ```
 
-14. Set up the test project:
+7.  Set up the test project:
     ```
     dotnet new xunit -n ToDo.Tests
     dotnet sln add ToDo.Tests/ToDo.Tests.csproj
@@ -194,7 +200,7 @@
     dotnet add ToDo.Tests package FluentAssertions
     ```
 
-15. Update ToDo.Api/Program.cs to use InfrastructureModule and handle environment variables:
+8.  Update ToDo.Api/Program.cs to use InfrastructureModule and handle environment variables:
     ```csharp
     builder.Configuration.AddEnvironmentVariables();
 
