@@ -14,6 +14,14 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddInfrastructureServices(builder.Configuration);
 builder.Services.AddControllers();
 
+builder.Services.AddCors(options =>
+{
+  options.AddPolicy("AllowBlazorOrigin",
+            builder => builder.WithOrigins("https://localhost:5001")
+                              .AllowAnyMethod()
+                              .AllowAnyHeader());
+});
+
 builder.Host.UseSerilog();
 
 var app = builder.Build();
@@ -29,6 +37,7 @@ app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+app.UseCors("AllowBlazorOrigin");
 
 var summaries = new[]
 {
