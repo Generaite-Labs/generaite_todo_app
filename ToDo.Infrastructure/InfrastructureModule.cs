@@ -2,7 +2,9 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using ToDo.Domain.Entities;
+using ToDo.Core.Configuration;
 
 namespace ToDo.Infrastructure;
 
@@ -10,14 +12,11 @@ public static class InfrastructureModule
 {
   public static IServiceCollection AddInfrastructureServices(this IServiceCollection services, IConfiguration configuration)
   {
-    var connectionString = configuration.GetConnectionString("DefaultConnection")
-        ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
-
-    services.Configure<DatabaseConfig>(options =>
-        options.ConnectionString = connectionString);
-
-    services.AddDbContext<TodoDbContext>(options =>
-        options.UseNpgsql(connectionString));
+    services.AddDbContext<TodoDbContext>((serviceProvider, options) =>
+    {
+      var databaseOptions = serviceProvider.GetRequiredService<IOptions<DatabaseOptions>>().Value;
+      options.UseNpgsql(databaseOptions.ConnectionString);
+    });
 
     services.AddIdentity<ApplicationUser, IdentityRole>()
         .AddEntityFrameworkStores<TodoDbContext>()
@@ -40,7 +39,7 @@ public static class InfrastructureModule
 
       // User settings
       options.User.AllowedUserNameCharacters =
-                  "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
+              "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
       options.User.RequireUniqueEmail = false;
     });
 

@@ -1,4 +1,5 @@
 using ToDo.Infrastructure;
+using ToDo.Core.Configuration;
 using Serilog;
 
 Log.Logger = new LoggerConfiguration()
@@ -7,11 +8,27 @@ Log.Logger = new LoggerConfiguration()
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Configure the host
+builder.Host.UseSerilog();
+
+// Add configuration
+builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+                     .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true)
+                     .AddEnvironmentVariables("TODO_");
+
 // Add services to the container.
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+// Add application configuration
+builder.Services.AddOptions<DatabaseOptions>()
+    .Bind(builder.Configuration.GetSection(DatabaseOptions.Database))
+    .ValidateDataAnnotations()
+    .ValidateOnStart();
+
+// Add infrastructure services
 builder.Services.AddInfrastructureServices(builder.Configuration);
+
 builder.Services.AddControllers();
 builder.Services.AddSignalR();
 
