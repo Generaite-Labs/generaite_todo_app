@@ -7,7 +7,7 @@
         +created_at: DateTime
         +updated_at: DateTime
     }
-    class Task {
+    class TodoItem {
         +id: Int
         +title: String
         +description: String
@@ -18,7 +18,7 @@
         +created_at: DateTime
         +updated_at: DateTime
     }
-    class TaskList {
+    class TodoItemList {
         +id: Int
         +name: String
         +user_id: Int

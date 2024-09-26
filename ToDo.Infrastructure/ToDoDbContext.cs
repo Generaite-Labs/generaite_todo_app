@@ -2,19 +2,36 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using ToDo.Domain.Entities;
 
-namespace ToDo.Infrastructure;
-
-public class TodoDbContext : IdentityDbContext<ApplicationUser>
+namespace ToDo.Infrastructure
 {
-  public TodoDbContext(DbContextOptions<TodoDbContext> options) : base(options) { }
-
-  protected override void OnModelCreating(ModelBuilder modelBuilder)
+  public class TodoDbContext : IdentityDbContext<ApplicationUser>
   {
-    base.OnModelCreating(modelBuilder);
-    // Add any additional model configurations here
-  }
+    public TodoDbContext(DbContextOptions<TodoDbContext> options) : base(options) { }
 
-  // Add DbSet properties for your entities here as you create them
-  // For example:
-  // public DbSet<TodoItem> TodoItems { get; set; }
+    public DbSet<TodoItem> TodoItems { get; set; }
+    public DbSet<TodoItemList> TodoItemLists { get; set; }
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+      base.OnModelCreating(modelBuilder);
+
+      modelBuilder.Entity<TodoItem>()
+          .HasOne(t => t.User)
+          .WithMany(u => u.TodoItems)
+          .HasForeignKey(t => t.UserId)
+          .OnDelete(DeleteBehavior.Cascade);
+
+      modelBuilder.Entity<TodoItem>()
+          .HasOne(t => t.TodoItemList)
+          .WithMany(tl => tl.TodoItems)
+          .HasForeignKey(t => t.TodoItemListId)
+          .OnDelete(DeleteBehavior.SetNull);
+
+      modelBuilder.Entity<TodoItemList>()
+          .HasOne(tl => tl.User)
+          .WithMany(u => u.TodoItemLists)
+          .HasForeignKey(tl => tl.UserId)
+          .OnDelete(DeleteBehavior.Cascade);
+    }
+  }
 }

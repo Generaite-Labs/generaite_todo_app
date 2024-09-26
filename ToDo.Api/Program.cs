@@ -35,7 +35,7 @@ builder.Services.AddSignalR();
 builder.Services.AddCors(options =>
 {
   options.AddPolicy("AllowBlazorOrigin",
-            builder => builder.WithOrigins("https://localhost:5001")
+            builder => builder.WithOrigins("https://localhost:5146")
                               .AllowAnyMethod()
                               .AllowAnyHeader());
 });
