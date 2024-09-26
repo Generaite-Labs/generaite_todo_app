@@ -12,8 +12,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Host.UseSerilog();
 
 // Add configuration
-builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-                     .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true)
+builder.Configuration.AddJsonFile(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "appsettings.json"), optional: false, reloadOnChange: true)
+                     .AddJsonFile(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, $"appsettings.{builder.Environment.EnvironmentName}.json"), optional: true)
                      .AddEnvironmentVariables("TODO_");
 
 // Add services to the container.
