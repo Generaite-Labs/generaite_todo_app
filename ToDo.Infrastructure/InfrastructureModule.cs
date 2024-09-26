@@ -5,6 +5,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using ToDo.Domain.Entities;
 using ToDo.Core.Configuration;
+using ToDo.Domain.Interfaces;
+using ToDo.Infrastructure.Repositories;
 
 namespace ToDo.Infrastructure;
 
@@ -42,6 +44,10 @@ public static class InfrastructureModule
               "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
       options.User.RequireUniqueEmail = false;
     });
+
+
+    services.AddScoped<ITodoItemRepository, TodoItemRepository>();
+    services.AddScoped<ITodoItemListRepository, TodoItemListRepository>();
 
     // Register other infrastructure services...
 

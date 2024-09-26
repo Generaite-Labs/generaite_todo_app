@@ -8,30 +8,38 @@ namespace ToDo.Infrastructure
   {
     public TodoDbContext(DbContextOptions<TodoDbContext> options) : base(options) { }
 
-    public DbSet<TodoItem> TodoItems { get; set; }
-    public DbSet<TodoItemList> TodoItemLists { get; set; }
+    public DbSet<TodoItem> TodoItems { get; set; } = null!;
+    public DbSet<TodoItemList> TodoItemLists { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
       base.OnModelCreating(modelBuilder);
 
-      modelBuilder.Entity<TodoItem>()
-          .HasOne(t => t.User)
-          .WithMany(u => u.TodoItems)
-          .HasForeignKey(t => t.UserId)
-          .OnDelete(DeleteBehavior.Cascade);
+      modelBuilder.Entity<TodoItem>(entity =>
+      {
+        entity.HasOne(t => t.User)
+              .WithMany(u => u.TodoItems)
+              .HasForeignKey(t => t.UserId)
+              .OnDelete(DeleteBehavior.Cascade);
 
-      modelBuilder.Entity<TodoItem>()
-          .HasOne(t => t.TodoItemList)
-          .WithMany(tl => tl.TodoItems)
-          .HasForeignKey(t => t.TodoItemListId)
-          .OnDelete(DeleteBehavior.SetNull);
+        entity.HasOne(t => t.TodoItemList)
+              .WithMany(tl => tl.TodoItems)
+              .HasForeignKey(t => t.TodoItemListId)
+              .OnDelete(DeleteBehavior.SetNull);
 
-      modelBuilder.Entity<TodoItemList>()
-          .HasOne(tl => tl.User)
-          .WithMany(u => u.TodoItemLists)
-          .HasForeignKey(tl => tl.UserId)
-          .OnDelete(DeleteBehavior.Cascade);
+        entity.Property(t => t.Title).HasMaxLength(200);
+        entity.Property(t => t.Description).HasMaxLength(1000);
+      });
+
+      modelBuilder.Entity<TodoItemList>(entity =>
+      {
+        entity.HasOne(tl => tl.User)
+              .WithMany(u => u.TodoItemLists)
+              .HasForeignKey(tl => tl.UserId)
+              .OnDelete(DeleteBehavior.Cascade);
+
+        entity.Property(tl => tl.Name).HasMaxLength(100);
+      });
     }
   }
 }
