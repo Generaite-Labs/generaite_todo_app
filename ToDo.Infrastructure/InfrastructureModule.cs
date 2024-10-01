@@ -50,6 +50,7 @@ public static class InfrastructureModule
     services.AddScoped<ITodoItemRepository, TodoItemRepository>();
     services.AddScoped<ITodoItemListRepository, TodoItemListRepository>();
     services.AddScoped<ITodoItemService, TodoItemService>();
+    services.AddScoped<ITodoItemListService, TodoItemListService>();
 
     // Register other infrastructure services...
 
