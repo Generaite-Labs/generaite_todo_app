@@ -15,10 +15,9 @@ ToDo.sln
 │   │   └── Validators/
 │   │
 │   ├── ToDo.Infrastructure/
-│   │   ├── Data/
-│   │   │   ├── Configurations/
-│   │   │   ├── Migrations/
-│   │   │   └── Repositories/
+│   │   ├── Configurations/
+│   │   ├── Migrations/
+│   │   ├── Repositories/
 │   │   ├── Identity/
 │   │   ├── Logging/
 │   │   └── ExternalServices/

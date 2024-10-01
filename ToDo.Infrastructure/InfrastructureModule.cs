@@ -7,6 +7,7 @@ using ToDo.Domain.Entities;
 using ToDo.Core.Configuration;
 using ToDo.Domain.Interfaces;
 using ToDo.Infrastructure.Repositories;
+using ToDo.Application.Services;
 
 namespace ToDo.Infrastructure;
 
@@ -48,6 +49,7 @@ public static class InfrastructureModule
 
     services.AddScoped<ITodoItemRepository, TodoItemRepository>();
     services.AddScoped<ITodoItemListRepository, TodoItemListRepository>();
+    services.AddScoped<ITodoItemService, TodoItemService>();
 
     // Register other infrastructure services...
 

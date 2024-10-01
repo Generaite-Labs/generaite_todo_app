@@ -1,0 +1,37 @@
+using System;
+using ToDo.Domain.Entities;
+
+namespace ToDo.Application.DTOs
+{
+    public class TodoItemDto
+    {
+        public int Id { get; set; }
+        public string Title { get; set; } = string.Empty;
+        public string? Description { get; set; }
+        public TodoItemStatus Status { get; set; }
+        public DateTime? DueDate { get; set; }
+        public string UserId { get; set; } = string.Empty;
+        public int? TodoItemListId { get; set; }
+        public DateTime CreatedAt { get; set; }
+        public DateTime UpdatedAt { get; set; }
+    }
+
+    public class CreateTodoItemDto
+    {
+        public string Title { get; set; } = string.Empty;
+        public string? Description { get; set; }
+        public TodoItemStatus Status { get; set; }
+        public DateTime? DueDate { get; set; }
+        public string UserId { get; set; } = string.Empty;
+        public int? TodoItemListId { get; set; }
+    }
+
+    public class UpdateTodoItemDto
+    {
+        public string Title { get; set; } = string.Empty;
+        public string? Description { get; set; }
+        public TodoItemStatus Status { get; set; }
+        public DateTime? DueDate { get; set; }
+        public int? TodoItemListId { get; set; }
+    }
+}

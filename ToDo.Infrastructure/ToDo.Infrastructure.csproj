@@ -3,6 +3,7 @@
   <ItemGroup>
     <ProjectReference Include="..\ToDo.Domain\ToDo.Domain.csproj" />
     <ProjectReference Include="..\ToDo.Core\ToDo.Core.csproj" />
+    <ProjectReference Include="..\ToDo.Application\ToDo.Application.csproj" />
   </ItemGroup>
 
   <ItemGroup>
