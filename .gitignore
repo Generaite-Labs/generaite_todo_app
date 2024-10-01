@@ -260,3 +260,5 @@ $RECYCLE.BIN/
 # Env file
 .env
 .aider*
+code.cs
+docs.md
