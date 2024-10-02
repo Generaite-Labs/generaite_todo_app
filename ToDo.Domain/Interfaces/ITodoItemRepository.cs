@@ -1,6 +1,5 @@
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using ToDo.Domain.Entities;
+using ToDo.Domain.Common;
 
 namespace ToDo.Domain.Interfaces
 {
@@ -13,5 +12,6 @@ namespace ToDo.Domain.Interfaces
     Task<TodoItem> AddAsync(TodoItem todoItem);
     Task UpdateAsync(TodoItem todoItem);
     Task DeleteAsync(int id);
+    Task<PaginatedResult<TodoItem>> GetPagedAsync(string userId, PaginationRequest paginationRequest);
   }
 }

@@ -11,5 +11,6 @@ namespace ToDo.Application.Services
     Task<TodoItemDto> CreateAsync(CreateTodoItemDto todoItemDto);
     Task<TodoItemDto> UpdateAsync(int id, UpdateTodoItemDto todoItemDto);
     Task DeleteAsync(int id);
+    Task<PaginatedResultDto<TodoItemDto>> GetPagedAsync(string userId, PaginationRequestDto paginationRequestDto);
   }
 }

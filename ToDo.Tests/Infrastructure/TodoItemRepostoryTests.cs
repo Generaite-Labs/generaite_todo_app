@@ -1,11 +1,8 @@
+
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Linq;
-using System.Threading.Tasks;
 using ToDo.Domain.Entities;
-using ToDo.Infrastructure;
+using ToDo.Domain.Common;
 using ToDo.Infrastructure.Repositories;
-using Xunit;
 
 namespace ToDo.Infrastructure.Tests
 {
@@ -163,6 +160,99 @@ namespace ToDo.Infrastructure.Tests
       Assert.Equal(0, _context.TodoItems.Count());
       var dbTodoItem = await _context.TodoItems.FindAsync(todoItem.Id);
       Assert.Null(dbTodoItem);
+    }
+
+
+    [Fact]
+    public async Task GetPagedAsync_ReturnsCorrectItemsAndNextCursor()
+    {
+      // Arrange
+      var options = new DbContextOptionsBuilder<TodoDbContext>()
+          .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
+          .Options;
+
+      using (var context = new TodoDbContext(options))
+      {
+        var userId = "testUser";
+        var items = new List<TodoItem>
+                {
+                    new TodoItem { Id = 1, Title = "Item 1", UserId = userId },
+                    new TodoItem { Id = 2, Title = "Item 2", UserId = userId },
+                    new TodoItem { Id = 3, Title = "Item 3", UserId = userId },
+                    new TodoItem { Id = 4, Title = "Item 4", UserId = userId },
+                    new TodoItem { Id = 5, Title = "Item 5", UserId = userId },
+                };
+        context.TodoItems.AddRange(items);
+        context.SaveChanges();
+      }
+
+      using (var context = new TodoDbContext(options))
+      {
+        var repository = new TodoItemRepository(context);
+
+        // Act
+        var result = await repository.GetPagedAsync(
+            "testUser",
+            new PaginationRequest(2, null) // Request 2 items per page, starting from the beginning
+        );
+
+        // Assert
+        Assert.Equal(2, result.Items.Count());
+        Assert.Equal("Item 1", result.Items.First().Title);
+        Assert.Equal("Item 2", result.Items.Last().Title);
+        Assert.NotNull(result.NextCursor);
+        Assert.True(result.HasNextPage);
+
+        // Act again with the next cursor
+        result = await repository.GetPagedAsync(
+            "testUser",
+            new PaginationRequest(2, result.NextCursor)
+        );
+
+        // Assert
+        Assert.Equal(2, result.Items.Count());
+        Assert.Equal("Item 3", result.Items.First().Title);
+        Assert.Equal("Item 4", result.Items.Last().Title);
+        Assert.NotNull(result.NextCursor);
+        Assert.True(result.HasNextPage);
+
+        // Act one last time to get the last page
+        result = await repository.GetPagedAsync(
+            "testUser",
+            new PaginationRequest(2, result.NextCursor)
+        );
+
+        // Assert
+        Assert.Single(result.Items);
+        Assert.Equal("Item 5", result.Items.First().Title);
+        Assert.Null(result.NextCursor);
+        Assert.False(result.HasNextPage);
+      }
+    }
+
+    [Fact]
+    public async Task GetPagedAsync_WithNonExistentUser_ReturnsEmptyResult()
+    {
+      // Arrange
+      var options = new DbContextOptionsBuilder<TodoDbContext>()
+          .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
+          .Options;
+
+      using (var context = new TodoDbContext(options))
+      {
+        var repository = new TodoItemRepository(context);
+
+        // Act
+        var result = await repository.GetPagedAsync(
+            "nonExistentUser",
+            new PaginationRequest(10, null)
+        );
+
+        // Assert
+        Assert.Empty(result.Items);
+        Assert.Null(result.NextCursor);
+        Assert.False(result.HasNextPage);
+      }
     }
 
     public void Dispose()

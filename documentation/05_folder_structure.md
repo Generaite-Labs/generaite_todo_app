@@ -6,6 +6,7 @@ ToDo.sln
 │   │   ├── ValueObjects/
 │   │   ├── Aggregates/
 │   │   ├── Events/
+│   │   ├── Common/
 │   │   └── Interfaces/
 │   │
 │   ├── ToDo.Application/
