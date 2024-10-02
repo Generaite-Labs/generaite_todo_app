@@ -1,0 +1,7 @@
+bin/
+obj/
+.aider*
+wwwroot/
+repopack*
+.gitignore
+documentation/
