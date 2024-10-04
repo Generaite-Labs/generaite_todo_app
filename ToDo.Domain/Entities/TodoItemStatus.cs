@@ -4,6 +4,6 @@ namespace ToDo.Domain.Entities
   {
     TODO,
     IN_PROGRESS,
-    DONE
+    COMPLETED
   }
 }

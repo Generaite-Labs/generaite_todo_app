@@ -12,6 +12,11 @@ namespace ToDo.Application.Mappers
             CreateMap<CreateTodoItemDto, TodoItem>();
             CreateMap<UpdateTodoItemDto, TodoItem>()
                 .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
+
+            // Add mappings for TodoItemStatus
+            CreateMap<TodoItemStatus, TodoItemStatus>().ConvertUsing((src, dest) => src);
+            CreateMap<TodoItemStatus?, TodoItemStatus>().ConvertUsing((src, dest) => src ?? dest);
+            CreateMap<TodoItemStatus, TodoItemStatus?>().ConvertUsing((src, dest) => src);
         }
     }
 }

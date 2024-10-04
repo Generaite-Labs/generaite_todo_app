@@ -17,6 +17,8 @@ namespace ToDo.Domain.Entities
 
     public DateTime? DueDate { get; set; }
 
+    public DateTime? CompletedAt { get; set; }
+
     public required string UserId { get; set; }
 
     [ForeignKey("UserId")]

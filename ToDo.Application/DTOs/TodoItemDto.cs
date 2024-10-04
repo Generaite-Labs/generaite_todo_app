@@ -1,5 +1,4 @@
 using System;
-using ToDo.Domain.Entities;
 
 namespace ToDo.Application.DTOs
 {
@@ -8,8 +7,9 @@ namespace ToDo.Application.DTOs
         public int Id { get; set; }
         public string Title { get; set; } = string.Empty;
         public string? Description { get; set; }
-        public TodoItemStatus Status { get; set; }
+        public TodoItemStatusDto Status { get; set; }
         public DateTime? DueDate { get; set; }
+        public DateTime? CompletedAt { get; set; }
         public string UserId { get; set; } = string.Empty;
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
@@ -19,7 +19,7 @@ namespace ToDo.Application.DTOs
     {
         public string Title { get; set; } = string.Empty;
         public string? Description { get; set; }
-        public TodoItemStatus Status { get; set; }
+        public TodoItemStatusDto Status { get; set; }
         public DateTime? DueDate { get; set; }
         public string UserId { get; set; } = string.Empty;
     }
@@ -28,7 +28,14 @@ namespace ToDo.Application.DTOs
     {
         public string Title { get; set; } = string.Empty;
         public string? Description { get; set; }
-        public TodoItemStatus Status { get; set; }
+        public TodoItemStatusDto Status { get; set; }
+        public DateTime? CompletedAt { get; set; }
         public DateTime? DueDate { get; set; }
+    }
+    public enum TodoItemStatusDto
+    {
+        TODO,
+        IN_PROGRESS,
+        COMPLETED
     }
 }

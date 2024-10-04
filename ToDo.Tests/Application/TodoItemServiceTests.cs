@@ -103,7 +103,7 @@ namespace ToDo.Tests.Application
       {
         Title = "New Item",
         UserId = "user1",
-        Status = TodoItemStatus.TODO
+        Status = (TodoItemStatusDto)TodoItemStatus.TODO
       };
       var createdItem = new TodoItem
       {
@@ -119,7 +119,7 @@ namespace ToDo.Tests.Application
         Id = 1,
         Title = "New Item",
         UserId = "user1",
-        Status = TodoItemStatus.TODO,
+        Status = (TodoItemStatusDto)TodoItemStatus.TODO,
         CreatedAt = createdItem.CreatedAt,
         UpdatedAt = createdItem.UpdatedAt
       };
@@ -135,7 +135,7 @@ namespace ToDo.Tests.Application
       result.Id.Should().Be(1);
       result.Title.Should().Be("New Item");
       result.UserId.Should().Be("user1");
-      result.Status.Should().Be(TodoItemStatus.TODO);
+      result.Status.Should().Be((TodoItemStatusDto)TodoItemStatus.TODO);
       result.CreatedAt.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(1));
       result.UpdatedAt.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(1));
 
@@ -172,7 +172,7 @@ namespace ToDo.Tests.Application
       var updateDto = new UpdateTodoItemDto
       {
         Title = "Updated Title",
-        Status = TodoItemStatus.IN_PROGRESS
+        Status = (TodoItemStatusDto)TodoItemStatus.IN_PROGRESS
       };
       var updatedItem = new TodoItem
       {
@@ -187,14 +187,14 @@ namespace ToDo.Tests.Application
         Id = 1,
         Title = "Updated Title",
         UserId = "user1",
-        Status = TodoItemStatus.IN_PROGRESS,
+        Status = (TodoItemStatusDto)TodoItemStatus.IN_PROGRESS,
         UpdatedAt = updatedItem.UpdatedAt
       };
       _mockRepo.Setup(repo => repo.GetByIdAsync(1)).ReturnsAsync(existingItem);
       _mockMapper.Setup(mapper => mapper.Map(updateDto, existingItem)).Callback<UpdateTodoItemDto, TodoItem>((src, dest) =>
       {
         dest.Title = src.Title;
-        dest.Status = src.Status;
+        dest.Status = (TodoItemStatus)src.Status;
       });
       _mockRepo.Setup(repo => repo.UpdateAsync(It.IsAny<TodoItem>())).Returns(Task.CompletedTask);
       _mockMapper.Setup(mapper => mapper.Map<TodoItemDto>(It.IsAny<TodoItem>())).Returns(updatedItemDto);
@@ -206,7 +206,7 @@ namespace ToDo.Tests.Application
       result.Should().NotBeNull();
       result.Id.Should().Be(1);
       result.Title.Should().Be("Updated Title");
-      result.Status.Should().Be(TodoItemStatus.IN_PROGRESS);
+      result.Status.Should().Be((TodoItemStatusDto)TodoItemStatus.IN_PROGRESS);
       result.UpdatedAt.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(1));
 
       // Verify that UpdateAsync was called with the correct item
