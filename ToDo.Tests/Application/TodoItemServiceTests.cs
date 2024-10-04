@@ -1,4 +1,3 @@
-
 using Moq;
 using FluentAssertions;
 using ToDo.Domain.Entities;
@@ -7,6 +6,7 @@ using ToDo.Application.Services;
 using ToDo.Application.DTOs;
 using Microsoft.Extensions.Logging;
 using ToDo.Domain.Common;
+using AutoMapper;
 
 namespace ToDo.Tests.Application
 {
@@ -14,13 +14,15 @@ namespace ToDo.Tests.Application
   {
     private readonly Mock<ITodoItemRepository> _mockRepo;
     private readonly Mock<ILogger<TodoItemService>> _mockLogger;
+    private readonly Mock<IMapper> _mockMapper;
     private readonly ITodoItemService _service;
 
     public TodoItemServiceTests()
     {
       _mockRepo = new Mock<ITodoItemRepository>();
       _mockLogger = new Mock<ILogger<TodoItemService>>();
-      _service = new TodoItemService(_mockRepo.Object, _mockLogger.Object);
+      _mockMapper = new Mock<IMapper>();
+      _service = new TodoItemService(_mockRepo.Object, _mockLogger.Object, _mockMapper.Object);
     }
 
     [Fact]
@@ -28,7 +30,9 @@ namespace ToDo.Tests.Application
     {
       // Arrange
       var todoItem = new TodoItem { Id = 1, Title = "Test Item", UserId = "user1" };
+      var todoItemDto = new TodoItemDto { Id = 1, Title = "Test Item", UserId = "user1" };
       _mockRepo.Setup(repo => repo.GetByIdAsync(1)).ReturnsAsync(todoItem);
+      _mockMapper.Setup(mapper => mapper.Map<TodoItemDto>(todoItem)).Returns(todoItemDto);
 
       // Act
       var result = await _service.GetByIdAsync(1);
@@ -59,7 +63,13 @@ namespace ToDo.Tests.Application
                 new TodoItem { Id = 1, Title = "Item 1", UserId = "user1" },
                 new TodoItem { Id = 2, Title = "Item 2", UserId = "user2" }
             };
+      var todoItemDtos = new List<TodoItemDto>
+            {
+                new TodoItemDto { Id = 1, Title = "Item 1", UserId = "user1" },
+                new TodoItemDto { Id = 2, Title = "Item 2", UserId = "user2" }
+            };
       _mockRepo.Setup(repo => repo.GetAllAsync()).ReturnsAsync(todoItems);
+      _mockMapper.Setup(mapper => mapper.Map<IEnumerable<TodoItemDto>>(todoItems)).Returns(todoItemDtos);
 
       // Act
       var result = await _service.GetAllAsync();
@@ -80,8 +90,6 @@ namespace ToDo.Tests.Application
           Times.Once);
     }
 
-    // Add more tests for other methods...
-
     [Fact]
     public async Task CreateAsync_ShouldReturnCreatedTodoItemDto()
     {
@@ -101,7 +109,18 @@ namespace ToDo.Tests.Application
         CreatedAt = DateTime.UtcNow,
         UpdatedAt = DateTime.UtcNow
       };
+      var createdItemDto = new TodoItemDto
+      {
+        Id = 1,
+        Title = "New Item",
+        UserId = "user1",
+        Status = TodoItemStatus.TODO,
+        CreatedAt = createdItem.CreatedAt,
+        UpdatedAt = createdItem.UpdatedAt
+      };
+      _mockMapper.Setup(mapper => mapper.Map<TodoItem>(createDto)).Returns(createdItem);
       _mockRepo.Setup(repo => repo.AddAsync(It.IsAny<TodoItem>())).ReturnsAsync(createdItem);
+      _mockMapper.Setup(mapper => mapper.Map<TodoItemDto>(createdItem)).Returns(createdItemDto);
 
       // Act
       var result = await _service.CreateAsync(createDto);
@@ -150,7 +169,29 @@ namespace ToDo.Tests.Application
         Title = "Updated Title",
         Status = TodoItemStatus.IN_PROGRESS
       };
+      var updatedItem = new TodoItem
+      {
+        Id = 1,
+        Title = "Updated Title",
+        UserId = "user1",
+        Status = TodoItemStatus.IN_PROGRESS,
+        UpdatedAt = DateTime.UtcNow
+      };
+      var updatedItemDto = new TodoItemDto
+      {
+        Id = 1,
+        Title = "Updated Title",
+        UserId = "user1",
+        Status = TodoItemStatus.IN_PROGRESS,
+        UpdatedAt = updatedItem.UpdatedAt
+      };
       _mockRepo.Setup(repo => repo.GetByIdAsync(1)).ReturnsAsync(existingItem);
+      _mockMapper.Setup(mapper => mapper.Map(updateDto, existingItem)).Callback<UpdateTodoItemDto, TodoItem>((src, dest) => {
+        dest.Title = src.Title;
+        dest.Status = src.Status;
+      });
+      _mockRepo.Setup(repo => repo.UpdateAsync(It.IsAny<TodoItem>())).Returns(Task.CompletedTask);
+      _mockMapper.Setup(mapper => mapper.Map<TodoItemDto>(It.IsAny<TodoItem>())).Returns(updatedItemDto);
 
       // Act
       var result = await _service.UpdateAsync(1, updateDto);
@@ -161,6 +202,13 @@ namespace ToDo.Tests.Application
       result.Title.Should().Be("Updated Title");
       result.Status.Should().Be(TodoItemStatus.IN_PROGRESS);
       result.UpdatedAt.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(1));
+
+      // Verify that UpdateAsync was called with the correct item
+      _mockRepo.Verify(repo => repo.UpdateAsync(It.Is<TodoItem>(item =>
+        item.Id == 1 &&
+        item.Title == "Updated Title" &&
+        item.Status == TodoItemStatus.IN_PROGRESS)),
+      Times.Once);
     }
 
     [Fact]
@@ -191,10 +239,17 @@ namespace ToDo.Tests.Application
                 new TodoItem { Id = 2, Title = "Task 2", UserId = userId }
             };
 
+      var todoItemDtos = new List<TodoItemDto>
+            {
+                new TodoItemDto { Id = 1, Title = "Task 1", UserId = userId },
+                new TodoItemDto { Id = 2, Title = "Task 2", UserId = userId }
+            };
+
       var domainPaginatedResult = new PaginatedResult<TodoItem>(todoItems, "nextPageCursor");
 
       _mockRepo.Setup(repo => repo.GetPagedAsync(userId, It.IsAny<PaginationRequest>()))
                      .ReturnsAsync(domainPaginatedResult);
+      _mockMapper.Setup(mapper => mapper.Map<List<TodoItemDto>>(todoItems)).Returns(todoItemDtos);
 
       // Act
       var result = await _service.GetPagedAsync(userId, paginationRequestDto);
@@ -224,10 +279,16 @@ namespace ToDo.Tests.Application
                 new TodoItem { Id = 3, Title = "Task 3", UserId = userId }
             };
 
+      var todoItemDtos = new List<TodoItemDto>
+            {
+                new TodoItemDto { Id = 3, Title = "Task 3", UserId = userId }
+            };
+
       var domainPaginatedResult = new PaginatedResult<TodoItem>(todoItems, null);
 
       _mockRepo.Setup(repo => repo.GetPagedAsync(userId, It.IsAny<PaginationRequest>()))
                      .ReturnsAsync(domainPaginatedResult);
+      _mockMapper.Setup(mapper => mapper.Map<List<TodoItemDto>>(It.IsAny<List<TodoItem>>())).Returns(todoItemDtos);
 
       // Act
       var result = await _service.GetPagedAsync(userId, paginationRequestDto);
@@ -242,7 +303,6 @@ namespace ToDo.Tests.Application
       _mockRepo.Verify(repo => repo.GetPagedAsync(userId, It.Is<PaginationRequest>(pr =>
           pr.Limit == paginationRequestDto.Limit && pr.Cursor == paginationRequestDto.Cursor)), Times.Once);
     }
-
     [Fact]
     public async Task GetPagedAsync_WithEmptyResult_ReturnsEmptyPaginatedResultDto()
     {
@@ -252,10 +312,12 @@ namespace ToDo.Tests.Application
       var domainPaginationRequest = new PaginationRequest(paginationRequestDto.Limit, paginationRequestDto.Cursor);
 
       var emptyList = new List<TodoItem>();
+      var emptyDtoList = new List<TodoItemDto>();
       var domainPaginatedResult = new PaginatedResult<TodoItem>(emptyList, null);
 
       _mockRepo.Setup(repo => repo.GetPagedAsync(userId, It.IsAny<PaginationRequest>()))
-                     .ReturnsAsync(domainPaginatedResult);
+                       .ReturnsAsync(domainPaginatedResult);
+      _mockMapper.Setup(mapper => mapper.Map<List<TodoItemDto>>(It.IsAny<List<TodoItem>>())).Returns(emptyDtoList);
 
       // Act
       var result = await _service.GetPagedAsync(userId, paginationRequestDto);

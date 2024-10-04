@@ -3,6 +3,7 @@ using ToDo.Core.Configuration;
 using Serilog;
 using ToDo.Api;
 using Serilog.Events;
+using ToDo.Application.Mappers;
 
 Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
@@ -49,6 +50,8 @@ try
                                   .AllowAnyMethod()
                                   .AllowAnyHeader());
   });
+
+  builder.Services.AddAutoMapper(typeof(TodoItemMappingProfile));
 
   var app = builder.Build();
 
