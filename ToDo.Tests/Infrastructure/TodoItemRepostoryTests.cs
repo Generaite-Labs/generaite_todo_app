@@ -3,6 +3,8 @@ using Microsoft.EntityFrameworkCore;
 using ToDo.Domain.Entities;
 using ToDo.Domain.Common;
 using ToDo.Infrastructure.Repositories;
+using Microsoft.Extensions.Logging;
+using Moq;
 
 namespace ToDo.Infrastructure.Tests
 {
@@ -10,6 +12,7 @@ namespace ToDo.Infrastructure.Tests
   {
     private readonly TodoDbContext _context;
     private readonly TodoItemRepository _repository;
+    private readonly Mock<ILogger<TodoItemRepository>> _mockLogger;
 
     public TodoItemRepositoryTests()
     {
@@ -18,7 +21,8 @@ namespace ToDo.Infrastructure.Tests
           .Options;
 
       _context = new TodoDbContext(options);
-      _repository = new TodoItemRepository(_context);
+      _mockLogger = new Mock<ILogger<TodoItemRepository>>();
+      _repository = new TodoItemRepository(_context, _mockLogger.Object);
     }
 
     [Fact]
@@ -188,7 +192,8 @@ namespace ToDo.Infrastructure.Tests
 
       using (var context = new TodoDbContext(options))
       {
-        var repository = new TodoItemRepository(context);
+        var mockLogger = new Mock<ILogger<TodoItemRepository>>();
+        var repository = new TodoItemRepository(context, mockLogger.Object);
 
         // Act
         var result = await repository.GetPagedAsync(
@@ -240,7 +245,8 @@ namespace ToDo.Infrastructure.Tests
 
       using (var context = new TodoDbContext(options))
       {
-        var repository = new TodoItemRepository(context);
+        var mockLogger = new Mock<ILogger<TodoItemRepository>>();
+        var repository = new TodoItemRepository(context, mockLogger.Object);
 
         // Act
         var result = await repository.GetPagedAsync(
