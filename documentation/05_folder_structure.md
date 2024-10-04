@@ -14,6 +14,7 @@ ToDo.sln
 │   │   ├── DTOs/
 │   │   ├── Interfaces/
 │   │   ├── Mappers/
+│   │   ├── Exceptions/
 │   │   └── Validators/
 │   │
 │   ├── ToDo.Infrastructure/

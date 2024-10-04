@@ -4,9 +4,11 @@ using ToDo.Domain.Entities;
 using ToDo.Domain.Interfaces;
 using ToDo.Application.Services;
 using ToDo.Application.DTOs;
+using ToDo.Application.Exceptions;
 using Microsoft.Extensions.Logging;
 using ToDo.Domain.Common;
 using AutoMapper;
+using System.Linq;
 
 namespace ToDo.Tests.Application
 {
@@ -186,7 +188,8 @@ namespace ToDo.Tests.Application
         UpdatedAt = updatedItem.UpdatedAt
       };
       _mockRepo.Setup(repo => repo.GetByIdAsync(1)).ReturnsAsync(existingItem);
-      _mockMapper.Setup(mapper => mapper.Map(updateDto, existingItem)).Callback<UpdateTodoItemDto, TodoItem>((src, dest) => {
+      _mockMapper.Setup(mapper => mapper.Map(updateDto, existingItem)).Callback<UpdateTodoItemDto, TodoItem>((src, dest) =>
+      {
         dest.Title = src.Title;
         dest.Status = src.Status;
       });
@@ -304,32 +307,117 @@ namespace ToDo.Tests.Application
           pr.Limit == paginationRequestDto.Limit && pr.Cursor == paginationRequestDto.Cursor)), Times.Once);
     }
     [Fact]
-    public async Task GetPagedAsync_WithEmptyResult_ReturnsEmptyPaginatedResultDto()
+    public async Task GetPagedAsync_WithEmptyResult_ThrowsInvalidTodoItemMappingException()
     {
       // Arrange
       var userId = "testUser";
       var paginationRequestDto = new PaginationRequestDto { Limit = 2, Cursor = null };
-      var domainPaginationRequest = new PaginationRequest(paginationRequestDto.Limit, paginationRequestDto.Cursor);
-
       var emptyList = new List<TodoItem>();
-      var emptyDtoList = new List<TodoItemDto>();
       var domainPaginatedResult = new PaginatedResult<TodoItem>(emptyList, null);
 
       _mockRepo.Setup(repo => repo.GetPagedAsync(userId, It.IsAny<PaginationRequest>()))
                        .ReturnsAsync(domainPaginatedResult);
-      _mockMapper.Setup(mapper => mapper.Map<List<TodoItemDto>>(It.IsAny<List<TodoItem>>())).Returns(emptyDtoList);
+      _mockMapper.Setup(mapper => mapper.Map<List<TodoItemDto>>(It.IsAny<List<TodoItem>>())).Returns(new List<TodoItemDto>());
 
-      // Act
-      var result = await _service.GetPagedAsync(userId, paginationRequestDto);
+      // Act & Assert
+      await Assert.ThrowsAsync<InvalidTodoItemMappingException>(() => _service.GetPagedAsync(userId, paginationRequestDto));
+    }
 
-      // Assert
-      Assert.NotNull(result);
-      Assert.Empty(result.Items);
-      Assert.Null(result.NextCursor);
-      Assert.False(result.HasNextPage);
+    [Fact]
+    public async Task GetByIdAsync_ShouldThrowTodoItemNotFoundException_WhenItemDoesNotExist()
+    {
+      // Arrange
+      _mockRepo.Setup(repo => repo.GetByIdAsync(1)).ReturnsAsync((TodoItem?)null);
 
-      _mockRepo.Verify(repo => repo.GetPagedAsync(userId, It.Is<PaginationRequest>(pr =>
-          pr.Limit == paginationRequestDto.Limit && pr.Cursor == paginationRequestDto.Cursor)), Times.Once);
+      // Act & Assert
+      await Assert.ThrowsAsync<TodoItemNotFoundException>(() => _service.GetByIdAsync(1));
+    }
+
+    [Fact]
+    public async Task GetAllAsync_ShouldThrowInvalidTodoItemMappingException_WhenMappingFails()
+    {
+      // Arrange
+      var todoItems = new List<TodoItem> { new TodoItem { Id = 1, Title = "Test Item", UserId = "user123" } };
+      _mockRepo.Setup(repo => repo.GetAllAsync()).ReturnsAsync(todoItems);
+      _mockMapper.Setup(mapper => mapper.Map<IEnumerable<TodoItemDto>>(todoItems)).Returns(Enumerable.Empty<TodoItemDto>());
+
+      // Act & Assert
+      await Assert.ThrowsAsync<InvalidTodoItemMappingException>(() => _service.GetAllAsync());
+    }
+
+    [Fact]
+    public async Task CreateAsync_ShouldThrowInvalidTodoItemMappingException_WhenMappingFails()
+    {
+      // Arrange
+      var createDto = new CreateTodoItemDto { Title = "Test" };
+      _mockMapper.Setup(mapper => mapper.Map<TodoItem>(createDto)).Returns(new TodoItem { Title = "Test Item", UserId = "user123" });
+      _mockRepo.Setup(repo => repo.AddAsync(It.IsAny<TodoItem>())).ReturnsAsync(new TodoItem { Id = 1, Title = "Test Item", UserId = "user123" });
+      _mockMapper.Setup(mapper => mapper.Map<TodoItemDto>(It.IsAny<TodoItem>())).Returns((TodoItemDto?)null);
+
+      // Act & Assert
+      await Assert.ThrowsAsync<InvalidTodoItemMappingException>(() => _service.CreateAsync(createDto));
+    }
+
+    [Fact]
+    public async Task CreateAsync_ShouldThrowTodoItemOperationException_WhenRepositoryAddFails()
+    {
+      // Arrange
+      var createDto = new CreateTodoItemDto { Title = "Test" };
+      var todoItem = new TodoItem { Title = "Test", UserId = "user123" };
+      _mockMapper.Setup(mapper => mapper.Map<TodoItem>(createDto)).Returns(todoItem);
+      _mockRepo.Setup(repo => repo.AddAsync(It.IsAny<TodoItem>())).ThrowsAsync(new Exception("DB error"));
+
+      // Act & Assert
+      await Assert.ThrowsAsync<TodoItemOperationException>(() => _service.CreateAsync(createDto));
+    }
+
+    [Fact]
+    public async Task UpdateAsync_ShouldThrowTodoItemNotFoundException_WhenItemDoesNotExist()
+    {
+      // Arrange
+      var updateDto = new UpdateTodoItemDto { Title = "Updated" };
+      _mockRepo.Setup(repo => repo.GetByIdAsync(1)).ReturnsAsync((TodoItem?)null);
+
+      // Act & Assert
+      await Assert.ThrowsAsync<TodoItemNotFoundException>(() => _service.UpdateAsync(1, updateDto));
+    }
+
+    [Fact]
+    public async Task UpdateAsync_ShouldThrowTodoItemOperationException_WhenRepositoryUpdateFails()
+    {
+      // Arrange
+      var existingItem = new TodoItem { Id = 1, Title = "Old", UserId = "user123" };
+      var updateDto = new UpdateTodoItemDto { Title = "Updated" };
+      _mockRepo.Setup(repo => repo.GetByIdAsync(1)).ReturnsAsync(existingItem);
+      _mockRepo.Setup(repo => repo.UpdateAsync(It.IsAny<TodoItem>())).ThrowsAsync(new Exception("DB error"));
+
+      // Act & Assert
+      await Assert.ThrowsAsync<TodoItemOperationException>(() => _service.UpdateAsync(1, updateDto));
+    }
+
+    [Fact]
+    public async Task DeleteAsync_ShouldThrowTodoItemOperationException_WhenRepositoryDeleteFails()
+    {
+      // Arrange
+      _mockRepo.Setup(repo => repo.DeleteAsync(1)).ThrowsAsync(new Exception("DB error"));
+
+      // Act & Assert
+      await Assert.ThrowsAsync<TodoItemOperationException>(() => _service.DeleteAsync(1));
+    }
+
+    [Fact]
+    public async Task GetPagedAsync_ShouldThrowInvalidTodoItemMappingException_WhenMappingFails()
+    {
+      // Arrange
+      var userId = "testUser";
+      var paginationRequestDto = new PaginationRequestDto { Limit = 2, Cursor = null };
+      var todoItems = new List<TodoItem> { new TodoItem { Id = 1, Title = "Test Item", UserId = "user123" } };
+      var domainPaginatedResult = new PaginatedResult<TodoItem>(todoItems, null);
+      _mockRepo.Setup(repo => repo.GetPagedAsync(userId, It.IsAny<PaginationRequest>())).ReturnsAsync(domainPaginatedResult);
+      _mockMapper.Setup(mapper => mapper.Map<List<TodoItemDto>>(It.IsAny<List<TodoItem>>())).Returns((List<TodoItemDto>?)null);
+
+      // Act & Assert
+      await Assert.ThrowsAsync<InvalidTodoItemMappingException>(() => _service.GetPagedAsync(userId, paginationRequestDto));
     }
   }
 }
