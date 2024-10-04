@@ -50,15 +50,12 @@ public static class InfrastructureModule
 
     // Repositories
     services.AddScoped<ITodoItemRepository, TodoItemRepository>();
-    services.AddScoped<ITodoItemListRepository, TodoItemListRepository>();
 
     // Services
     services.AddScoped<ITodoItemService, TodoItemService>();
-    services.AddScoped<ITodoItemListService, TodoItemListService>();
 
     // Validators
     services.AddValidatorsFromAssemblyContaining<CreateTodoItemDtoValidator>();
-    services.AddValidatorsFromAssemblyContaining<CreateTodoItemListDtoValidator>();
 
     // Register other infrastructure services...
 

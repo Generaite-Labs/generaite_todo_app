@@ -91,30 +91,6 @@ namespace ToDo.Infrastructure.Tests
     }
 
     [Fact]
-    public async Task GetByListIdAsync_ReturnsCorrectTodoItems()
-    {
-      // Arrange
-      var todoItemList = new TodoItemList { Name = "Test List", UserId = "user1" };
-      _context.TodoItemLists.Add(todoItemList);
-      await _context.SaveChangesAsync();
-
-      var todoItem1 = new TodoItem { Title = "Test Item 1", UserId = "user1", TodoItemListId = todoItemList.Id };
-      var todoItem2 = new TodoItem { Title = "Test Item 2", UserId = "user1", TodoItemListId = todoItemList.Id };
-      var todoItem3 = new TodoItem { Title = "Test Item 3", UserId = "user1", TodoItemListId = null };
-      _context.TodoItems.AddRange(todoItem1, todoItem2, todoItem3);
-      await _context.SaveChangesAsync();
-
-      // Act
-      var result = await _repository.GetByListIdAsync(todoItemList.Id);
-
-      // Assert
-      Assert.Equal(2, result.Count());
-      Assert.Contains(result, t => t.Title == "Test Item 1");
-      Assert.Contains(result, t => t.Title == "Test Item 2");
-      Assert.DoesNotContain(result, t => t.Title == "Test Item 3");
-    }
-
-    [Fact]
     public async Task AddAsync_AddsTodoItemToDatabase()
     {
       // Arrange

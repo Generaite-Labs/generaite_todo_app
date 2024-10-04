@@ -43,13 +43,6 @@ namespace ToDo.Application.Services
       return todoItems.Select(MapToDto);
     }
 
-    public async Task<IEnumerable<TodoItemDto>> GetByListIdAsync(int listId)
-    {
-      _logger.LogInformation("Getting TodoItems for list: {ListId}", listId);
-      var todoItems = await _todoItemRepository.GetByListIdAsync(listId);
-      return todoItems.Select(MapToDto);
-    }
-
     public async Task<TodoItemDto> CreateAsync(CreateTodoItemDto createDto)
     {
       _logger.LogInformation("Creating new TodoItem: {@CreateTodoItemDto}", createDto);
@@ -60,7 +53,6 @@ namespace ToDo.Application.Services
         Status = createDto.Status,
         DueDate = createDto.DueDate,
         UserId = createDto.UserId,
-        TodoItemListId = createDto.TodoItemListId,
         CreatedAt = DateTime.UtcNow,
         UpdatedAt = DateTime.UtcNow
       };
@@ -84,7 +76,6 @@ namespace ToDo.Application.Services
       existingItem.Description = updateDto.Description;
       existingItem.Status = updateDto.Status;
       existingItem.DueDate = updateDto.DueDate;
-      existingItem.TodoItemListId = updateDto.TodoItemListId;
       existingItem.UpdatedAt = DateTime.UtcNow;
 
       await _todoItemRepository.UpdateAsync(existingItem);
@@ -127,7 +118,6 @@ namespace ToDo.Application.Services
         Status = todoItem.Status,
         DueDate = todoItem.DueDate,
         UserId = todoItem.UserId,
-        TodoItemListId = todoItem.TodoItemListId,
         CreatedAt = todoItem.CreatedAt,
         UpdatedAt = todoItem.UpdatedAt
       };

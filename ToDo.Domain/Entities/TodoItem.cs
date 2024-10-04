@@ -22,11 +22,6 @@ namespace ToDo.Domain.Entities
     [ForeignKey("UserId")]
     public virtual ApplicationUser? User { get; set; }
 
-    public int? TodoItemListId { get; set; }
-
-    [ForeignKey("TodoItemListId")]
-    public virtual TodoItemList? TodoItemList { get; set; }
-
     public DateTime CreatedAt { get; set; }
 
     public DateTime UpdatedAt { get; set; }

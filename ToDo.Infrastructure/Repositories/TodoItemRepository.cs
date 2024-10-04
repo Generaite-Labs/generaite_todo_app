@@ -47,16 +47,6 @@ namespace ToDo.Infrastructure.Repositories
       return result;
     }
 
-    public async Task<IEnumerable<TodoItem>> GetByListIdAsync(int listId)
-    {
-      _logger.LogInformation("Getting TodoItems for list: {ListId}", listId);
-      var stopwatch = Stopwatch.StartNew();
-      var result = await _context.Set<TodoItem>().Where(t => t.TodoItemListId == listId).ToListAsync();
-      stopwatch.Stop();
-      _logger.LogInformation("Retrieved {Count} TodoItems for list {ListId}. Took {ElapsedMilliseconds}ms", result.Count, listId, stopwatch.ElapsedMilliseconds);
-      return result;
-    }
-
     public async Task<TodoItem> AddAsync(TodoItem todoItem)
     {
       _logger.LogInformation("Adding new TodoItem: {@TodoItem}", todoItem);

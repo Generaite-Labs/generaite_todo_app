@@ -10,6 +10,5 @@ namespace ToDo.Domain.Entities
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
     public virtual ICollection<TodoItem> TodoItems { get; set; } = new List<TodoItem>();
-    public virtual ICollection<TodoItemList> TodoItemLists { get; set; } = new List<TodoItemList>();
   }
 }
