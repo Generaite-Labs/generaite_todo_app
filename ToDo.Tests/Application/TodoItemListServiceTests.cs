@@ -1,25 +1,24 @@
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using Moq;
-using Xunit;
 using FluentAssertions;
 using ToDo.Domain.Entities;
 using ToDo.Domain.Interfaces;
 using ToDo.Application.Services;
 using ToDo.Application.DTOs;
+using Microsoft.Extensions.Logging;
 
 namespace ToDo.Tests.Application
 {
     public class TodoItemListServiceTests
     {
         private readonly Mock<ITodoItemListRepository> _mockRepo;
+        private readonly Mock<ILogger<TodoItemListService>> _mockLogger;
         private readonly ITodoItemListService _service;
 
         public TodoItemListServiceTests()
         {
             _mockRepo = new Mock<ITodoItemListRepository>();
-            _service = new TodoItemListService(_mockRepo.Object);
+            _mockLogger = new Mock<ILogger<TodoItemListService>>();
+            _service = new TodoItemListService(_mockRepo.Object, _mockLogger.Object);
         }
 
         [Fact]
@@ -37,6 +36,16 @@ namespace ToDo.Tests.Application
             result!.Id.Should().Be(1);
             result.Name.Should().Be("Test List");
             result.UserId.Should().Be("user1");
+
+            // Verify logging
+            _mockLogger.Verify(
+                x => x.Log(
+                    LogLevel.Information,
+                    It.IsAny<EventId>(),
+                    It.Is<It.IsAnyType>((o, t) => o.ToString()!.Contains("Getting TodoItemList by ID: 1")),
+                    It.IsAny<Exception>(),
+                    It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
+                Times.Once);
         }
 
         [Fact]
