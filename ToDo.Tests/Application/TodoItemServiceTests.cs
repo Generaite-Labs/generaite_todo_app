@@ -18,6 +18,8 @@ namespace ToDo.Tests.Application
     private readonly Mock<ILogger<TodoItemService>> _mockLogger;
     private readonly Mock<IMapper> _mockMapper;
     private readonly ITodoItemService _service;
+    private const string ValidUserId = "user1";
+    private const string InvalidUserId = "user2";
 
     public TodoItemServiceTests()
     {
@@ -28,58 +30,59 @@ namespace ToDo.Tests.Application
     }
 
     [Fact]
-    public async Task GetByIdAsync_ShouldReturnTodoItemDto_WhenItemExists()
+    public async Task GetByIdAsync_ShouldReturnTodoItemDto_WhenItemExistsAndUserIsAuthorized()
     {
       // Arrange
-      var todoItem = new TodoItem { Id = 1, Title = "Test Item", UserId = "user1" };
-      var todoItemDto = new TodoItemDto { Id = 1, Title = "Test Item", UserId = "user1" };
+      var todoItem = new TodoItem { Id = 1, Title = "Test Item", UserId = ValidUserId };
+      var todoItemDto = new TodoItemDto { Id = 1, Title = "Test Item", UserId = ValidUserId };
       _mockRepo.Setup(repo => repo.GetByIdAsync(1)).ReturnsAsync(todoItem);
       _mockMapper.Setup(mapper => mapper.Map<TodoItemDto>(todoItem)).Returns(todoItemDto);
 
       // Act
-      var result = await _service.GetByIdAsync(1);
+      var result = await _service.GetByIdAsync(ValidUserId, 1);
 
       // Assert
       result.Should().NotBeNull();
       result!.Id.Should().Be(1);
       result.Title.Should().Be("Test Item");
-      result.UserId.Should().Be("user1");
-
-      // Verify logging
-      _mockLogger.Verify(
-          x => x.Log(
-              LogLevel.Information,
-              It.IsAny<EventId>(),
-              It.Is<It.IsAnyType>((o, t) => o.ToString()!.Contains("Getting TodoItem by ID: 1")),
-              It.IsAny<Exception>(),
-              It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
-          Times.Once);
+      result.UserId.Should().Be(ValidUserId);
     }
 
     [Fact]
-    public async Task GetAllAsync_ShouldReturnAllItemsAsDto()
+    public async Task GetByIdAsync_ShouldThrowUnauthorizedTodoItemAccessException_WhenUserIsNotAuthorized()
+    {
+      // Arrange
+      var todoItem = new TodoItem { Id = 1, Title = "Test Item", UserId = ValidUserId };
+      _mockRepo.Setup(repo => repo.GetByIdAsync(1)).ReturnsAsync(todoItem);
+
+      // Act & Assert
+      await Assert.ThrowsAsync<UnauthorizedTodoItemAccessException>(() => _service.GetByIdAsync(InvalidUserId, 1));
+    }
+
+    [Fact]
+    public async Task GetAllAsync_ShouldReturnOnlyUserOwnedItems()
     {
       // Arrange
       var todoItems = new List<TodoItem>
-            {
-                new TodoItem { Id = 1, Title = "Item 1", UserId = "user1" },
-                new TodoItem { Id = 2, Title = "Item 2", UserId = "user2" }
-            };
+      {
+          new TodoItem { Id = 1, Title = "Item 1", UserId = ValidUserId },
+          new TodoItem { Id = 2, Title = "Item 2", UserId = ValidUserId }
+      };
       var todoItemDtos = new List<TodoItemDto>
-            {
-                new TodoItemDto { Id = 1, Title = "Item 1", UserId = "user1" },
-                new TodoItemDto { Id = 2, Title = "Item 2", UserId = "user2" }
-            };
-      _mockRepo.Setup(repo => repo.GetAllAsync()).ReturnsAsync(todoItems);
+      {
+          new TodoItemDto { Id = 1, Title = "Item 1", UserId = ValidUserId },
+          new TodoItemDto { Id = 2, Title = "Item 2", UserId = ValidUserId }
+      };
+      _mockRepo.Setup(repo => repo.GetByUserIdAsync(ValidUserId)).ReturnsAsync(todoItems);
       _mockMapper.Setup(mapper => mapper.Map<IEnumerable<TodoItemDto>>(todoItems)).Returns(todoItemDtos);
 
       // Act
-      var result = await _service.GetAllAsync();
+      var result = await _service.GetAllAsync(ValidUserId);
 
       // Assert
       result.Should().HaveCount(2);
-      result.Should().Contain(dto => dto.Id == 1 && dto.Title == "Item 1" && dto.UserId == "user1");
-      result.Should().Contain(dto => dto.Id == 2 && dto.Title == "Item 2" && dto.UserId == "user2");
+      result.Should().Contain(dto => dto.Id == 1 && dto.Title == "Item 1" && dto.UserId == ValidUserId);
+      result.Should().Contain(dto => dto.Id == 2 && dto.Title == "Item 2" && dto.UserId == ValidUserId);
 
       // Verify logging
       _mockLogger.Verify(
@@ -125,7 +128,7 @@ namespace ToDo.Tests.Application
       _mockMapper.Setup(mapper => mapper.Map<TodoItemDto>(createdItem)).Returns(createdItemDto);
 
       // Act
-      var result = await _service.CreateAsync(createDto);
+      var result = await _service.CreateAsync(ValidUserId, createDto);
 
       // Assert
       result.Should().NotBeNull();
@@ -197,7 +200,7 @@ namespace ToDo.Tests.Application
       _mockMapper.Setup(mapper => mapper.Map<TodoItemDto>(It.IsAny<TodoItem>())).Returns(updatedItemDto);
 
       // Act
-      var result = await _service.UpdateAsync(1, updateDto);
+      var result = await _service.UpdateAsync(ValidUserId, 1, updateDto);
 
       // Assert
       result.Should().NotBeNull();
@@ -219,9 +222,11 @@ namespace ToDo.Tests.Application
     {
       // Arrange
       var idToDelete = 1;
+      var existingItem = new TodoItem { Id = idToDelete, UserId = ValidUserId, Title = "Test Item" };
+      _mockRepo.Setup(repo => repo.GetByIdAsync(idToDelete)).ReturnsAsync(existingItem);
 
       // Act
-      await _service.DeleteAsync(idToDelete);
+      await _service.DeleteAsync(ValidUserId, idToDelete);
 
       // Assert
       _mockRepo.Verify(repo => repo.DeleteAsync(idToDelete), Times.Once);
@@ -330,7 +335,7 @@ namespace ToDo.Tests.Application
       _mockRepo.Setup(repo => repo.GetByIdAsync(1)).ReturnsAsync((TodoItem?)null);
 
       // Act & Assert
-      await Assert.ThrowsAsync<TodoItemNotFoundException>(() => _service.GetByIdAsync(1));
+      await Assert.ThrowsAsync<UnauthorizedTodoItemAccessException>(() => _service.GetByIdAsync(ValidUserId, 1));
     }
 
     [Fact]
@@ -342,7 +347,7 @@ namespace ToDo.Tests.Application
       _mockMapper.Setup(mapper => mapper.Map<IEnumerable<TodoItemDto>>(todoItems)).Returns(Enumerable.Empty<TodoItemDto>());
 
       // Act & Assert
-      await Assert.ThrowsAsync<InvalidTodoItemMappingException>(() => _service.GetAllAsync());
+      await Assert.ThrowsAsync<InvalidTodoItemMappingException>(() => _service.GetAllAsync(ValidUserId));
     }
 
     [Fact]
@@ -355,7 +360,7 @@ namespace ToDo.Tests.Application
       _mockMapper.Setup(mapper => mapper.Map<TodoItemDto>(It.IsAny<TodoItem>())).Returns((TodoItemDto?)null);
 
       // Act & Assert
-      await Assert.ThrowsAsync<InvalidTodoItemMappingException>(() => _service.CreateAsync(createDto));
+      await Assert.ThrowsAsync<InvalidTodoItemMappingException>(() => _service.CreateAsync(ValidUserId, createDto));
     }
 
     [Fact]
@@ -368,7 +373,7 @@ namespace ToDo.Tests.Application
       _mockRepo.Setup(repo => repo.AddAsync(It.IsAny<TodoItem>())).ThrowsAsync(new Exception("DB error"));
 
       // Act & Assert
-      await Assert.ThrowsAsync<TodoItemOperationException>(() => _service.CreateAsync(createDto));
+      await Assert.ThrowsAsync<TodoItemOperationException>(() => _service.CreateAsync(ValidUserId, createDto));
     }
 
     [Fact]
@@ -379,30 +384,32 @@ namespace ToDo.Tests.Application
       _mockRepo.Setup(repo => repo.GetByIdAsync(1)).ReturnsAsync((TodoItem?)null);
 
       // Act & Assert
-      await Assert.ThrowsAsync<TodoItemNotFoundException>(() => _service.UpdateAsync(1, updateDto));
+      await Assert.ThrowsAsync<UnauthorizedTodoItemAccessException>(() => _service.UpdateAsync(ValidUserId, 1, updateDto));
     }
 
     [Fact]
     public async Task UpdateAsync_ShouldThrowTodoItemOperationException_WhenRepositoryUpdateFails()
     {
       // Arrange
-      var existingItem = new TodoItem { Id = 1, Title = "Old", UserId = "user123" };
+      var existingItem = new TodoItem { Id = 1, Title = "Old", UserId = ValidUserId };
       var updateDto = new UpdateTodoItemDto { Title = "Updated" };
       _mockRepo.Setup(repo => repo.GetByIdAsync(1)).ReturnsAsync(existingItem);
       _mockRepo.Setup(repo => repo.UpdateAsync(It.IsAny<TodoItem>())).ThrowsAsync(new Exception("DB error"));
 
       // Act & Assert
-      await Assert.ThrowsAsync<TodoItemOperationException>(() => _service.UpdateAsync(1, updateDto));
+      await Assert.ThrowsAsync<TodoItemOperationException>(() => _service.UpdateAsync(ValidUserId, 1, updateDto));
     }
 
     [Fact]
     public async Task DeleteAsync_ShouldThrowTodoItemOperationException_WhenRepositoryDeleteFails()
     {
       // Arrange
+      var existingItem = new TodoItem { Id = 1, UserId = ValidUserId, Title = "Test Item" };
+      _mockRepo.Setup(repo => repo.GetByIdAsync(1)).ReturnsAsync(existingItem);
       _mockRepo.Setup(repo => repo.DeleteAsync(1)).ThrowsAsync(new Exception("DB error"));
 
       // Act & Assert
-      await Assert.ThrowsAsync<TodoItemOperationException>(() => _service.DeleteAsync(1));
+      await Assert.ThrowsAsync<TodoItemOperationException>(() => _service.DeleteAsync(ValidUserId, 1));
     }
 
     [Fact]

@@ -22,22 +22,22 @@ namespace ToDo.Application.Services
       _mapper = mapper;
     }
 
-    public async Task<TodoItemDto?> GetByIdAsync(int id)
+    public async Task<TodoItemDto?> GetByIdAsync(string userId, int id)
     {
-      _logger.LogInformation("Getting TodoItem by ID: {TodoItemId}", id);
+      _logger.LogInformation("Getting TodoItem by ID: {TodoItemId} for user: {UserId}", id, userId);
       var todoItem = await _todoItemRepository.GetByIdAsync(id);
-      if (todoItem == null)
+      if (todoItem == null || todoItem.UserId != userId)
       {
-        _logger.LogWarning("TodoItem not found: {TodoItemId}", id);
-        throw new TodoItemNotFoundException(id);
+        _logger.LogWarning("TodoItem not found or unauthorized access: {TodoItemId}, {UserId}", id, userId);
+        throw new UnauthorizedTodoItemAccessException(userId, id);
       }
       return _mapper.Map<TodoItemDto>(todoItem);
     }
 
-    public async Task<IEnumerable<TodoItemDto>> GetAllAsync()
+    public async Task<IEnumerable<TodoItemDto>> GetAllAsync(string userId)
     {
-      _logger.LogInformation("Getting all TodoItems");
-      var todoItems = await _todoItemRepository.GetAllAsync();
+      _logger.LogInformation("Getting all TodoItems for user: {UserId}", userId);
+      var todoItems = await _todoItemRepository.GetByUserIdAsync(userId);
       var mappedItems = _mapper.Map<IEnumerable<TodoItemDto>>(todoItems);
       if (mappedItems == null || !mappedItems.Any())
       {
@@ -46,29 +46,22 @@ namespace ToDo.Application.Services
       return mappedItems;
     }
 
-    public async Task<IEnumerable<TodoItemDto>> GetByUserIdAsync(string userId)
+    public async Task<TodoItemDto> CreateAsync(string userId, CreateTodoItemDto createDto)
     {
-      _logger.LogInformation("Getting TodoItems for user: {UserId}", userId);
-      var todoItems = await _todoItemRepository.GetByUserIdAsync(userId);
-      return _mapper.Map<IEnumerable<TodoItemDto>>(todoItems) ?? 
-             throw new InvalidTodoItemMappingException("Failed to map TodoItems to DTOs");
-    }
-
-    public async Task<TodoItemDto> CreateAsync(CreateTodoItemDto createDto)
-    {
-      _logger.LogInformation("Creating new TodoItem: {@CreateTodoItemDto}", createDto);
+      _logger.LogInformation("Creating new TodoItem for user: {UserId}, {@CreateTodoItemDto}", userId, createDto);
       var todoItem = _mapper.Map<TodoItem>(createDto);
       if (todoItem == null)
       {
         throw new InvalidTodoItemMappingException("Failed to map CreateTodoItemDto to TodoItem");
       }
+      todoItem.UserId = userId;
       todoItem.CreatedAt = DateTime.UtcNow;
       todoItem.UpdatedAt = DateTime.UtcNow;
 
       try
       {
         var createdItem = await _todoItemRepository.AddAsync(todoItem);
-        _logger.LogInformation("Created TodoItem with ID: {TodoItemId}", createdItem.Id);
+        _logger.LogInformation("Created TodoItem with ID: {TodoItemId} for user: {UserId}", createdItem.Id, userId);
         var mappedDto = _mapper.Map<TodoItemDto>(createdItem);
         if (mappedDto == null)
         {
@@ -86,14 +79,14 @@ namespace ToDo.Application.Services
       }
     }
 
-    public async Task<TodoItemDto> UpdateAsync(int id, UpdateTodoItemDto updateDto)
+    public async Task<TodoItemDto> UpdateAsync(string userId, int id, UpdateTodoItemDto updateDto)
     {
-      _logger.LogInformation("Updating TodoItem: {TodoItemId}, {@UpdateTodoItemDto}", id, updateDto);
+      _logger.LogInformation("Updating TodoItem: {TodoItemId} for user: {UserId}, {@UpdateTodoItemDto}", id, userId, updateDto);
       var existingItem = await _todoItemRepository.GetByIdAsync(id);
-      if (existingItem == null)
+      if (existingItem == null || existingItem.UserId != userId)
       {
-        _logger.LogWarning("Failed to update TodoItem. Item not found: {TodoItemId}", id);
-        throw new TodoItemNotFoundException(id);
+        _logger.LogWarning("Failed to update TodoItem. Item not found or unauthorized access: {TodoItemId}, {UserId}", id, userId);
+        throw new UnauthorizedTodoItemAccessException(userId, id);
       }
 
       _mapper.Map(updateDto, existingItem);
@@ -102,7 +95,7 @@ namespace ToDo.Application.Services
       try
       {
         await _todoItemRepository.UpdateAsync(existingItem);
-        _logger.LogInformation("Updated TodoItem: {TodoItemId}", id);
+        _logger.LogInformation("Updated TodoItem: {TodoItemId} for user: {UserId}", id, userId);
         return _mapper.Map<TodoItemDto>(existingItem) ?? 
                throw new InvalidTodoItemMappingException("Failed to map updated TodoItem to TodoItemDto");
       }
@@ -112,13 +105,20 @@ namespace ToDo.Application.Services
       }
     }
 
-    public async Task DeleteAsync(int id)
+    public async Task DeleteAsync(string userId, int id)
     {
-      _logger.LogInformation("Deleting TodoItem: {TodoItemId}", id);
+      _logger.LogInformation("Deleting TodoItem: {TodoItemId} for user: {UserId}", id, userId);
+      var existingItem = await _todoItemRepository.GetByIdAsync(id);
+      if (existingItem == null || existingItem.UserId != userId)
+      {
+        _logger.LogWarning("Failed to delete TodoItem. Item not found or unauthorized access: {TodoItemId}, {UserId}", id, userId);
+        throw new UnauthorizedTodoItemAccessException(userId, id);
+      }
+
       try
       {
         await _todoItemRepository.DeleteAsync(id);
-        _logger.LogInformation("Deleted TodoItem: {TodoItemId}", id);
+        _logger.LogInformation("Deleted TodoItem: {TodoItemId} for user: {UserId}", id, userId);
       }
       catch (Exception ex)
       {
@@ -148,6 +148,11 @@ namespace ToDo.Application.Services
         Items = mappedItems,
         NextCursor = result.NextCursor
       };
+    }
+
+    private bool IsEntityOwnedByUser(TodoItem entity, string userId)
+    {
+      return entity.UserId == userId;
     }
   }
 }
