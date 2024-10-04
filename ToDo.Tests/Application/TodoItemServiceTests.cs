@@ -1,22 +1,26 @@
-using FluentAssertions;
+
 using Moq;
+using FluentAssertions;
 using ToDo.Domain.Entities;
 using ToDo.Domain.Interfaces;
-using ToDo.Domain.Common;
 using ToDo.Application.Services;
 using ToDo.Application.DTOs;
+using Microsoft.Extensions.Logging;
+using ToDo.Domain.Common;
 
 namespace ToDo.Tests.Application
 {
   public class TodoItemServiceTests
   {
     private readonly Mock<ITodoItemRepository> _mockRepo;
+    private readonly Mock<ILogger<TodoItemService>> _mockLogger;
     private readonly ITodoItemService _service;
 
     public TodoItemServiceTests()
     {
       _mockRepo = new Mock<ITodoItemRepository>();
-      _service = new TodoItemService(_mockRepo.Object);
+      _mockLogger = new Mock<ILogger<TodoItemService>>();
+      _service = new TodoItemService(_mockRepo.Object, _mockLogger.Object);
     }
 
     [Fact]
@@ -34,6 +38,16 @@ namespace ToDo.Tests.Application
       result!.Id.Should().Be(1);
       result.Title.Should().Be("Test Item");
       result.UserId.Should().Be("user1");
+
+      // Verify logging
+      _mockLogger.Verify(
+          x => x.Log(
+              LogLevel.Information,
+              It.IsAny<EventId>(),
+              It.Is<It.IsAnyType>((o, t) => o.ToString()!.Contains("Getting TodoItem by ID: 1")),
+              It.IsAny<Exception>(),
+              It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
+          Times.Once);
     }
 
     [Fact]
@@ -54,7 +68,19 @@ namespace ToDo.Tests.Application
       result.Should().HaveCount(2);
       result.Should().Contain(dto => dto.Id == 1 && dto.Title == "Item 1" && dto.UserId == "user1");
       result.Should().Contain(dto => dto.Id == 2 && dto.Title == "Item 2" && dto.UserId == "user2");
+
+      // Verify logging
+      _mockLogger.Verify(
+          x => x.Log(
+              LogLevel.Information,
+              It.IsAny<EventId>(),
+              It.Is<It.IsAnyType>((o, t) => o.ToString()!.Contains("Getting all TodoItems")),
+              It.IsAny<Exception>(),
+              It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
+          Times.Once);
     }
+
+    // Add more tests for other methods...
 
     [Fact]
     public async Task CreateAsync_ShouldReturnCreatedTodoItemDto()
@@ -88,6 +114,24 @@ namespace ToDo.Tests.Application
       result.Status.Should().Be(TodoItemStatus.TODO);
       result.CreatedAt.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(1));
       result.UpdatedAt.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(1));
+
+      // Verify logging
+      _mockLogger.Verify(
+          x => x.Log(
+              LogLevel.Information,
+              It.IsAny<EventId>(),
+              It.Is<It.IsAnyType>((o, t) => o.ToString()!.Contains("Creating new TodoItem")),
+              It.IsAny<Exception>(),
+              It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
+          Times.Once);
+      _mockLogger.Verify(
+          x => x.Log(
+              LogLevel.Information,
+              It.IsAny<EventId>(),
+              It.Is<It.IsAnyType>((o, t) => o.ToString()!.Contains("Created TodoItem with ID: 1")),
+              It.IsAny<Exception>(),
+              It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
+          Times.Once);
     }
 
     [Fact]
