@@ -2,6 +2,8 @@ using Microsoft.EntityFrameworkCore;
 using ToDo.Domain.Entities;
 using ToDo.Domain.Common;
 using ToDo.Infrastructure.Repositories;
+using Microsoft.Extensions.Logging;
+using Moq;
 
 namespace ToDo.Infrastructure.Tests
 {
@@ -9,6 +11,7 @@ namespace ToDo.Infrastructure.Tests
   {
     private readonly TodoDbContext _context;
     private readonly TodoItemListRepository _repository;
+    private readonly Mock<ILogger<TodoItemListRepository>> _mockLogger;
 
     public TodoItemListRepositoryTests()
     {
@@ -17,7 +20,8 @@ namespace ToDo.Infrastructure.Tests
           .Options;
 
       _context = new TodoDbContext(options);
-      _repository = new TodoItemListRepository(_context);
+      _mockLogger = new Mock<ILogger<TodoItemListRepository>>();
+      _repository = new TodoItemListRepository(_context, _mockLogger.Object);
     }
 
     [Fact]
@@ -163,7 +167,8 @@ namespace ToDo.Infrastructure.Tests
 
       using (var context = new TodoDbContext(options))
       {
-        var repository = new TodoItemListRepository(context);
+        var mockLogger = new Mock<ILogger<TodoItemListRepository>>();
+        var repository = new TodoItemListRepository(context, mockLogger.Object);
 
         // Act
         var result = await repository.GetPagedAsync(
@@ -215,7 +220,8 @@ namespace ToDo.Infrastructure.Tests
 
       using (var context = new TodoDbContext(options))
       {
-        var repository = new TodoItemListRepository(context);
+        var mockLogger = new Mock<ILogger<TodoItemListRepository>>();
+        var repository = new TodoItemListRepository(context, mockLogger.Object);
 
         // Act
         var result = await repository.GetPagedAsync(
@@ -248,7 +254,8 @@ namespace ToDo.Infrastructure.Tests
 
       using (var context = new TodoDbContext(options))
       {
-        var repository = new TodoItemListRepository(context);
+        var mockLogger = new Mock<ILogger<TodoItemListRepository>>();
+        var repository = new TodoItemListRepository(context, mockLogger.Object);
 
         // Act & Assert for page size 3
         var result = await repository.GetPagedAsync("testUser", new PaginationRequest(3, null));
@@ -265,6 +272,137 @@ namespace ToDo.Infrastructure.Tests
         Assert.Equal(5, result.Items.Count());
         Assert.Null(result.NextCursor);
       }
+    }
+
+    private void VerifyLog(LogLevel level, string messageContains)
+    {
+      _mockLogger.Verify(
+          x => x.Log(
+              level,
+              It.IsAny<EventId>(),
+              It.Is<It.IsAnyType>((v, _) => v.ToString()!.Contains(messageContains)),
+              It.IsAny<Exception>(),
+              (Func<It.IsAnyType, Exception?, string>)It.IsAny<object>()),
+          Times.Once);
+    }
+
+    [Fact]
+    public async Task GetByIdAsync_LogsInformation()
+    {
+      // Arrange
+      var todoItemList = new TodoItemList { Name = "Test List", UserId = "1" };
+      _context.TodoItemLists.Add(todoItemList);
+      await _context.SaveChangesAsync();
+
+      // Act
+      await _repository.GetByIdAsync(todoItemList.Id);
+
+      // Assert
+      VerifyLog(LogLevel.Information, $"Getting TodoItemList by ID: {todoItemList.Id}");
+    }
+
+    [Fact]
+    public async Task GetAllAsync_LogsInformationAndPerformance()
+    {
+      // Arrange
+      var todoItemList1 = new TodoItemList { Name = "Test List 1", UserId = "1" };
+      var todoItemList2 = new TodoItemList { Name = "Test List 2", UserId = "1" };
+      _context.TodoItemLists.AddRange(todoItemList1, todoItemList2);
+      await _context.SaveChangesAsync();
+
+      // Act
+      await _repository.GetAllAsync();
+
+      // Assert
+      VerifyLog(LogLevel.Information, "Getting all TodoItemLists");
+      VerifyLog(LogLevel.Information, "Retrieved 2 TodoItemLists. Took");
+    }
+
+    [Fact]
+    public async Task AddAsync_LogsInformation()
+    {
+      // Arrange
+      var todoItemList = new TodoItemList { Name = "Test List", UserId = "1" };
+
+      // Act
+      await _repository.AddAsync(todoItemList);
+
+      // Assert
+      VerifyLog(LogLevel.Information, "Adding new TodoItemList");
+      VerifyLog(LogLevel.Information, $"Added new TodoItemList with ID: {todoItemList.Id}");
+    }
+
+    [Fact]
+    public async Task GetByUserIdAsync_LogsInformationAndPerformance()
+    {
+      // Arrange
+      var userId = "user1";
+      var todoItemList1 = new TodoItemList { Name = "Test List 1", UserId = userId };
+      var todoItemList2 = new TodoItemList { Name = "Test List 2", UserId = userId };
+      _context.TodoItemLists.AddRange(todoItemList1, todoItemList2);
+      await _context.SaveChangesAsync();
+
+      // Act
+      await _repository.GetByUserIdAsync(userId);
+
+      // Assert
+      VerifyLog(LogLevel.Information, $"Getting TodoItemLists for user: {userId}");
+      VerifyLog(LogLevel.Information, $"Retrieved 2 TodoItemLists for user {userId}. Took");
+    }
+
+    [Fact]
+    public async Task UpdateAsync_LogsInformation()
+    {
+      // Arrange
+      var todoItemList = new TodoItemList { Name = "Test List", UserId = "1" };
+      _context.TodoItemLists.Add(todoItemList);
+      await _context.SaveChangesAsync();
+
+      // Act
+      todoItemList.Name = "Updated Test List";
+      await _repository.UpdateAsync(todoItemList);
+
+      // Assert
+      VerifyLog(LogLevel.Information, $"Updating TodoItemList: ");
+      VerifyLog(LogLevel.Information, $"Updated TodoItemList with ID: {todoItemList.Id}");
+    }
+
+    [Fact]
+    public async Task DeleteAsync_LogsInformation()
+    {
+      // Arrange
+      var todoItemList = new TodoItemList { Name = "Test List", UserId = "1" };
+      _context.TodoItemLists.Add(todoItemList);
+      await _context.SaveChangesAsync();
+
+      // Act
+      await _repository.DeleteAsync(todoItemList.Id);
+
+      // Assert
+      VerifyLog(LogLevel.Information, $"Deleting TodoItemList with ID: {todoItemList.Id}");
+      VerifyLog(LogLevel.Information, $"Deleted TodoItemList with ID: {todoItemList.Id}");
+    }
+
+    [Fact]
+    public async Task GetPagedAsync_LogsInformationAndPerformance()
+    {
+      // Arrange
+      var userId = "testUser";
+      var lists = new List<TodoItemList>
+      {
+          new TodoItemList { Id = 1, Name = "List 1", UserId = userId },
+          new TodoItemList { Id = 2, Name = "List 2", UserId = userId },
+          new TodoItemList { Id = 3, Name = "List 3", UserId = userId },
+      };
+      _context.TodoItemLists.AddRange(lists);
+      await _context.SaveChangesAsync();
+
+      // Act
+      await _repository.GetPagedAsync(userId, new PaginationRequest(2, null));
+
+      // Assert
+      VerifyLog(LogLevel.Information, $"Getting paged TodoItemLists for user: {userId}");
+      VerifyLog(LogLevel.Information, $"Retrieved paged TodoItemLists for user: {userId}. Took");
     }
 
     public void Dispose()
