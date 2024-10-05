@@ -1,4 +1,3 @@
-
 using Microsoft.EntityFrameworkCore;
 using ToDo.Domain.Entities;
 using ToDo.Domain.Common;
@@ -29,7 +28,7 @@ namespace ToDo.Infrastructure.Tests
     public async Task GetByIdAsync_ReturnsCorrectTodoItem()
     {
       // Arrange
-      var todoItem = new TodoItem { Title = "Test Item", UserId = "user1" };
+      var todoItem = TodoItem.CreateTodoItem("Test Item", null, "user1", null);
       _context.TodoItems.Add(todoItem);
       await _context.SaveChangesAsync();
 
@@ -56,8 +55,8 @@ namespace ToDo.Infrastructure.Tests
     public async Task GetAllAsync_ReturnsAllTodoItems()
     {
       // Arrange
-      var todoItem1 = new TodoItem { Title = "Test Item 1", UserId = "user1" };
-      var todoItem2 = new TodoItem { Title = "Test Item 2", UserId = "user1" };
+      var todoItem1 = TodoItem.CreateTodoItem("Test Item 1", null, "user1", null);
+      var todoItem2 = TodoItem.CreateTodoItem("Test Item 2", null, "user1", null);
       _context.TodoItems.AddRange(todoItem1, todoItem2);
       await _context.SaveChangesAsync();
 
@@ -74,9 +73,9 @@ namespace ToDo.Infrastructure.Tests
     public async Task GetByUserIdAsync_ReturnsCorrectTodoItems()
     {
       // Arrange
-      var todoItem1 = new TodoItem { Title = "Test Item 1", UserId = "user1" };
-      var todoItem2 = new TodoItem { Title = "Test Item 2", UserId = "user1" };
-      var todoItem3 = new TodoItem { Title = "Test Item 3", UserId = "user2" };
+      var todoItem1 = TodoItem.CreateTodoItem("Test Item 1", null, "user1", null);
+      var todoItem2 = TodoItem.CreateTodoItem("Test Item 2", null, "user1", null);
+      var todoItem3 = TodoItem.CreateTodoItem("Test Item 3", null, "user2", null);
       _context.TodoItems.AddRange(todoItem1, todoItem2, todoItem3);
       await _context.SaveChangesAsync();
 
@@ -94,7 +93,7 @@ namespace ToDo.Infrastructure.Tests
     public async Task AddAsync_AddsTodoItemToDatabase()
     {
       // Arrange
-      var todoItem = new TodoItem { Title = "Test Item", UserId = "user1" };
+      var todoItem = TodoItem.CreateTodoItem("Test Item", null, "user1", null);
 
       // Act
       var result = await _repository.AddAsync(todoItem);
@@ -111,12 +110,12 @@ namespace ToDo.Infrastructure.Tests
     public async Task UpdateAsync_UpdatesTodoItemInDatabase()
     {
       // Arrange
-      var todoItem = new TodoItem { Title = "Test Item", UserId = "user1" };
+      var todoItem = TodoItem.CreateTodoItem("Test Item", null, "user1", null);
       _context.TodoItems.Add(todoItem);
       await _context.SaveChangesAsync();
 
       // Act
-      todoItem.Title = "Updated Test Item";
+      todoItem.UpdateTodoItem("Updated Test Item", null, null);
       await _repository.UpdateAsync(todoItem);
 
       // Assert
@@ -129,7 +128,7 @@ namespace ToDo.Infrastructure.Tests
     public async Task DeleteAsync_RemovesTodoItemFromDatabase()
     {
       // Arrange
-      var todoItem = new TodoItem { Title = "Test Item", UserId = "user1" };
+      var todoItem = TodoItem.CreateTodoItem("Test Item", null, "user1", null);
       _context.TodoItems.Add(todoItem);
       await _context.SaveChangesAsync();
 
@@ -141,7 +140,6 @@ namespace ToDo.Infrastructure.Tests
       var dbTodoItem = await _context.TodoItems.FindAsync(todoItem.Id);
       Assert.Null(dbTodoItem);
     }
-
 
     [Fact]
     public async Task GetPagedAsync_ReturnsCorrectItemsAndNextCursor()
@@ -155,13 +153,13 @@ namespace ToDo.Infrastructure.Tests
       {
         var userId = "testUser";
         var items = new List<TodoItem>
-                {
-                    new TodoItem { Id = 1, Title = "Item 1", UserId = userId },
-                    new TodoItem { Id = 2, Title = "Item 2", UserId = userId },
-                    new TodoItem { Id = 3, Title = "Item 3", UserId = userId },
-                    new TodoItem { Id = 4, Title = "Item 4", UserId = userId },
-                    new TodoItem { Id = 5, Title = "Item 5", UserId = userId },
-                };
+        {
+          TodoItem.CreateTodoItem("Item 1", null, userId, null),
+          TodoItem.CreateTodoItem("Item 2", null, userId, null),
+          TodoItem.CreateTodoItem("Item 3", null, userId, null),
+          TodoItem.CreateTodoItem("Item 4", null, userId, null),
+          TodoItem.CreateTodoItem("Item 5", null, userId, null)
+        };
         context.TodoItems.AddRange(items);
         context.SaveChanges();
       }

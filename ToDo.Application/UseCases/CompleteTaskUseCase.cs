@@ -1,6 +1,6 @@
 using ToDo.Application.DTOs;
 using ToDo.Application.Exceptions;
-using ToDo.Domain.Entities;
+using ToDo.Application.Interfaces;
 using Microsoft.Extensions.Logging;
 
 public class CompleteTaskUseCase : ICompleteTaskUseCase
