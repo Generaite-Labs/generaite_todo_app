@@ -35,7 +35,19 @@ namespace ToDo.Core.Configuration
     {
       services.AddOptions<DatabaseOptions>()
           .Bind(configuration.GetSection(DatabaseOptions.Database))
+          .ValidateDataAnnotations()
           .ValidateOnStart();
+
+      services.AddOptions<ApplicationSettings>()
+          .Bind(configuration.GetSection(ApplicationSettings.Application))
+          .ValidateDataAnnotations()
+          .ValidateOnStart();
+
+      // Register IOptions<T> for dependency injection
+      services.AddSingleton(resolver => 
+          resolver.GetRequiredService<IOptions<DatabaseOptions>>().Value);
+      services.AddSingleton(resolver => 
+          resolver.GetRequiredService<IOptions<ApplicationSettings>>().Value);
 
       // Add other configuration sections as needed
     }
