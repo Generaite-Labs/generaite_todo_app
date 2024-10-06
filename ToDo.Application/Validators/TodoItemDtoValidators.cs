@@ -1,6 +1,6 @@
 using FluentValidation;
 using ToDo.Application.DTOs;
-using ToDo.Domain.Entities;
+using ToDo.Domain.ValueObjects;
 
 namespace ToDo.Application.Validators
 {
@@ -16,7 +16,8 @@ namespace ToDo.Application.Validators
                 .MaximumLength(1000).WithMessage("Description must not exceed 1000 characters.");
 
             RuleFor(x => x.Status)
-                .IsInEnum().WithMessage("Invalid status value.");
+                .Must(status => status == null || TodoItemStatus.FromString(status.Value) != null)
+                .WithMessage("Invalid status value.");
 
             RuleFor(x => x.DueDate)
                 .GreaterThanOrEqualTo(DateTime.Today)
@@ -39,7 +40,8 @@ namespace ToDo.Application.Validators
                 .MaximumLength(1000).WithMessage("Description must not exceed 1000 characters.");
 
             RuleFor(x => x.Status)
-                .IsInEnum().WithMessage("Invalid status value.");
+                .Must(status => status == null || TodoItemStatus.FromString(status.Value) != null)
+                .WithMessage("Invalid status value.");
 
             RuleFor(x => x.DueDate)
                 .GreaterThanOrEqualTo(DateTime.Today)
@@ -52,11 +54,11 @@ namespace ToDo.Application.Validators
                 .WithMessage("Completed date cannot be in the future.");
 
             RuleFor(x => x)
-                .Must(x => x.Status != TodoItemStatusDto.COMPLETED || x.CompletedAt.HasValue)
+                .Must(x => x.Status != TodoItemStatus.Completed || x.CompletedAt.HasValue)
                 .WithMessage("Completed date is required when status is set to Completed.");
 
             RuleFor(x => x)
-                .Must(x => x.Status == TodoItemStatusDto.COMPLETED || !x.CompletedAt.HasValue)
+                .Must(x => x.Status == TodoItemStatus.Completed || !x.CompletedAt.HasValue)
                 .WithMessage("Completed date should be null when status is not Completed.");
         }
     }

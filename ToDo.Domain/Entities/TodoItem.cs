@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using ToDo.Domain.Events;  // Add this using statement
+using ToDo.Domain.Events; 
+using ToDo.Domain.ValueObjects;
 
 namespace ToDo.Domain.Entities
 {
@@ -13,7 +14,7 @@ namespace ToDo.Domain.Entities
 
     public string? Description { get; private set; }
 
-    public TodoItemStatus Status { get; private set; }
+    public TodoItemStatus? Status { get; set; }
 
     public DateTime? DueDate { get; private set; }
 
@@ -51,7 +52,7 @@ namespace ToDo.Domain.Entities
         Description = description,
         UserId = userId,
         DueDate = dueDate,
-        Status = TodoItemStatus.TODO,
+        Status = TodoItemStatus.NotStarted,
         CreatedAt = DateTime.UtcNow,
         UpdatedAt = DateTime.UtcNow
       };
@@ -62,7 +63,7 @@ namespace ToDo.Domain.Entities
 
     public void StartTodoItem()
     {
-      Status = TodoItemStatus.IN_PROGRESS;
+      Status = TodoItemStatus.InProgress;
       StartedAt = DateTime.UtcNow;
       CompletedAt = null;
       UpdatedAt = DateTime.UtcNow;
@@ -70,14 +71,14 @@ namespace ToDo.Domain.Entities
 
     public void StopTodoItem()
     {
-      Status = TodoItemStatus.TODO;
+      Status = TodoItemStatus.NotStarted;
       CompletedAt = null;
       UpdatedAt = DateTime.UtcNow;
     }
 
     public void CompleteTodoItem()
     {
-      Status = TodoItemStatus.COMPLETED;
+      Status = TodoItemStatus.Completed;
       CompletedAt = DateTime.UtcNow;
       UpdatedAt = DateTime.UtcNow;
     }

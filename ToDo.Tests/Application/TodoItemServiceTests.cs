@@ -11,6 +11,7 @@ using Microsoft.Extensions.Logging;
 using ToDo.Domain.Common;
 using AutoMapper;
 using System.Linq;
+using ToDo.Domain.ValueObjects; // Add this line to import TodoItemStatus
 
 namespace ToDo.Tests.Application
 {
@@ -107,7 +108,7 @@ namespace ToDo.Tests.Application
         Description = "Test Description",
         UserId = ValidUserId,
         DueDate = createDto.DueDate,
-        Status = TodoItemStatusDto.TODO,
+        Status = TodoItemStatus.NotStarted, // Changed from TodoItemStatusDto.TODO
         CreatedAt = createdItem.CreatedAt,
         UpdatedAt = createdItem.UpdatedAt
       };
@@ -149,7 +150,7 @@ namespace ToDo.Tests.Application
         Description = "Updated Description",
         UserId = ValidUserId,
         DueDate = updateDto.DueDate,
-        Status = TodoItemStatusDto.TODO,
+        Status = TodoItemStatus.NotStarted, // Changed from TodoItemStatusDto.TODO
         UpdatedAt = DateTime.UtcNow
       };
       _mockRepo.Setup(repo => repo.GetByIdAsync(1)).ReturnsAsync(existingItem);
@@ -166,7 +167,7 @@ namespace ToDo.Tests.Application
       result.Description.Should().Be("Updated Description");
       result.UserId.Should().Be(ValidUserId);
       result.DueDate.Should().Be(updateDto.DueDate);
-      result.Status.Should().Be(TodoItemStatusDto.TODO);
+      result.Status.Should().Be(TodoItemStatus.NotStarted); // Changed from TodoItemStatusDto.TODO
       result.UpdatedAt.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(1));
     }
 
@@ -181,7 +182,7 @@ namespace ToDo.Tests.Application
       await _service.StartTodoItemAsync(ValidUserId, 1);
 
       // Assert
-      todoItem.Status.Should().Be(TodoItemStatus.IN_PROGRESS);
+      todoItem.Status.Should().Be(TodoItemStatus.InProgress);
       todoItem.StartedAt.Should().NotBeNull();
       todoItem.StartedAt.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(1));
       _mockRepo.Verify(repo => repo.UpdateAsync(It.IsAny<TodoItem>()), Times.Once);
@@ -199,7 +200,7 @@ namespace ToDo.Tests.Application
       await _service.CompleteTodoItemAsync(ValidUserId, 1);
 
       // Assert
-      todoItem.Status.Should().Be(TodoItemStatus.COMPLETED);
+      todoItem.Status.Should().Be(TodoItemStatus.Completed);
       todoItem.CompletedAt.Should().NotBeNull();
       todoItem.CompletedAt.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(1));
       _mockRepo.Verify(repo => repo.UpdateAsync(It.IsAny<TodoItem>()), Times.Once);

@@ -2,6 +2,7 @@ using ToDo.Application.DTOs;
 using ToDo.Application.Exceptions;
 using ToDo.Application.Interfaces;
 using Microsoft.Extensions.Logging;
+using ToDo.Domain.ValueObjects;
 
 public class CompleteTaskUseCase : ICompleteTaskUseCase
 {
@@ -24,7 +25,7 @@ public class CompleteTaskUseCase : ICompleteTaskUseCase
             throw new TodoItemNotFoundException(taskId);
         }
 
-        if (task.Status == TodoItemStatusDto.COMPLETED)
+        if (task.Status == TodoItemStatus.Completed)
         {
             _logger.LogInformation("Task {TaskId} is already completed", taskId);
             return task;
@@ -32,7 +33,7 @@ public class CompleteTaskUseCase : ICompleteTaskUseCase
 
         var updateDto = new UpdateTodoItemDto
         {
-            Status = TodoItemStatusDto.COMPLETED,
+            Status = TodoItemStatus.Completed,
             CompletedAt = DateTime.UtcNow
         };
 

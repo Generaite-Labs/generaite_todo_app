@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using ToDo.Domain.Entities;
+using ToDo.Domain.ValueObjects;
 
 namespace ToDo.Infrastructure
 {
@@ -23,6 +24,12 @@ namespace ToDo.Infrastructure
 
         entity.Property(t => t.Title).HasMaxLength(200);
         entity.Property(t => t.Description).HasMaxLength(1000);
+
+        entity.Property(t => t.Status)
+            .HasConversion(
+                v => v.Value,
+                v => TodoItemStatus.FromString(v))
+            .HasMaxLength(20);
       });
     }
   }
