@@ -8,6 +8,9 @@ using Microsoft.AspNetCore.Identity;
 using ToDo.Domain.Interfaces;
 using ToDo.Application.Interfaces;
 using ToDo.Application.Services;
+using ToDo.Application.EventHandlers;
+using ToDo.Domain.Events;
+using ToDo.Infrastructure.Services;
 
 Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
@@ -79,6 +82,12 @@ try
   });
 
   builder.Services.AddAutoMapper(typeof(TodoItemMappingProfile));
+
+  // Register domain event handler
+  builder.Services.AddScoped<IDomainEventDispatcher, DomainEventDispatcher>();
+  builder.Services.AddScoped<IDomainEventHandler<TodoItemCompletedEvent>, TodoItemCompletedEventHandler>();
+
+  builder.Services.AddScoped<IDomainEventService, DomainEventService>();
 
   var app = builder.Build();
 

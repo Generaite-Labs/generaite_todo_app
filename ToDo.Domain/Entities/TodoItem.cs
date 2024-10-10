@@ -109,5 +109,14 @@ namespace ToDo.Domain.Entities
     {
       _domainEvents.Clear();
     }
+
+    public void MarkAsCompleted()
+    {
+      if (Status != TodoItemStatus.Completed)
+      {
+        Status = TodoItemStatus.Completed;
+        _domainEvents.Add(new TodoItemCompletedEvent(Id));
+      }
+    }
   }
 }

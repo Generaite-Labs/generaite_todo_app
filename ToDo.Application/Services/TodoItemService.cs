@@ -7,7 +7,6 @@ using ToDo.Application.Exceptions;
 using ToDo.Application.Interfaces;
 using Microsoft.Extensions.Logging;
 using System.Diagnostics;
-using ToDo.Domain.Events;
 
 namespace ToDo.Application.Services
 {
@@ -17,13 +16,15 @@ namespace ToDo.Application.Services
     private readonly IDomainEventDispatcher _eventDispatcher;
     private readonly ILogger<TodoItemService> _logger;
     private readonly IMapper _mapper;
+    private readonly IDomainEventService _domainEventService;
 
-    public TodoItemService(ITodoItemRepository repository, IDomainEventDispatcher eventDispatcher, ILogger<TodoItemService> logger, IMapper mapper)
+    public TodoItemService(ITodoItemRepository repository, IDomainEventDispatcher eventDispatcher, ILogger<TodoItemService> logger, IMapper mapper, IDomainEventService domainEventService)
     {
       _repository = repository;
       _eventDispatcher = eventDispatcher;
       _logger = logger;
       _mapper = mapper;
+      _domainEventService = domainEventService;
     }
 
     public async Task<TodoItemDto?> GetByIdAsync(string userId, int id)
