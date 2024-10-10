@@ -14,7 +14,7 @@ namespace ToDo.Domain.Entities
 
     public string? Description { get; private set; }
 
-    public TodoItemStatus? Status { get; set; }
+    public required TodoItemStatus Status { get; set; } // Remove the '?' to make it non-nullable
 
     public DateTime? DueDate { get; private set; }
 

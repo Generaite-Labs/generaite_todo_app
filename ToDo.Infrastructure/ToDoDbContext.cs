@@ -29,7 +29,8 @@ namespace ToDo.Infrastructure
             .HasConversion(
                 v => v.Value,
                 v => TodoItemStatus.FromString(v))
-            .HasMaxLength(20);
+            .HasMaxLength(20)
+            .IsRequired(); 
       });
     }
   }

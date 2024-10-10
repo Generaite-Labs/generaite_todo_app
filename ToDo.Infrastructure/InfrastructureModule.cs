@@ -1,9 +1,7 @@
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
-using ToDo.Domain.Entities;
 using ToDo.Core.Configuration;
 using ToDo.Domain.Interfaces;
 using ToDo.Infrastructure.Repositories;
@@ -11,6 +9,7 @@ using ToDo.Application.Services;
 using ToDo.Application.Validators;
 using ToDo.Application.Interfaces;
 using FluentValidation;
+using ToDo.Infrastructure.Services;
 
 namespace ToDo.Infrastructure;
 
@@ -24,31 +23,6 @@ public static class InfrastructureModule
       options.UseNpgsql(databaseOptions.ConnectionString);
     });
 
-    services.AddIdentity<ApplicationUser, IdentityRole>()
-        .AddEntityFrameworkStores<TodoDbContext>()
-        .AddDefaultTokenProviders();
-
-    services.Configure<IdentityOptions>(options =>
-    {
-      // Password settings
-      options.Password.RequireDigit = true;
-      options.Password.RequireLowercase = true;
-      options.Password.RequireNonAlphanumeric = true;
-      options.Password.RequireUppercase = true;
-      options.Password.RequiredLength = 6;
-      options.Password.RequiredUniqueChars = 1;
-
-      // Lockout settings
-      options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
-      options.Lockout.MaxFailedAccessAttempts = 5;
-      options.Lockout.AllowedForNewUsers = true;
-
-      // User settings
-      options.User.AllowedUserNameCharacters =
-              "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
-      options.User.RequireUniqueEmail = false;
-    });
-
     // Repositories
     services.AddScoped<ITodoItemRepository, TodoItemRepository>();
 
@@ -58,7 +32,7 @@ public static class InfrastructureModule
     // Validators
     services.AddValidatorsFromAssemblyContaining<CreateTodoItemDtoValidator>();
 
-    // Register other infrastructure services...
+    services.AddScoped<IDomainEventDispatcher, DomainEventDispatcher>();
 
     return services;
   }

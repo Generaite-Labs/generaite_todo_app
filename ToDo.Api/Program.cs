@@ -4,6 +4,10 @@ using Serilog;
 using ToDo.Api;
 using Serilog.Events;
 using ToDo.Application.Mappers;
+using Microsoft.AspNetCore.Identity;
+using ToDo.Domain.Interfaces;
+using ToDo.Application.Interfaces;
+using ToDo.Application.Services;
 
 Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
@@ -27,9 +31,31 @@ try
                        .AddJsonFile(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, $"appsettings.{builder.Environment.EnvironmentName}.json"), optional: true)
                        .AddEnvironmentVariables("TODO_");
 
-  // Add services to the container.
-  builder.Services.AddEndpointsApiExplorer();
-  builder.Services.AddSwaggerGen();
+  // Add Identity configuration
+  builder.Services.AddIdentity<IdentityUser, IdentityRole>(options => options.SignIn.RequireConfirmedAccount = true)
+      .AddEntityFrameworkStores<TodoDbContext>()
+      .AddDefaultTokenProviders();
+
+  builder.Services.Configure<IdentityOptions>(options =>
+  {
+      // Password settings
+      options.Password.RequireDigit = true;
+      options.Password.RequireLowercase = true;
+      options.Password.RequireNonAlphanumeric = true;
+      options.Password.RequireUppercase = true;
+      options.Password.RequiredLength = 6;
+      options.Password.RequiredUniqueChars = 1;
+
+      // Lockout settings
+      options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
+      options.Lockout.MaxFailedAccessAttempts = 5;
+      options.Lockout.AllowedForNewUsers = true;
+
+      // User settings
+      options.User.AllowedUserNameCharacters =
+              "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
+      options.User.RequireUniqueEmail = false;
+  });
 
   // Add application configuration
   builder.Services.AddOptions<DatabaseOptions>()
@@ -39,6 +65,7 @@ try
 
   // Add infrastructure services
   builder.Services.AddInfrastructureServices(builder.Configuration);
+  builder.Services.AddScoped<ITodoItemService, TodoItemService>();
 
   builder.Services.AddControllers();
   builder.Services.AddSignalR();
