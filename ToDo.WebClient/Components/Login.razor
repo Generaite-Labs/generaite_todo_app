@@ -1,0 +1,61 @@
+@page "/login"
+@using ToDo.WebClient.Services
+@using ToDo.Application.DTOs
+@using Blazored.LocalStorage
+@inject AuthenticationService AuthService
+@inject NavigationManager NavigationManager
+@inject ILocalStorageService LocalStorage
+
+<h3>Login</h3>
+
+<EditForm Model="@loginDto" OnValidSubmit="HandleLogin">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="form-group">
+        <label for="email">Email:</label>
+        <InputText id="email" @bind-Value="loginDto.Email" class="form-control" />
+        <ValidationMessage For="@(() => loginDto.Email)" />
+    </div>
+
+    <div class="form-group">
+        <label for="password">Password:</label>
+        <InputText id="password" @bind-Value="loginDto.Password" class="form-control" type="password" />
+        <ValidationMessage For="@(() => loginDto.Password)" />
+    </div>
+
+    <button type="submit" class="btn btn-primary">Login</button>
+</EditForm>
+
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+    <div class="alert alert-danger mt-3">@errorMessage</div>
+}
+
+@code {
+    private LoginDto loginDto = new LoginDto { Email = string.Empty, Password = string.Empty };
+    private string errorMessage = string.Empty;
+
+    private async Task HandleLogin()
+    {
+        errorMessage = string.Empty;
+        try
+        {
+            var token = await AuthService.Login(loginDto);
+            if (!string.IsNullOrEmpty(token))
+            {
+                await LocalStorage.SetItemAsync("authToken", token);
+                NavigationManager.NavigateTo("/");
+            }
+            else
+            {
+                errorMessage = "Invalid email or password";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"An error occurred: {ex.Message}";
+            Console.Error.WriteLine($"Login error: {ex}");
+        }
+    }
+}

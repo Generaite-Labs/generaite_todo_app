@@ -35,6 +35,7 @@ ToDo.sln
 │   │   ├── Pages/
 │   │   ├── Components/
 │   │   ├── Services/
+│   │   ├── Auth/
 │   │   └── wwwroot/
 │   │       ├── css/
 │   │       └── js/
