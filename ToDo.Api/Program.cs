@@ -11,137 +11,211 @@ using ToDo.Application.Services;
 using ToDo.Application.EventHandlers;
 using ToDo.Domain.Events;
 using ToDo.Infrastructure.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using ToDo.Domain.Entities;
+using ToDo.Infrastructure.Configuration;
+using Microsoft.AspNetCore.Identity.UI.Services;
+using Microsoft.OpenApi.Models;
+
+var builder = WebApplication.CreateBuilder(args);
 
 Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
     .Enrich.FromLogContext()
-    .WriteTo.Console()
+    .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}")
     .CreateBootstrapLogger();
 
 try
 {
-  var builder = WebApplication.CreateBuilder(args);
+    // Configure Serilog
+    builder.Host.UseSerilog((context, services, configuration) => configuration
+        .ReadFrom.Configuration(context.Configuration)
+        .ReadFrom.Services(services)
+        .Enrich.FromLogContext()
+        .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}"));
 
-  // Configure Serilog
-  builder.Host.UseSerilog((context, services, configuration) => configuration
-      .ReadFrom.Configuration(context.Configuration)
-      .ReadFrom.Services(services)
-      .Enrich.FromLogContext()
-      .WriteTo.Console(new Serilog.Formatting.Compact.CompactJsonFormatter()));
+    // Add configuration
+    builder.Configuration.AddJsonFile(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "appsettings.json"), optional: false, reloadOnChange: true)
+                         .AddJsonFile(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, $"appsettings.{builder.Environment.EnvironmentName}.json"), optional: true)
+                         .AddEnvironmentVariables("TODO_");
 
-  // Add configuration
-  builder.Configuration.AddJsonFile(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "appsettings.json"), optional: false, reloadOnChange: true)
-                       .AddJsonFile(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, $"appsettings.{builder.Environment.EnvironmentName}.json"), optional: true)
-                       .AddEnvironmentVariables("TODO_");
+    // Add Identity configuration
+    builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
+        .AddEntityFrameworkStores<TodoDbContext>()
+        .AddDefaultTokenProviders();
 
-  // Add Identity configuration
-  builder.Services.AddIdentity<IdentityUser, IdentityRole>(options => options.SignIn.RequireConfirmedAccount = true)
-      .AddEntityFrameworkStores<TodoDbContext>()
-      .AddDefaultTokenProviders();
+    builder.Services.AddSingleton<IConfiguration>(builder.Configuration);
 
-  builder.Services.Configure<IdentityOptions>(options =>
-  {
-      // Password settings
-      options.Password.RequireDigit = true;
-      options.Password.RequireLowercase = true;
-      options.Password.RequireNonAlphanumeric = true;
-      options.Password.RequireUppercase = true;
-      options.Password.RequiredLength = 6;
-      options.Password.RequiredUniqueChars = 1;
+    // Add this line to register the EmailSender
+    if (builder.Environment.IsDevelopment())
+    {
+        builder.Services.AddTransient<IEmailSender, DevelopmentEmailSender>();
+        builder.Services.AddTransient<IEmailSender<ApplicationUser>, DevelopmentEmailSender>();
+    }
+    else
+    {
+        builder.Services.AddTransient<IEmailSender, EmailSender>();
+        builder.Services.AddTransient<IEmailSender<ApplicationUser>, EmailSender>();
+    }
 
-      // Lockout settings
-      options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
-      options.Lockout.MaxFailedAccessAttempts = 5;
-      options.Lockout.AllowedForNewUsers = true;
+    builder.Services.AddAuthentication(options =>
+    {
+        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    }).AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = builder.Configuration["Jwt:Issuer"],
+            ValidAudience = builder.Configuration["Jwt:Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"] ?? throw new InvalidOperationException("Jwt:Key is not configured")))
+        };
+    });
 
-      // User settings
-      options.User.AllowedUserNameCharacters =
-              "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
-      options.User.RequireUniqueEmail = false;
-  });
+    builder.Services.Configure<IdentityOptions>(options =>
+    {
+        // Password settings
+        options.Password.RequireDigit = true;
+        options.Password.RequireLowercase = true;
+        options.Password.RequireNonAlphanumeric = true;
+        options.Password.RequireUppercase = true;
+        options.Password.RequiredLength = 6;
+        options.Password.RequiredUniqueChars = 1;
 
-  // Add application configuration
-  builder.Services.AddOptions<DatabaseOptions>()
-      .Bind(builder.Configuration.GetSection(DatabaseOptions.Database))
-      .ValidateDataAnnotations()
-      .ValidateOnStart();
+        // Lockout settings
+        options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
+        options.Lockout.MaxFailedAccessAttempts = 5;
+        options.Lockout.AllowedForNewUsers = true;
 
-  // Add infrastructure services
-  builder.Services.AddInfrastructureServices(builder.Configuration);
-  builder.Services.AddScoped<ITodoItemService, TodoItemService>();
+        // User settings
+        options.User.AllowedUserNameCharacters =
+                "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
+        options.User.RequireUniqueEmail = false;
+    });
 
-  builder.Services.AddControllers();
-  builder.Services.AddSignalR();
+    // Add application configuration
+    builder.Services.AddOptions<DatabaseOptions>()
+        .Bind(builder.Configuration.GetSection(DatabaseOptions.Database))
+        .ValidateDataAnnotations()
+        .ValidateOnStart();
 
-  builder.Services.AddCors(options =>
-  {
-    options.AddPolicy("AllowBlazorOrigin",
-                builder => builder.WithOrigins("https://localhost:5146")
-                                  .AllowAnyMethod()
-                                  .AllowAnyHeader());
-  });
+    // Add infrastructure services
+    builder.Services.AddInfrastructureServices(builder.Configuration);
+    builder.Services.AddScoped<ITodoItemService, TodoItemService>();
 
-  builder.Services.AddAutoMapper(typeof(TodoItemMappingProfile));
+    builder.Services.AddControllers();
+    builder.Services.AddSignalR();
 
-  // Register domain event handler
-  builder.Services.AddScoped<IDomainEventDispatcher, DomainEventDispatcher>();
-  builder.Services.AddScoped<IDomainEventHandler<TodoItemCompletedEvent>, TodoItemCompletedEventHandler>();
+    builder.Services.AddCors(options =>
+    {
+        options.AddPolicy("AllowBlazorOrigin",
+                    builder => builder.WithOrigins("http://localhost:5090")
+                                      .AllowAnyMethod()
+                                      .AllowAnyHeader()
+                                      .AllowCredentials());
+    });
 
-  builder.Services.AddScoped<IDomainEventService, DomainEventService>();
+    builder.Services.AddAutoMapper(typeof(TodoItemMappingProfile));
 
-  var app = builder.Build();
+    // Register domain event handler
+    builder.Services.AddScoped<IDomainEventDispatcher, DomainEventDispatcher>();
+    builder.Services.AddScoped<IDomainEventHandler<TodoItemCompletedEvent>, TodoItemCompletedEventHandler>();
 
-  // Add global exception handling middleware
-  app.UseMiddleware<GlobalExceptionHandlingMiddleware>();
+    builder.Services.AddScoped<IDomainEventService, DomainEventService>();
 
-  // Add Serilog request logging
-  app.UseSerilogRequestLogging(options =>
-  {
-    options.MessageTemplate = "HTTP {RequestMethod} {RequestPath} responded {StatusCode} in {Elapsed:0.0000} ms";
-  });
+    builder.Services.Configure<EmailConfiguration>(builder.Configuration.GetSection("EmailConfiguration"));
 
-  // Configure the HTTP request pipeline.
-  if (app.Environment.IsDevelopment())
-  {
-    app.UseSwagger();
-    app.UseSwaggerUI();
-  }
+    builder.Services.AddEndpointsApiExplorer();
+    builder.Services.AddSwaggerGen(c =>
+    {
+        c.SwaggerDoc("v1", new OpenApiInfo { Title = "ToDo API", Version = "v1" });
+        
+        c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+        {
+            Description = "JWT Authorization header using the Bearer scheme. Enter 'Bearer' [space] and then your token in the text input below.",
+            Name = "Authorization",
+            In = ParameterLocation.Header,
+            Type = SecuritySchemeType.ApiKey,
+            Scheme = "Bearer"
+        });
 
-  app.UseHttpsRedirection();
-  app.UseAuthentication();
-  app.UseAuthorization();
-  app.MapControllers();
-  app.UseCors("AllowBlazorOrigin");
+        c.AddSecurityRequirement(new OpenApiSecurityRequirement
+        {
+            {
+                new OpenApiSecurityScheme
+                {
+                    Reference = new OpenApiReference
+                    {
+                        Type = ReferenceType.SecurityScheme,
+                        Id = "Bearer"
+                    }
+                },
+                new string[] {}
+            }
+        });
+    });
 
-  var summaries = new[]
-  {
+    var app = builder.Build();
+
+    // Add global exception handling middleware
+    app.UseMiddleware<GlobalExceptionHandlingMiddleware>();
+
+    // Add Serilog request logging
+    app.UseSerilogRequestLogging(options =>
+    {
+        options.MessageTemplate = "[{Timestamp:HH:mm:ss}] HTTP {RequestMethod} {RequestPath} responded {StatusCode} in {Elapsed:0.0000} ms";
+    });
+
+    // Configure the HTTP request pipeline.
+    if (app.Environment.IsDevelopment())
+    {
+        app.UseSwagger();
+        app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "ToDo API v1"));
+    }
+
+    app.UseHttpsRedirection();
+    app.UseAuthentication();
+    app.UseAuthorization();
+    app.MapControllers();
+    app.UseCors("AllowBlazorOrigin");
+
+    app.MapIdentityApi<ApplicationUser>();
+
+    var summaries = new[]
+    {
         "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
     };
 
-  app.MapGet("/weatherforecast", () =>
-  {
-    var forecast = Enumerable.Range(1, 5).Select(index =>
-          new WeatherForecast
-          (
-              DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-              Random.Shared.Next(-20, 55),
-              summaries[Random.Shared.Next(summaries.Length)]
-          ))
-          .ToArray();
-    return forecast;
-  })
-  .WithName("GetWeatherForecast")
-  .WithOpenApi();
+    app.MapGet("/weatherforecast", () =>
+    {
+        var forecast = Enumerable.Range(1, 5).Select(index =>
+              new WeatherForecast
+              (
+                  DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
+                  Random.Shared.Next(-20, 55),
+                  summaries[Random.Shared.Next(summaries.Length)]
+              ))
+              .ToArray();
+        return forecast;
+    })
+    .WithName("GetWeatherForecast")
+    .WithOpenApi();
 
-  app.Run();
+    app.Run();
 }
 catch (Exception ex)
 {
-  Log.Fatal(ex, "Application terminated unexpectedly");
+    Log.Fatal(ex, "Application terminated unexpectedly");
 }
 finally
 {
-  Log.CloseAndFlush();
+    Log.CloseAndFlush();
 }
 
 record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
