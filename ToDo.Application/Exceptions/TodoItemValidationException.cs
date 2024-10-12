@@ -7,7 +7,7 @@ namespace ToDo.Application.Exceptions
     {
         public IEnumerable<string> Errors { get; }
 
-        public TodoItemValidationException(IEnumerable<string> errors) 
+        public TodoItemValidationException(IEnumerable<string> errors)
             : base("One or more validation errors occurred.")
         {
             Errors = errors;

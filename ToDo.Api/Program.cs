@@ -135,7 +135,7 @@ try
     builder.Services.AddSwaggerGen(c =>
     {
         c.SwaggerDoc("v1", new OpenApiInfo { Title = "ToDo API", Version = "v1" });
-        
+
         c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
         {
             Description = "JWT Authorization header using the Bearer scheme. Enter 'Bearer' [space] and then your token in the text input below.",
@@ -220,5 +220,5 @@ finally
 
 record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
 {
-  public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
+    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
 }

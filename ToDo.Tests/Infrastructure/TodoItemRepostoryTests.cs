@@ -7,152 +7,152 @@ using Moq;
 
 namespace ToDo.Infrastructure.Tests
 {
-  public class TodoItemRepositoryTests : IDisposable
-  {
-    private readonly TodoDbContext _context;
-    private readonly TodoItemRepository _repository;
-    private readonly Mock<ILogger<TodoItemRepository>> _mockLogger;
-
-    public TodoItemRepositoryTests()
+    public class TodoItemRepositoryTests : IDisposable
     {
-      var options = new DbContextOptionsBuilder<TodoDbContext>()
-          .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
-          .Options;
+        private readonly TodoDbContext _context;
+        private readonly TodoItemRepository _repository;
+        private readonly Mock<ILogger<TodoItemRepository>> _mockLogger;
 
-      _context = new TodoDbContext(options);
-      _mockLogger = new Mock<ILogger<TodoItemRepository>>();
-      _repository = new TodoItemRepository(_context, _mockLogger.Object);
-    }
+        public TodoItemRepositoryTests()
+        {
+            var options = new DbContextOptionsBuilder<TodoDbContext>()
+                .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
+                .Options;
 
-    [Fact]
-    public async Task GetByIdAsync_ReturnsCorrectTodoItem()
-    {
-      // Arrange
-      var todoItem = TodoItem.CreateTodoItem("Test Item", null, "user1", null);
-      _context.TodoItems.Add(todoItem);
-      await _context.SaveChangesAsync();
+            _context = new TodoDbContext(options);
+            _mockLogger = new Mock<ILogger<TodoItemRepository>>();
+            _repository = new TodoItemRepository(_context, _mockLogger.Object);
+        }
 
-      // Act
-      var result = await _repository.GetByIdAsync(todoItem.Id);
+        [Fact]
+        public async Task GetByIdAsync_ReturnsCorrectTodoItem()
+        {
+            // Arrange
+            var todoItem = TodoItem.CreateTodoItem("Test Item", null, "user1", null);
+            _context.TodoItems.Add(todoItem);
+            await _context.SaveChangesAsync();
 
-      // Assert
-      Assert.NotNull(result);
-      Assert.Equal(todoItem.Id, result.Id);
-      Assert.Equal(todoItem.Title, result.Title);
-    }
+            // Act
+            var result = await _repository.GetByIdAsync(todoItem.Id);
 
-    [Fact]
-    public async Task GetByIdAsync_ReturnsNullForNonexistentId()
-    {
-      // Act
-      var result = await _repository.GetByIdAsync(-1);
+            // Assert
+            Assert.NotNull(result);
+            Assert.Equal(todoItem.Id, result.Id);
+            Assert.Equal(todoItem.Title, result.Title);
+        }
 
-      // Assert
-      Assert.Null(result);
-    }
+        [Fact]
+        public async Task GetByIdAsync_ReturnsNullForNonexistentId()
+        {
+            // Act
+            var result = await _repository.GetByIdAsync(-1);
 
-    [Fact]
-    public async Task GetAllAsync_ReturnsAllTodoItems()
-    {
-      // Arrange
-      var todoItem1 = TodoItem.CreateTodoItem("Test Item 1", null, "user1", null);
-      var todoItem2 = TodoItem.CreateTodoItem("Test Item 2", null, "user1", null);
-      _context.TodoItems.AddRange(todoItem1, todoItem2);
-      await _context.SaveChangesAsync();
+            // Assert
+            Assert.Null(result);
+        }
 
-      // Act
-      var result = await _repository.GetAllAsync();
+        [Fact]
+        public async Task GetAllAsync_ReturnsAllTodoItems()
+        {
+            // Arrange
+            var todoItem1 = TodoItem.CreateTodoItem("Test Item 1", null, "user1", null);
+            var todoItem2 = TodoItem.CreateTodoItem("Test Item 2", null, "user1", null);
+            _context.TodoItems.AddRange(todoItem1, todoItem2);
+            await _context.SaveChangesAsync();
 
-      // Assert
-      Assert.Equal(2, result.Count());
-      Assert.Contains(result, t => t.Title == "Test Item 1");
-      Assert.Contains(result, t => t.Title == "Test Item 2");
-    }
+            // Act
+            var result = await _repository.GetAllAsync();
 
-    [Fact]
-    public async Task GetByUserIdAsync_ReturnsCorrectTodoItems()
-    {
-      // Arrange
-      var todoItem1 = TodoItem.CreateTodoItem("Test Item 1", null, "user1", null);
-      var todoItem2 = TodoItem.CreateTodoItem("Test Item 2", null, "user1", null);
-      var todoItem3 = TodoItem.CreateTodoItem("Test Item 3", null, "user2", null);
-      _context.TodoItems.AddRange(todoItem1, todoItem2, todoItem3);
-      await _context.SaveChangesAsync();
+            // Assert
+            Assert.Equal(2, result.Count());
+            Assert.Contains(result, t => t.Title == "Test Item 1");
+            Assert.Contains(result, t => t.Title == "Test Item 2");
+        }
 
-      // Act
-      var result = await _repository.GetByUserIdAsync("user1");
+        [Fact]
+        public async Task GetByUserIdAsync_ReturnsCorrectTodoItems()
+        {
+            // Arrange
+            var todoItem1 = TodoItem.CreateTodoItem("Test Item 1", null, "user1", null);
+            var todoItem2 = TodoItem.CreateTodoItem("Test Item 2", null, "user1", null);
+            var todoItem3 = TodoItem.CreateTodoItem("Test Item 3", null, "user2", null);
+            _context.TodoItems.AddRange(todoItem1, todoItem2, todoItem3);
+            await _context.SaveChangesAsync();
 
-      // Assert
-      Assert.Equal(2, result.Count());
-      Assert.Contains(result, t => t.Title == "Test Item 1");
-      Assert.Contains(result, t => t.Title == "Test Item 2");
-      Assert.DoesNotContain(result, t => t.Title == "Test Item 3");
-    }
+            // Act
+            var result = await _repository.GetByUserIdAsync("user1");
 
-    [Fact]
-    public async Task AddAsync_AddsTodoItemToDatabase()
-    {
-      // Arrange
-      var todoItem = TodoItem.CreateTodoItem("Test Item", null, "user1", null);
+            // Assert
+            Assert.Equal(2, result.Count());
+            Assert.Contains(result, t => t.Title == "Test Item 1");
+            Assert.Contains(result, t => t.Title == "Test Item 2");
+            Assert.DoesNotContain(result, t => t.Title == "Test Item 3");
+        }
 
-      // Act
-      var result = await _repository.AddAsync(todoItem);
+        [Fact]
+        public async Task AddAsync_AddsTodoItemToDatabase()
+        {
+            // Arrange
+            var todoItem = TodoItem.CreateTodoItem("Test Item", null, "user1", null);
 
-      // Assert
-      Assert.NotEqual(0, result.Id);
-      Assert.Equal(1, _context.TodoItems.Count());
-      var dbTodoItem = await _context.TodoItems.FindAsync(result.Id);
-      Assert.NotNull(dbTodoItem);
-      Assert.Equal(todoItem.Title, dbTodoItem.Title);
-    }
+            // Act
+            var result = await _repository.AddAsync(todoItem);
 
-    [Fact]
-    public async Task UpdateAsync_UpdatesTodoItemInDatabase()
-    {
-      // Arrange
-      var todoItem = TodoItem.CreateTodoItem("Test Item", null, "user1", null);
-      _context.TodoItems.Add(todoItem);
-      await _context.SaveChangesAsync();
+            // Assert
+            Assert.NotEqual(0, result.Id);
+            Assert.Equal(1, _context.TodoItems.Count());
+            var dbTodoItem = await _context.TodoItems.FindAsync(result.Id);
+            Assert.NotNull(dbTodoItem);
+            Assert.Equal(todoItem.Title, dbTodoItem.Title);
+        }
 
-      // Act
-      todoItem.UpdateTodoItem("Updated Test Item", null, null);
-      await _repository.UpdateAsync(todoItem);
+        [Fact]
+        public async Task UpdateAsync_UpdatesTodoItemInDatabase()
+        {
+            // Arrange
+            var todoItem = TodoItem.CreateTodoItem("Test Item", null, "user1", null);
+            _context.TodoItems.Add(todoItem);
+            await _context.SaveChangesAsync();
 
-      // Assert
-      var dbTodoItem = await _context.TodoItems.FindAsync(todoItem.Id);
-      Assert.NotNull(dbTodoItem);
-      Assert.Equal("Updated Test Item", dbTodoItem.Title);
-    }
+            // Act
+            todoItem.UpdateTodoItem("Updated Test Item", null, null);
+            await _repository.UpdateAsync(todoItem);
 
-    [Fact]
-    public async Task DeleteAsync_RemovesTodoItemFromDatabase()
-    {
-      // Arrange
-      var todoItem = TodoItem.CreateTodoItem("Test Item", null, "user1", null);
-      _context.TodoItems.Add(todoItem);
-      await _context.SaveChangesAsync();
+            // Assert
+            var dbTodoItem = await _context.TodoItems.FindAsync(todoItem.Id);
+            Assert.NotNull(dbTodoItem);
+            Assert.Equal("Updated Test Item", dbTodoItem.Title);
+        }
 
-      // Act
-      await _repository.DeleteAsync(todoItem.Id);
+        [Fact]
+        public async Task DeleteAsync_RemovesTodoItemFromDatabase()
+        {
+            // Arrange
+            var todoItem = TodoItem.CreateTodoItem("Test Item", null, "user1", null);
+            _context.TodoItems.Add(todoItem);
+            await _context.SaveChangesAsync();
 
-      // Assert
-      Assert.Equal(0, _context.TodoItems.Count());
-      var dbTodoItem = await _context.TodoItems.FindAsync(todoItem.Id);
-      Assert.Null(dbTodoItem);
-    }
+            // Act
+            await _repository.DeleteAsync(todoItem.Id);
 
-    [Fact]
-    public async Task GetPagedAsync_ReturnsCorrectItemsAndNextCursor()
-    {
-      // Arrange
-      var options = new DbContextOptionsBuilder<TodoDbContext>()
-          .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
-          .Options;
+            // Assert
+            Assert.Equal(0, _context.TodoItems.Count());
+            var dbTodoItem = await _context.TodoItems.FindAsync(todoItem.Id);
+            Assert.Null(dbTodoItem);
+        }
 
-      using (var context = new TodoDbContext(options))
-      {
-        var userId = "testUser";
-        var items = new List<TodoItem>
+        [Fact]
+        public async Task GetPagedAsync_ReturnsCorrectItemsAndNextCursor()
+        {
+            // Arrange
+            var options = new DbContextOptionsBuilder<TodoDbContext>()
+                .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
+                .Options;
+
+            using (var context = new TodoDbContext(options))
+            {
+                var userId = "testUser";
+                var items = new List<TodoItem>
         {
           TodoItem.CreateTodoItem("Item 1", null, userId, null),
           TodoItem.CreateTodoItem("Item 2", null, userId, null),
@@ -160,85 +160,85 @@ namespace ToDo.Infrastructure.Tests
           TodoItem.CreateTodoItem("Item 4", null, userId, null),
           TodoItem.CreateTodoItem("Item 5", null, userId, null)
         };
-        context.TodoItems.AddRange(items);
-        context.SaveChanges();
-      }
+                context.TodoItems.AddRange(items);
+                context.SaveChanges();
+            }
 
-      using (var context = new TodoDbContext(options))
-      {
-        var mockLogger = new Mock<ILogger<TodoItemRepository>>();
-        var repository = new TodoItemRepository(context, mockLogger.Object);
+            using (var context = new TodoDbContext(options))
+            {
+                var mockLogger = new Mock<ILogger<TodoItemRepository>>();
+                var repository = new TodoItemRepository(context, mockLogger.Object);
 
-        // Act
-        var result = await repository.GetPagedAsync(
-            "testUser",
-            new PaginationRequest(2, null) // Request 2 items per page, starting from the beginning
-        );
+                // Act
+                var result = await repository.GetPagedAsync(
+                    "testUser",
+                    new PaginationRequest(2, null) // Request 2 items per page, starting from the beginning
+                );
 
-        // Assert
-        Assert.Equal(2, result.Items.Count());
-        Assert.Equal("Item 1", result.Items.First().Title);
-        Assert.Equal("Item 2", result.Items.Last().Title);
-        Assert.NotNull(result.NextCursor);
-        Assert.True(result.HasNextPage);
+                // Assert
+                Assert.Equal(2, result.Items.Count());
+                Assert.Equal("Item 1", result.Items.First().Title);
+                Assert.Equal("Item 2", result.Items.Last().Title);
+                Assert.NotNull(result.NextCursor);
+                Assert.True(result.HasNextPage);
 
-        // Act again with the next cursor
-        result = await repository.GetPagedAsync(
-            "testUser",
-            new PaginationRequest(2, result.NextCursor)
-        );
+                // Act again with the next cursor
+                result = await repository.GetPagedAsync(
+                    "testUser",
+                    new PaginationRequest(2, result.NextCursor)
+                );
 
-        // Assert
-        Assert.Equal(2, result.Items.Count());
-        Assert.Equal("Item 3", result.Items.First().Title);
-        Assert.Equal("Item 4", result.Items.Last().Title);
-        Assert.NotNull(result.NextCursor);
-        Assert.True(result.HasNextPage);
+                // Assert
+                Assert.Equal(2, result.Items.Count());
+                Assert.Equal("Item 3", result.Items.First().Title);
+                Assert.Equal("Item 4", result.Items.Last().Title);
+                Assert.NotNull(result.NextCursor);
+                Assert.True(result.HasNextPage);
 
-        // Act one last time to get the last page
-        result = await repository.GetPagedAsync(
-            "testUser",
-            new PaginationRequest(2, result.NextCursor)
-        );
+                // Act one last time to get the last page
+                result = await repository.GetPagedAsync(
+                    "testUser",
+                    new PaginationRequest(2, result.NextCursor)
+                );
 
-        // Assert
-        Assert.Single(result.Items);
-        Assert.Equal("Item 5", result.Items.First().Title);
-        Assert.Null(result.NextCursor);
-        Assert.False(result.HasNextPage);
-      }
+                // Assert
+                Assert.Single(result.Items);
+                Assert.Equal("Item 5", result.Items.First().Title);
+                Assert.Null(result.NextCursor);
+                Assert.False(result.HasNextPage);
+            }
+        }
+
+        [Fact]
+        public async Task GetPagedAsync_WithNonExistentUser_ReturnsEmptyResult()
+        {
+            // Arrange
+            var options = new DbContextOptionsBuilder<TodoDbContext>()
+                .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
+                .Options;
+
+            using (var context = new TodoDbContext(options))
+            {
+                var mockLogger = new Mock<ILogger<TodoItemRepository>>();
+                var repository = new TodoItemRepository(context, mockLogger.Object);
+
+                // Act
+                var result = await repository.GetPagedAsync(
+                    "nonExistentUser",
+                    new PaginationRequest(10, null)
+                );
+
+                // Assert
+                Assert.Empty(result.Items);
+                Assert.Null(result.NextCursor);
+                Assert.False(result.HasNextPage);
+            }
+        }
+
+        public void Dispose()
+        {
+            _context.Database.EnsureDeleted();
+            _context.Dispose();
+        }
     }
-
-    [Fact]
-    public async Task GetPagedAsync_WithNonExistentUser_ReturnsEmptyResult()
-    {
-      // Arrange
-      var options = new DbContextOptionsBuilder<TodoDbContext>()
-          .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
-          .Options;
-
-      using (var context = new TodoDbContext(options))
-      {
-        var mockLogger = new Mock<ILogger<TodoItemRepository>>();
-        var repository = new TodoItemRepository(context, mockLogger.Object);
-
-        // Act
-        var result = await repository.GetPagedAsync(
-            "nonExistentUser",
-            new PaginationRequest(10, null)
-        );
-
-        // Assert
-        Assert.Empty(result.Items);
-        Assert.Null(result.NextCursor);
-        Assert.False(result.HasNextPage);
-      }
-    }
-
-    public void Dispose()
-    {
-      _context.Database.EnsureDeleted();
-      _context.Dispose();
-    }
-  }
 }

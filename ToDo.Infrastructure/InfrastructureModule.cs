@@ -15,25 +15,25 @@ namespace ToDo.Infrastructure;
 
 public static class InfrastructureModule
 {
-  public static IServiceCollection AddInfrastructureServices(this IServiceCollection services, IConfiguration configuration)
-  {
-    services.AddDbContext<TodoDbContext>((serviceProvider, options) =>
+    public static IServiceCollection AddInfrastructureServices(this IServiceCollection services, IConfiguration configuration)
     {
-      var databaseOptions = serviceProvider.GetRequiredService<IOptions<DatabaseOptions>>().Value;
-      options.UseNpgsql(databaseOptions.ConnectionString);
-    });
+        services.AddDbContext<TodoDbContext>((serviceProvider, options) =>
+        {
+            var databaseOptions = serviceProvider.GetRequiredService<IOptions<DatabaseOptions>>().Value;
+            options.UseNpgsql(databaseOptions.ConnectionString);
+        });
 
-    // Repositories
-    services.AddScoped<ITodoItemRepository, TodoItemRepository>();
+        // Repositories
+        services.AddScoped<ITodoItemRepository, TodoItemRepository>();
 
-    // Services
-    services.AddScoped<ITodoItemService, TodoItemService>();
+        // Services
+        services.AddScoped<ITodoItemService, TodoItemService>();
 
-    // Validators
-    services.AddValidatorsFromAssemblyContaining<CreateTodoItemDtoValidator>();
+        // Validators
+        services.AddValidatorsFromAssemblyContaining<CreateTodoItemDtoValidator>();
 
-    services.AddScoped<IDomainEventDispatcher, DomainEventDispatcher>();
+        services.AddScoped<IDomainEventDispatcher, DomainEventDispatcher>();
 
-    return services;
-  }
+        return services;
+    }
 }
