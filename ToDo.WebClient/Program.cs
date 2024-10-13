@@ -5,6 +5,7 @@ using ToDo.WebClient.Services;
 using Microsoft.AspNetCore.Components.Authorization;
 using Blazored.LocalStorage;
 using ToDo.WebClient.Auth;
+using Radzen;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
@@ -21,5 +22,6 @@ builder.Services.AddHttpClient<AuthenticationService>(client =>
 builder.Services.AddBlazoredLocalStorage();
 builder.Services.AddAuthorizationCore();
 builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthStateProvider>();
+builder.Services.AddRadzenComponents();
 
 await builder.Build().RunAsync();
