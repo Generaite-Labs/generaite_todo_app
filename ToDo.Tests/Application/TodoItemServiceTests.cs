@@ -21,6 +21,7 @@ namespace ToDo.Tests.Application
     private readonly Mock<ILogger<TodoItemService>> _mockLogger;
     private readonly Mock<IMapper> _mockMapper;
     private readonly Mock<IDomainEventDispatcher> _mockEventDispatcher;
+    private readonly Mock<IDomainEventService> _mockDomainEventService;
     private readonly ITodoItemService _service;
     private const string ValidUserId = "user1";
     private const string InvalidUserId = "user2";
@@ -31,7 +32,14 @@ namespace ToDo.Tests.Application
       _mockLogger = new Mock<ILogger<TodoItemService>>();
       _mockMapper = new Mock<IMapper>();
       _mockEventDispatcher = new Mock<IDomainEventDispatcher>();
-      _service = new TodoItemService(_mockRepo.Object, _mockEventDispatcher.Object, _mockLogger.Object, _mockMapper.Object);
+      _mockDomainEventService = new Mock<IDomainEventService>();
+      _service = new TodoItemService(
+          _mockRepo.Object,
+          _mockEventDispatcher.Object,
+          _mockLogger.Object,
+          _mockMapper.Object,
+          _mockDomainEventService.Object
+      );
     }
 
     [Fact]
