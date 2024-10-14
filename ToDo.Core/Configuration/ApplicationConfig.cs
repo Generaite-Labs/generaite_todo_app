@@ -43,13 +43,18 @@ namespace ToDo.Core.Configuration
           .ValidateDataAnnotations()
           .ValidateOnStart();
 
+      services.AddOptions<JwtOptions>()
+          .Bind(configuration.GetSection(JwtOptions.Jwt))
+          .ValidateDataAnnotations()
+          .ValidateOnStart();
+
       // Register IOptions<T> for dependency injection
       services.AddSingleton(resolver => 
           resolver.GetRequiredService<IOptions<DatabaseOptions>>().Value);
       services.AddSingleton(resolver => 
           resolver.GetRequiredService<IOptions<ApplicationSettings>>().Value);
-
-      // Add other configuration sections as needed
+      services.AddSingleton(resolver => 
+          resolver.GetRequiredService<IOptions<JwtOptions>>().Value);
     }
   }
 }

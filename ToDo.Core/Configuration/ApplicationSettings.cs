@@ -14,5 +14,11 @@ namespace ToDo.Core.Configuration
 
         [Required(ErrorMessage = "LogLevel is required")]
         public string LogLevel { get; set; } = "Information";
+
+        [Required(ErrorMessage = "ApiBaseUrl is required")]
+        public string ApiBaseUrl { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "FrontendUrl is required")]
+        public string FrontendUrl { get; set; } = string.Empty;
     }
 }
