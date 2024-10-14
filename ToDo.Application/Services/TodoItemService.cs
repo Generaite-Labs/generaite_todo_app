@@ -31,9 +31,14 @@ namespace ToDo.Application.Services
     {
       _logger.LogInformation("Getting TodoItem by ID: {TodoItemId} for user: {UserId}", id, userId);
       var todoItem = await _repository.GetByIdAsync(id);
-      if (todoItem == null || todoItem.UserId != userId)
+      if (todoItem == null)
       {
-        _logger.LogWarning("TodoItem not found or unauthorized access: {TodoItemId}, {UserId}", id, userId);
+        _logger.LogWarning("TodoItem not found: {TodoItemId}, {UserId}", id, userId);
+        return null;
+      }
+      if (todoItem.UserId != userId)
+      {
+        _logger.LogWarning("Unauthorized access to TodoItem: {TodoItemId}, {UserId}", id, userId);
         throw new UnauthorizedTodoItemAccessException(userId, id);
       }
       return _mapper.Map<TodoItemDto>(todoItem);

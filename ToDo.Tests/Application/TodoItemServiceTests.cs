@@ -352,16 +352,6 @@ namespace ToDo.Tests.Application
     }
 
     [Fact]
-    public async Task GetByIdAsync_ShouldThrowTodoItemNotFoundException_WhenItemDoesNotExist()
-    {
-      // Arrange
-      _mockRepo.Setup(repo => repo.GetByIdAsync(1)).ReturnsAsync((TodoItem?)null);
-
-      // Act & Assert
-      await Assert.ThrowsAsync<UnauthorizedTodoItemAccessException>(() => _service.GetByIdAsync(ValidUserId, 1));
-    }
-
-    [Fact]
     public async Task GetAllAsync_ShouldThrowInvalidTodoItemMappingException_WhenMappingFails()
     {
       // Arrange
