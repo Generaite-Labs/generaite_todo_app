@@ -6,7 +6,7 @@ using Microsoft.Kiota.Abstractions;
 using System.Collections.Generic;
 using System.IO;
 using System;
-namespace ToDo.ToDoClient.Models
+namespace ToDo.WebClient.ToDoClient.Models
 {
     [global::System.CodeDom.Compiler.GeneratedCode("Kiota", "1.0.0")]
     #pragma warning disable CS1591
@@ -52,7 +52,7 @@ namespace ToDo.ToDoClient.Models
         public string Type { get; set; }
 #endif
         /// <summary>
-        /// Instantiates a new <see cref="global::ToDo.ToDoClient.Models.ProblemDetails"/> and sets the default values.
+        /// Instantiates a new <see cref="global::ToDo.WebClient.ToDoClient.Models.ProblemDetails"/> and sets the default values.
         /// </summary>
         public ProblemDetails()
         {
@@ -61,12 +61,12 @@ namespace ToDo.ToDoClient.Models
         /// <summary>
         /// Creates a new instance of the appropriate class based on discriminator value
         /// </summary>
-        /// <returns>A <see cref="global::ToDo.ToDoClient.Models.ProblemDetails"/></returns>
+        /// <returns>A <see cref="global::ToDo.WebClient.ToDoClient.Models.ProblemDetails"/></returns>
         /// <param name="parseNode">The parse node to use to read the discriminator value and create the object</param>
-        public static global::ToDo.ToDoClient.Models.ProblemDetails CreateFromDiscriminatorValue(IParseNode parseNode)
+        public static global::ToDo.WebClient.ToDoClient.Models.ProblemDetails CreateFromDiscriminatorValue(IParseNode parseNode)
         {
             _ = parseNode ?? throw new ArgumentNullException(nameof(parseNode));
-            return new global::ToDo.ToDoClient.Models.ProblemDetails();
+            return new global::ToDo.WebClient.ToDoClient.Models.ProblemDetails();
         }
         /// <summary>
         /// The deserialization information for the current model

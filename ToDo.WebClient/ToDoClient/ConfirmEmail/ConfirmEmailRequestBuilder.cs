@@ -8,7 +8,7 @@ using System.IO;
 using System.Threading.Tasks;
 using System.Threading;
 using System;
-namespace ToDo.ToDoClient.ConfirmEmail
+namespace ToDo.WebClient.ToDoClient.ConfirmEmail
 {
     /// <summary>
     /// Builds and executes requests for operations under \confirmEmail
@@ -17,7 +17,7 @@ namespace ToDo.ToDoClient.ConfirmEmail
     public partial class ConfirmEmailRequestBuilder : BaseRequestBuilder
     {
         /// <summary>
-        /// Instantiates a new <see cref="global::ToDo.ToDoClient.ConfirmEmail.ConfirmEmailRequestBuilder"/> and sets the default values.
+        /// Instantiates a new <see cref="global::ToDo.WebClient.ToDoClient.ConfirmEmail.ConfirmEmailRequestBuilder"/> and sets the default values.
         /// </summary>
         /// <param name="pathParameters">Path parameters for the request</param>
         /// <param name="requestAdapter">The request adapter to use to execute the requests.</param>
@@ -25,7 +25,7 @@ namespace ToDo.ToDoClient.ConfirmEmail
         {
         }
         /// <summary>
-        /// Instantiates a new <see cref="global::ToDo.ToDoClient.ConfirmEmail.ConfirmEmailRequestBuilder"/> and sets the default values.
+        /// Instantiates a new <see cref="global::ToDo.WebClient.ToDoClient.ConfirmEmail.ConfirmEmailRequestBuilder"/> and sets the default values.
         /// </summary>
         /// <param name="rawUrl">The raw URL to use for the request builder.</param>
         /// <param name="requestAdapter">The request adapter to use to execute the requests.</param>
@@ -37,11 +37,11 @@ namespace ToDo.ToDoClient.ConfirmEmail
         /// <param name="requestConfiguration">Configuration for the request such as headers, query parameters, and middleware options.</param>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
-        public async Task<Stream?> GetAsync(Action<RequestConfiguration<global::ToDo.ToDoClient.ConfirmEmail.ConfirmEmailRequestBuilder.ConfirmEmailRequestBuilderGetQueryParameters>>? requestConfiguration = default, CancellationToken cancellationToken = default)
+        public async Task<Stream?> GetAsync(Action<RequestConfiguration<global::ToDo.WebClient.ToDoClient.ConfirmEmail.ConfirmEmailRequestBuilder.ConfirmEmailRequestBuilderGetQueryParameters>>? requestConfiguration = default, CancellationToken cancellationToken = default)
         {
 #nullable restore
 #else
-        public async Task<Stream> GetAsync(Action<RequestConfiguration<global::ToDo.ToDoClient.ConfirmEmail.ConfirmEmailRequestBuilder.ConfirmEmailRequestBuilderGetQueryParameters>> requestConfiguration = default, CancellationToken cancellationToken = default)
+        public async Task<Stream> GetAsync(Action<RequestConfiguration<global::ToDo.WebClient.ToDoClient.ConfirmEmail.ConfirmEmailRequestBuilder.ConfirmEmailRequestBuilderGetQueryParameters>> requestConfiguration = default, CancellationToken cancellationToken = default)
         {
 #endif
             var requestInfo = ToGetRequestInformation(requestConfiguration);
@@ -51,11 +51,11 @@ namespace ToDo.ToDoClient.ConfirmEmail
         /// <param name="requestConfiguration">Configuration for the request such as headers, query parameters, and middleware options.</param>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
-        public RequestInformation ToGetRequestInformation(Action<RequestConfiguration<global::ToDo.ToDoClient.ConfirmEmail.ConfirmEmailRequestBuilder.ConfirmEmailRequestBuilderGetQueryParameters>>? requestConfiguration = default)
+        public RequestInformation ToGetRequestInformation(Action<RequestConfiguration<global::ToDo.WebClient.ToDoClient.ConfirmEmail.ConfirmEmailRequestBuilder.ConfirmEmailRequestBuilderGetQueryParameters>>? requestConfiguration = default)
         {
 #nullable restore
 #else
-        public RequestInformation ToGetRequestInformation(Action<RequestConfiguration<global::ToDo.ToDoClient.ConfirmEmail.ConfirmEmailRequestBuilder.ConfirmEmailRequestBuilderGetQueryParameters>> requestConfiguration = default)
+        public RequestInformation ToGetRequestInformation(Action<RequestConfiguration<global::ToDo.WebClient.ToDoClient.ConfirmEmail.ConfirmEmailRequestBuilder.ConfirmEmailRequestBuilderGetQueryParameters>> requestConfiguration = default)
         {
 #endif
             var requestInfo = new RequestInformation(Method.GET, UrlTemplate, PathParameters);
@@ -65,11 +65,11 @@ namespace ToDo.ToDoClient.ConfirmEmail
         /// <summary>
         /// Returns a request builder with the provided arbitrary URL. Using this method means any other path or query parameters are ignored.
         /// </summary>
-        /// <returns>A <see cref="global::ToDo.ToDoClient.ConfirmEmail.ConfirmEmailRequestBuilder"/></returns>
+        /// <returns>A <see cref="global::ToDo.WebClient.ToDoClient.ConfirmEmail.ConfirmEmailRequestBuilder"/></returns>
         /// <param name="rawUrl">The raw URL to use for the request builder.</param>
-        public global::ToDo.ToDoClient.ConfirmEmail.ConfirmEmailRequestBuilder WithUrl(string rawUrl)
+        public global::ToDo.WebClient.ToDoClient.ConfirmEmail.ConfirmEmailRequestBuilder WithUrl(string rawUrl)
         {
-            return new global::ToDo.ToDoClient.ConfirmEmail.ConfirmEmailRequestBuilder(rawUrl, RequestAdapter);
+            return new global::ToDo.WebClient.ToDoClient.ConfirmEmail.ConfirmEmailRequestBuilder(rawUrl, RequestAdapter);
         }
         [global::System.CodeDom.Compiler.GeneratedCode("Kiota", "1.0.0")]
         #pragma warning disable CS1591
@@ -109,7 +109,7 @@ namespace ToDo.ToDoClient.ConfirmEmail
         /// </summary>
         [Obsolete("This class is deprecated. Please use the generic RequestConfiguration class generated by the generator.")]
         [global::System.CodeDom.Compiler.GeneratedCode("Kiota", "1.0.0")]
-        public partial class ConfirmEmailRequestBuilderGetRequestConfiguration : RequestConfiguration<global::ToDo.ToDoClient.ConfirmEmail.ConfirmEmailRequestBuilder.ConfirmEmailRequestBuilderGetQueryParameters>
+        public partial class ConfirmEmailRequestBuilderGetRequestConfiguration : RequestConfiguration<global::ToDo.WebClient.ToDoClient.ConfirmEmail.ConfirmEmailRequestBuilder.ConfirmEmailRequestBuilderGetQueryParameters>
         {
         }
     }

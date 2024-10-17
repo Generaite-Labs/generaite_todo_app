@@ -5,7 +5,7 @@ using Microsoft.Kiota.Abstractions.Serialization;
 using System.Collections.Generic;
 using System.IO;
 using System;
-namespace ToDo.ToDoClient.Models
+namespace ToDo.WebClient.ToDoClient.Models
 {
     [global::System.CodeDom.Compiler.GeneratedCode("Kiota", "1.0.0")]
     #pragma warning disable CS1591
@@ -31,10 +31,10 @@ namespace ToDo.ToDoClient.Models
         /// <summary>The status property</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
-        public global::ToDo.ToDoClient.Models.TodoItemStatus? Status { get; set; }
+        public global::ToDo.WebClient.ToDoClient.Models.TodoItemStatus? Status { get; set; }
 #nullable restore
 #else
-        public global::ToDo.ToDoClient.Models.TodoItemStatus Status { get; set; }
+        public global::ToDo.WebClient.ToDoClient.Models.TodoItemStatus Status { get; set; }
 #endif
         /// <summary>The title property</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
@@ -57,12 +57,12 @@ namespace ToDo.ToDoClient.Models
         /// <summary>
         /// Creates a new instance of the appropriate class based on discriminator value
         /// </summary>
-        /// <returns>A <see cref="global::ToDo.ToDoClient.Models.TodoItemDto"/></returns>
+        /// <returns>A <see cref="global::ToDo.WebClient.ToDoClient.Models.TodoItemDto"/></returns>
         /// <param name="parseNode">The parse node to use to read the discriminator value and create the object</param>
-        public static global::ToDo.ToDoClient.Models.TodoItemDto CreateFromDiscriminatorValue(IParseNode parseNode)
+        public static global::ToDo.WebClient.ToDoClient.Models.TodoItemDto CreateFromDiscriminatorValue(IParseNode parseNode)
         {
             _ = parseNode ?? throw new ArgumentNullException(nameof(parseNode));
-            return new global::ToDo.ToDoClient.Models.TodoItemDto();
+            return new global::ToDo.WebClient.ToDoClient.Models.TodoItemDto();
         }
         /// <summary>
         /// The deserialization information for the current model
@@ -77,7 +77,7 @@ namespace ToDo.ToDoClient.Models
                 { "description", n => { Description = n.GetStringValue(); } },
                 { "dueDate", n => { DueDate = n.GetDateTimeOffsetValue(); } },
                 { "id", n => { Id = n.GetIntValue(); } },
-                { "status", n => { Status = n.GetObjectValue<global::ToDo.ToDoClient.Models.TodoItemStatus>(global::ToDo.ToDoClient.Models.TodoItemStatus.CreateFromDiscriminatorValue); } },
+                { "status", n => { Status = n.GetObjectValue<global::ToDo.WebClient.ToDoClient.Models.TodoItemStatus>(global::ToDo.WebClient.ToDoClient.Models.TodoItemStatus.CreateFromDiscriminatorValue); } },
                 { "title", n => { Title = n.GetStringValue(); } },
                 { "updatedAt", n => { UpdatedAt = n.GetDateTimeOffsetValue(); } },
                 { "userId", n => { UserId = n.GetStringValue(); } },
@@ -95,7 +95,7 @@ namespace ToDo.ToDoClient.Models
             writer.WriteStringValue("description", Description);
             writer.WriteDateTimeOffsetValue("dueDate", DueDate);
             writer.WriteIntValue("id", Id);
-            writer.WriteObjectValue<global::ToDo.ToDoClient.Models.TodoItemStatus>("status", Status);
+            writer.WriteObjectValue<global::ToDo.WebClient.ToDoClient.Models.TodoItemStatus>("status", Status);
             writer.WriteStringValue("title", Title);
             writer.WriteDateTimeOffsetValue("updatedAt", UpdatedAt);
             writer.WriteStringValue("userId", UserId);

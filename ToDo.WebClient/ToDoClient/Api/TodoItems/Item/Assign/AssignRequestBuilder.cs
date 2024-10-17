@@ -8,8 +8,8 @@ using System.IO;
 using System.Threading.Tasks;
 using System.Threading;
 using System;
-using ToDo.ToDoClient.Models;
-namespace ToDo.ToDoClient.Api.TodoItems.Item.Assign
+using ToDo.WebClient.ToDoClient.Models;
+namespace ToDo.WebClient.ToDoClient.Api.TodoItems.Item.Assign
 {
     /// <summary>
     /// Builds and executes requests for operations under \api\TodoItems\{id}\assign
@@ -18,7 +18,7 @@ namespace ToDo.ToDoClient.Api.TodoItems.Item.Assign
     public partial class AssignRequestBuilder : BaseRequestBuilder
     {
         /// <summary>
-        /// Instantiates a new <see cref="global::ToDo.ToDoClient.Api.TodoItems.Item.Assign.AssignRequestBuilder"/> and sets the default values.
+        /// Instantiates a new <see cref="global::ToDo.WebClient.ToDoClient.Api.TodoItems.Item.Assign.AssignRequestBuilder"/> and sets the default values.
         /// </summary>
         /// <param name="pathParameters">Path parameters for the request</param>
         /// <param name="requestAdapter">The request adapter to use to execute the requests.</param>
@@ -26,7 +26,7 @@ namespace ToDo.ToDoClient.Api.TodoItems.Item.Assign
         {
         }
         /// <summary>
-        /// Instantiates a new <see cref="global::ToDo.ToDoClient.Api.TodoItems.Item.Assign.AssignRequestBuilder"/> and sets the default values.
+        /// Instantiates a new <see cref="global::ToDo.WebClient.ToDoClient.Api.TodoItems.Item.Assign.AssignRequestBuilder"/> and sets the default values.
         /// </summary>
         /// <param name="rawUrl">The raw URL to use for the request builder.</param>
         /// <param name="requestAdapter">The request adapter to use to execute the requests.</param>
@@ -37,7 +37,7 @@ namespace ToDo.ToDoClient.Api.TodoItems.Item.Assign
         /// <param name="body">The request body</param>
         /// <param name="cancellationToken">Cancellation token to use when cancelling requests</param>
         /// <param name="requestConfiguration">Configuration for the request such as headers, query parameters, and middleware options.</param>
-        /// <exception cref="global::ToDo.ToDoClient.Models.ProblemDetails">When receiving a 404 status code</exception>
+        /// <exception cref="global::ToDo.WebClient.ToDoClient.Models.ProblemDetails">When receiving a 404 status code</exception>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
         public async Task<string?> PostAsync(string body, Action<RequestConfiguration<DefaultQueryParameters>>? requestConfiguration = default, CancellationToken cancellationToken = default)
@@ -51,7 +51,7 @@ namespace ToDo.ToDoClient.Api.TodoItems.Item.Assign
             var requestInfo = ToPostRequestInformation(body, requestConfiguration);
             var errorMapping = new Dictionary<string, ParsableFactory<IParsable>>
             {
-                { "404", global::ToDo.ToDoClient.Models.ProblemDetails.CreateFromDiscriminatorValue },
+                { "404", global::ToDo.WebClient.ToDoClient.Models.ProblemDetails.CreateFromDiscriminatorValue },
             };
             return await RequestAdapter.SendPrimitiveAsync<string>(requestInfo, errorMapping, cancellationToken).ConfigureAwait(false);
         }
@@ -77,11 +77,11 @@ namespace ToDo.ToDoClient.Api.TodoItems.Item.Assign
         /// <summary>
         /// Returns a request builder with the provided arbitrary URL. Using this method means any other path or query parameters are ignored.
         /// </summary>
-        /// <returns>A <see cref="global::ToDo.ToDoClient.Api.TodoItems.Item.Assign.AssignRequestBuilder"/></returns>
+        /// <returns>A <see cref="global::ToDo.WebClient.ToDoClient.Api.TodoItems.Item.Assign.AssignRequestBuilder"/></returns>
         /// <param name="rawUrl">The raw URL to use for the request builder.</param>
-        public global::ToDo.ToDoClient.Api.TodoItems.Item.Assign.AssignRequestBuilder WithUrl(string rawUrl)
+        public global::ToDo.WebClient.ToDoClient.Api.TodoItems.Item.Assign.AssignRequestBuilder WithUrl(string rawUrl)
         {
-            return new global::ToDo.ToDoClient.Api.TodoItems.Item.Assign.AssignRequestBuilder(rawUrl, RequestAdapter);
+            return new global::ToDo.WebClient.ToDoClient.Api.TodoItems.Item.Assign.AssignRequestBuilder(rawUrl, RequestAdapter);
         }
         /// <summary>
         /// Configuration for the request such as headers, query parameters, and middleware options.

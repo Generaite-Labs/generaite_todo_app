@@ -8,6 +8,6 @@ namespace ToDo.Core.Configuration
 
     [Required(ErrorMessage = "ConnectionString is required")]
     [MinLength(10, ErrorMessage = "ConnectionString must be at least 10 characters long")]
-    public string ConnectionString { get; set; } = string.Empty;
+    public required string ConnectionString { get; set; }
   }
 }

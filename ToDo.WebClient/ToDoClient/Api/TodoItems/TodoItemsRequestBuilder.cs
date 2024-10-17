@@ -8,10 +8,10 @@ using System.IO;
 using System.Threading.Tasks;
 using System.Threading;
 using System;
-using ToDo.ToDoClient.Api.TodoItems.Item;
-using ToDo.ToDoClient.Api.TodoItems.Paged;
-using ToDo.ToDoClient.Models;
-namespace ToDo.ToDoClient.Api.TodoItems
+using ToDo.WebClient.ToDoClient.Api.TodoItems.Item;
+using ToDo.WebClient.ToDoClient.Api.TodoItems.Paged;
+using ToDo.WebClient.ToDoClient.Models;
+namespace ToDo.WebClient.ToDoClient.Api.TodoItems
 {
     /// <summary>
     /// Builds and executes requests for operations under \api\TodoItems
@@ -20,37 +20,37 @@ namespace ToDo.ToDoClient.Api.TodoItems
     public partial class TodoItemsRequestBuilder : BaseRequestBuilder
     {
         /// <summary>The paged property</summary>
-        public global::ToDo.ToDoClient.Api.TodoItems.Paged.PagedRequestBuilder Paged
+        public global::ToDo.WebClient.ToDoClient.Api.TodoItems.Paged.PagedRequestBuilder Paged
         {
-            get => new global::ToDo.ToDoClient.Api.TodoItems.Paged.PagedRequestBuilder(PathParameters, RequestAdapter);
+            get => new global::ToDo.WebClient.ToDoClient.Api.TodoItems.Paged.PagedRequestBuilder(PathParameters, RequestAdapter);
         }
-        /// <summary>Gets an item from the ToDo.ToDoClient.api.TodoItems.item collection</summary>
+        /// <summary>Gets an item from the ToDo.WebClient.ToDoClient.api.TodoItems.item collection</summary>
         /// <param name="position">Unique identifier of the item</param>
-        /// <returns>A <see cref="global::ToDo.ToDoClient.Api.TodoItems.Item.TodoItemsItemRequestBuilder"/></returns>
-        public global::ToDo.ToDoClient.Api.TodoItems.Item.TodoItemsItemRequestBuilder this[int position]
+        /// <returns>A <see cref="global::ToDo.WebClient.ToDoClient.Api.TodoItems.Item.TodoItemsItemRequestBuilder"/></returns>
+        public global::ToDo.WebClient.ToDoClient.Api.TodoItems.Item.TodoItemsItemRequestBuilder this[int position]
         {
             get
             {
                 var urlTplParams = new Dictionary<string, object>(PathParameters);
                 urlTplParams.Add("id", position);
-                return new global::ToDo.ToDoClient.Api.TodoItems.Item.TodoItemsItemRequestBuilder(urlTplParams, RequestAdapter);
+                return new global::ToDo.WebClient.ToDoClient.Api.TodoItems.Item.TodoItemsItemRequestBuilder(urlTplParams, RequestAdapter);
             }
         }
-        /// <summary>Gets an item from the ToDo.ToDoClient.api.TodoItems.item collection</summary>
+        /// <summary>Gets an item from the ToDo.WebClient.ToDoClient.api.TodoItems.item collection</summary>
         /// <param name="position">Unique identifier of the item</param>
-        /// <returns>A <see cref="global::ToDo.ToDoClient.Api.TodoItems.Item.TodoItemsItemRequestBuilder"/></returns>
+        /// <returns>A <see cref="global::ToDo.WebClient.ToDoClient.Api.TodoItems.Item.TodoItemsItemRequestBuilder"/></returns>
         [Obsolete("This indexer is deprecated and will be removed in the next major version. Use the one with the typed parameter instead.")]
-        public global::ToDo.ToDoClient.Api.TodoItems.Item.TodoItemsItemRequestBuilder this[string position]
+        public global::ToDo.WebClient.ToDoClient.Api.TodoItems.Item.TodoItemsItemRequestBuilder this[string position]
         {
             get
             {
                 var urlTplParams = new Dictionary<string, object>(PathParameters);
                 if (!string.IsNullOrWhiteSpace(position)) urlTplParams.Add("id", position);
-                return new global::ToDo.ToDoClient.Api.TodoItems.Item.TodoItemsItemRequestBuilder(urlTplParams, RequestAdapter);
+                return new global::ToDo.WebClient.ToDoClient.Api.TodoItems.Item.TodoItemsItemRequestBuilder(urlTplParams, RequestAdapter);
             }
         }
         /// <summary>
-        /// Instantiates a new <see cref="global::ToDo.ToDoClient.Api.TodoItems.TodoItemsRequestBuilder"/> and sets the default values.
+        /// Instantiates a new <see cref="global::ToDo.WebClient.ToDoClient.Api.TodoItems.TodoItemsRequestBuilder"/> and sets the default values.
         /// </summary>
         /// <param name="pathParameters">Path parameters for the request</param>
         /// <param name="requestAdapter">The request adapter to use to execute the requests.</param>
@@ -58,50 +58,50 @@ namespace ToDo.ToDoClient.Api.TodoItems
         {
         }
         /// <summary>
-        /// Instantiates a new <see cref="global::ToDo.ToDoClient.Api.TodoItems.TodoItemsRequestBuilder"/> and sets the default values.
+        /// Instantiates a new <see cref="global::ToDo.WebClient.ToDoClient.Api.TodoItems.TodoItemsRequestBuilder"/> and sets the default values.
         /// </summary>
         /// <param name="rawUrl">The raw URL to use for the request builder.</param>
         /// <param name="requestAdapter">The request adapter to use to execute the requests.</param>
         public TodoItemsRequestBuilder(string rawUrl, IRequestAdapter requestAdapter) : base(requestAdapter, "{+baseurl}/api/TodoItems", rawUrl)
         {
         }
-        /// <returns>A List&lt;global::ToDo.ToDoClient.Models.TodoItemDto&gt;</returns>
+        /// <returns>A List&lt;global::ToDo.WebClient.ToDoClient.Models.TodoItemDto&gt;</returns>
         /// <param name="cancellationToken">Cancellation token to use when cancelling requests</param>
         /// <param name="requestConfiguration">Configuration for the request such as headers, query parameters, and middleware options.</param>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
-        public async Task<List<global::ToDo.ToDoClient.Models.TodoItemDto>?> GetAsync(Action<RequestConfiguration<DefaultQueryParameters>>? requestConfiguration = default, CancellationToken cancellationToken = default)
+        public async Task<List<global::ToDo.WebClient.ToDoClient.Models.TodoItemDto>?> GetAsync(Action<RequestConfiguration<DefaultQueryParameters>>? requestConfiguration = default, CancellationToken cancellationToken = default)
         {
 #nullable restore
 #else
-        public async Task<List<global::ToDo.ToDoClient.Models.TodoItemDto>> GetAsync(Action<RequestConfiguration<DefaultQueryParameters>> requestConfiguration = default, CancellationToken cancellationToken = default)
+        public async Task<List<global::ToDo.WebClient.ToDoClient.Models.TodoItemDto>> GetAsync(Action<RequestConfiguration<DefaultQueryParameters>> requestConfiguration = default, CancellationToken cancellationToken = default)
         {
 #endif
             var requestInfo = ToGetRequestInformation(requestConfiguration);
-            var collectionResult = await RequestAdapter.SendCollectionAsync<global::ToDo.ToDoClient.Models.TodoItemDto>(requestInfo, global::ToDo.ToDoClient.Models.TodoItemDto.CreateFromDiscriminatorValue, default, cancellationToken).ConfigureAwait(false);
+            var collectionResult = await RequestAdapter.SendCollectionAsync<global::ToDo.WebClient.ToDoClient.Models.TodoItemDto>(requestInfo, global::ToDo.WebClient.ToDoClient.Models.TodoItemDto.CreateFromDiscriminatorValue, default, cancellationToken).ConfigureAwait(false);
             return collectionResult?.AsList();
         }
-        /// <returns>A <see cref="global::ToDo.ToDoClient.Models.TodoItemDto"/></returns>
+        /// <returns>A <see cref="global::ToDo.WebClient.ToDoClient.Models.TodoItemDto"/></returns>
         /// <param name="body">The request body</param>
         /// <param name="cancellationToken">Cancellation token to use when cancelling requests</param>
         /// <param name="requestConfiguration">Configuration for the request such as headers, query parameters, and middleware options.</param>
-        /// <exception cref="global::ToDo.ToDoClient.Models.ProblemDetails">When receiving a 400 status code</exception>
+        /// <exception cref="global::ToDo.WebClient.ToDoClient.Models.ProblemDetails">When receiving a 400 status code</exception>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
-        public async Task<global::ToDo.ToDoClient.Models.TodoItemDto?> PostAsync(global::ToDo.ToDoClient.Models.CreateTodoItemDto body, Action<RequestConfiguration<DefaultQueryParameters>>? requestConfiguration = default, CancellationToken cancellationToken = default)
+        public async Task<global::ToDo.WebClient.ToDoClient.Models.TodoItemDto?> PostAsync(global::ToDo.WebClient.ToDoClient.Models.CreateTodoItemDto body, Action<RequestConfiguration<DefaultQueryParameters>>? requestConfiguration = default, CancellationToken cancellationToken = default)
         {
 #nullable restore
 #else
-        public async Task<global::ToDo.ToDoClient.Models.TodoItemDto> PostAsync(global::ToDo.ToDoClient.Models.CreateTodoItemDto body, Action<RequestConfiguration<DefaultQueryParameters>> requestConfiguration = default, CancellationToken cancellationToken = default)
+        public async Task<global::ToDo.WebClient.ToDoClient.Models.TodoItemDto> PostAsync(global::ToDo.WebClient.ToDoClient.Models.CreateTodoItemDto body, Action<RequestConfiguration<DefaultQueryParameters>> requestConfiguration = default, CancellationToken cancellationToken = default)
         {
 #endif
             _ = body ?? throw new ArgumentNullException(nameof(body));
             var requestInfo = ToPostRequestInformation(body, requestConfiguration);
             var errorMapping = new Dictionary<string, ParsableFactory<IParsable>>
             {
-                { "400", global::ToDo.ToDoClient.Models.ProblemDetails.CreateFromDiscriminatorValue },
+                { "400", global::ToDo.WebClient.ToDoClient.Models.ProblemDetails.CreateFromDiscriminatorValue },
             };
-            return await RequestAdapter.SendAsync<global::ToDo.ToDoClient.Models.TodoItemDto>(requestInfo, global::ToDo.ToDoClient.Models.TodoItemDto.CreateFromDiscriminatorValue, errorMapping, cancellationToken).ConfigureAwait(false);
+            return await RequestAdapter.SendAsync<global::ToDo.WebClient.ToDoClient.Models.TodoItemDto>(requestInfo, global::ToDo.WebClient.ToDoClient.Models.TodoItemDto.CreateFromDiscriminatorValue, errorMapping, cancellationToken).ConfigureAwait(false);
         }
         /// <returns>A <see cref="RequestInformation"/></returns>
         /// <param name="requestConfiguration">Configuration for the request such as headers, query parameters, and middleware options.</param>
@@ -124,11 +124,11 @@ namespace ToDo.ToDoClient.Api.TodoItems
         /// <param name="requestConfiguration">Configuration for the request such as headers, query parameters, and middleware options.</param>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
-        public RequestInformation ToPostRequestInformation(global::ToDo.ToDoClient.Models.CreateTodoItemDto body, Action<RequestConfiguration<DefaultQueryParameters>>? requestConfiguration = default)
+        public RequestInformation ToPostRequestInformation(global::ToDo.WebClient.ToDoClient.Models.CreateTodoItemDto body, Action<RequestConfiguration<DefaultQueryParameters>>? requestConfiguration = default)
         {
 #nullable restore
 #else
-        public RequestInformation ToPostRequestInformation(global::ToDo.ToDoClient.Models.CreateTodoItemDto body, Action<RequestConfiguration<DefaultQueryParameters>> requestConfiguration = default)
+        public RequestInformation ToPostRequestInformation(global::ToDo.WebClient.ToDoClient.Models.CreateTodoItemDto body, Action<RequestConfiguration<DefaultQueryParameters>> requestConfiguration = default)
         {
 #endif
             _ = body ?? throw new ArgumentNullException(nameof(body));
@@ -141,11 +141,11 @@ namespace ToDo.ToDoClient.Api.TodoItems
         /// <summary>
         /// Returns a request builder with the provided arbitrary URL. Using this method means any other path or query parameters are ignored.
         /// </summary>
-        /// <returns>A <see cref="global::ToDo.ToDoClient.Api.TodoItems.TodoItemsRequestBuilder"/></returns>
+        /// <returns>A <see cref="global::ToDo.WebClient.ToDoClient.Api.TodoItems.TodoItemsRequestBuilder"/></returns>
         /// <param name="rawUrl">The raw URL to use for the request builder.</param>
-        public global::ToDo.ToDoClient.Api.TodoItems.TodoItemsRequestBuilder WithUrl(string rawUrl)
+        public global::ToDo.WebClient.ToDoClient.Api.TodoItems.TodoItemsRequestBuilder WithUrl(string rawUrl)
         {
-            return new global::ToDo.ToDoClient.Api.TodoItems.TodoItemsRequestBuilder(rawUrl, RequestAdapter);
+            return new global::ToDo.WebClient.ToDoClient.Api.TodoItems.TodoItemsRequestBuilder(rawUrl, RequestAdapter);
         }
         /// <summary>
         /// Configuration for the request such as headers, query parameters, and middleware options.

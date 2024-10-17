@@ -5,7 +5,7 @@ using Microsoft.Kiota.Abstractions.Serialization;
 using System.Collections.Generic;
 using System.IO;
 using System;
-namespace ToDo.ToDoClient.Models
+namespace ToDo.WebClient.ToDoClient.Models
 {
     [global::System.CodeDom.Compiler.GeneratedCode("Kiota", "1.0.0")]
     #pragma warning disable CS1591
@@ -39,12 +39,12 @@ namespace ToDo.ToDoClient.Models
         /// <summary>
         /// Creates a new instance of the appropriate class based on discriminator value
         /// </summary>
-        /// <returns>A <see cref="global::ToDo.ToDoClient.Models.InfoRequest"/></returns>
+        /// <returns>A <see cref="global::ToDo.WebClient.ToDoClient.Models.InfoRequest"/></returns>
         /// <param name="parseNode">The parse node to use to read the discriminator value and create the object</param>
-        public static global::ToDo.ToDoClient.Models.InfoRequest CreateFromDiscriminatorValue(IParseNode parseNode)
+        public static global::ToDo.WebClient.ToDoClient.Models.InfoRequest CreateFromDiscriminatorValue(IParseNode parseNode)
         {
             _ = parseNode ?? throw new ArgumentNullException(nameof(parseNode));
-            return new global::ToDo.ToDoClient.Models.InfoRequest();
+            return new global::ToDo.WebClient.ToDoClient.Models.InfoRequest();
         }
         /// <summary>
         /// The deserialization information for the current model

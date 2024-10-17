@@ -8,8 +8,8 @@ using System.IO;
 using System.Threading.Tasks;
 using System.Threading;
 using System;
-using ToDo.ToDoClient.Models;
-namespace ToDo.ToDoClient.Api.TodoItems.Paged
+using ToDo.WebClient.ToDoClient.Models;
+namespace ToDo.WebClient.ToDoClient.Api.TodoItems.Paged
 {
     /// <summary>
     /// Builds and executes requests for operations under \api\TodoItems\paged
@@ -18,7 +18,7 @@ namespace ToDo.ToDoClient.Api.TodoItems.Paged
     public partial class PagedRequestBuilder : BaseRequestBuilder
     {
         /// <summary>
-        /// Instantiates a new <see cref="global::ToDo.ToDoClient.Api.TodoItems.Paged.PagedRequestBuilder"/> and sets the default values.
+        /// Instantiates a new <see cref="global::ToDo.WebClient.ToDoClient.Api.TodoItems.Paged.PagedRequestBuilder"/> and sets the default values.
         /// </summary>
         /// <param name="pathParameters">Path parameters for the request</param>
         /// <param name="requestAdapter">The request adapter to use to execute the requests.</param>
@@ -26,37 +26,37 @@ namespace ToDo.ToDoClient.Api.TodoItems.Paged
         {
         }
         /// <summary>
-        /// Instantiates a new <see cref="global::ToDo.ToDoClient.Api.TodoItems.Paged.PagedRequestBuilder"/> and sets the default values.
+        /// Instantiates a new <see cref="global::ToDo.WebClient.ToDoClient.Api.TodoItems.Paged.PagedRequestBuilder"/> and sets the default values.
         /// </summary>
         /// <param name="rawUrl">The raw URL to use for the request builder.</param>
         /// <param name="requestAdapter">The request adapter to use to execute the requests.</param>
         public PagedRequestBuilder(string rawUrl, IRequestAdapter requestAdapter) : base(requestAdapter, "{+baseurl}/api/TodoItems/paged{?Cursor*,Limit*}", rawUrl)
         {
         }
-        /// <returns>A <see cref="global::ToDo.ToDoClient.Models.TodoItemDtoPaginatedResultDto"/></returns>
+        /// <returns>A <see cref="global::ToDo.WebClient.ToDoClient.Models.TodoItemDtoPaginatedResultDto"/></returns>
         /// <param name="cancellationToken">Cancellation token to use when cancelling requests</param>
         /// <param name="requestConfiguration">Configuration for the request such as headers, query parameters, and middleware options.</param>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
-        public async Task<global::ToDo.ToDoClient.Models.TodoItemDtoPaginatedResultDto?> GetAsync(Action<RequestConfiguration<global::ToDo.ToDoClient.Api.TodoItems.Paged.PagedRequestBuilder.PagedRequestBuilderGetQueryParameters>>? requestConfiguration = default, CancellationToken cancellationToken = default)
+        public async Task<global::ToDo.WebClient.ToDoClient.Models.TodoItemDtoPaginatedResultDto?> GetAsync(Action<RequestConfiguration<global::ToDo.WebClient.ToDoClient.Api.TodoItems.Paged.PagedRequestBuilder.PagedRequestBuilderGetQueryParameters>>? requestConfiguration = default, CancellationToken cancellationToken = default)
         {
 #nullable restore
 #else
-        public async Task<global::ToDo.ToDoClient.Models.TodoItemDtoPaginatedResultDto> GetAsync(Action<RequestConfiguration<global::ToDo.ToDoClient.Api.TodoItems.Paged.PagedRequestBuilder.PagedRequestBuilderGetQueryParameters>> requestConfiguration = default, CancellationToken cancellationToken = default)
+        public async Task<global::ToDo.WebClient.ToDoClient.Models.TodoItemDtoPaginatedResultDto> GetAsync(Action<RequestConfiguration<global::ToDo.WebClient.ToDoClient.Api.TodoItems.Paged.PagedRequestBuilder.PagedRequestBuilderGetQueryParameters>> requestConfiguration = default, CancellationToken cancellationToken = default)
         {
 #endif
             var requestInfo = ToGetRequestInformation(requestConfiguration);
-            return await RequestAdapter.SendAsync<global::ToDo.ToDoClient.Models.TodoItemDtoPaginatedResultDto>(requestInfo, global::ToDo.ToDoClient.Models.TodoItemDtoPaginatedResultDto.CreateFromDiscriminatorValue, default, cancellationToken).ConfigureAwait(false);
+            return await RequestAdapter.SendAsync<global::ToDo.WebClient.ToDoClient.Models.TodoItemDtoPaginatedResultDto>(requestInfo, global::ToDo.WebClient.ToDoClient.Models.TodoItemDtoPaginatedResultDto.CreateFromDiscriminatorValue, default, cancellationToken).ConfigureAwait(false);
         }
         /// <returns>A <see cref="RequestInformation"/></returns>
         /// <param name="requestConfiguration">Configuration for the request such as headers, query parameters, and middleware options.</param>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
-        public RequestInformation ToGetRequestInformation(Action<RequestConfiguration<global::ToDo.ToDoClient.Api.TodoItems.Paged.PagedRequestBuilder.PagedRequestBuilderGetQueryParameters>>? requestConfiguration = default)
+        public RequestInformation ToGetRequestInformation(Action<RequestConfiguration<global::ToDo.WebClient.ToDoClient.Api.TodoItems.Paged.PagedRequestBuilder.PagedRequestBuilderGetQueryParameters>>? requestConfiguration = default)
         {
 #nullable restore
 #else
-        public RequestInformation ToGetRequestInformation(Action<RequestConfiguration<global::ToDo.ToDoClient.Api.TodoItems.Paged.PagedRequestBuilder.PagedRequestBuilderGetQueryParameters>> requestConfiguration = default)
+        public RequestInformation ToGetRequestInformation(Action<RequestConfiguration<global::ToDo.WebClient.ToDoClient.Api.TodoItems.Paged.PagedRequestBuilder.PagedRequestBuilderGetQueryParameters>> requestConfiguration = default)
         {
 #endif
             var requestInfo = new RequestInformation(Method.GET, UrlTemplate, PathParameters);
@@ -67,11 +67,11 @@ namespace ToDo.ToDoClient.Api.TodoItems.Paged
         /// <summary>
         /// Returns a request builder with the provided arbitrary URL. Using this method means any other path or query parameters are ignored.
         /// </summary>
-        /// <returns>A <see cref="global::ToDo.ToDoClient.Api.TodoItems.Paged.PagedRequestBuilder"/></returns>
+        /// <returns>A <see cref="global::ToDo.WebClient.ToDoClient.Api.TodoItems.Paged.PagedRequestBuilder"/></returns>
         /// <param name="rawUrl">The raw URL to use for the request builder.</param>
-        public global::ToDo.ToDoClient.Api.TodoItems.Paged.PagedRequestBuilder WithUrl(string rawUrl)
+        public global::ToDo.WebClient.ToDoClient.Api.TodoItems.Paged.PagedRequestBuilder WithUrl(string rawUrl)
         {
-            return new global::ToDo.ToDoClient.Api.TodoItems.Paged.PagedRequestBuilder(rawUrl, RequestAdapter);
+            return new global::ToDo.WebClient.ToDoClient.Api.TodoItems.Paged.PagedRequestBuilder(rawUrl, RequestAdapter);
         }
         [global::System.CodeDom.Compiler.GeneratedCode("Kiota", "1.0.0")]
         #pragma warning disable CS1591
@@ -92,7 +92,7 @@ namespace ToDo.ToDoClient.Api.TodoItems.Paged
         /// </summary>
         [Obsolete("This class is deprecated. Please use the generic RequestConfiguration class generated by the generator.")]
         [global::System.CodeDom.Compiler.GeneratedCode("Kiota", "1.0.0")]
-        public partial class PagedRequestBuilderGetRequestConfiguration : RequestConfiguration<global::ToDo.ToDoClient.Api.TodoItems.Paged.PagedRequestBuilder.PagedRequestBuilderGetQueryParameters>
+        public partial class PagedRequestBuilderGetRequestConfiguration : RequestConfiguration<global::ToDo.WebClient.ToDoClient.Api.TodoItems.Paged.PagedRequestBuilder.PagedRequestBuilderGetQueryParameters>
         {
         }
     }

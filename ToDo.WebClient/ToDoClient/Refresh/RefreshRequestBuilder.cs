@@ -8,8 +8,8 @@ using System.IO;
 using System.Threading.Tasks;
 using System.Threading;
 using System;
-using ToDo.ToDoClient.Models;
-namespace ToDo.ToDoClient.Refresh
+using ToDo.WebClient.ToDoClient.Models;
+namespace ToDo.WebClient.ToDoClient.Refresh
 {
     /// <summary>
     /// Builds and executes requests for operations under \refresh
@@ -18,7 +18,7 @@ namespace ToDo.ToDoClient.Refresh
     public partial class RefreshRequestBuilder : BaseRequestBuilder
     {
         /// <summary>
-        /// Instantiates a new <see cref="global::ToDo.ToDoClient.Refresh.RefreshRequestBuilder"/> and sets the default values.
+        /// Instantiates a new <see cref="global::ToDo.WebClient.ToDoClient.Refresh.RefreshRequestBuilder"/> and sets the default values.
         /// </summary>
         /// <param name="pathParameters">Path parameters for the request</param>
         /// <param name="requestAdapter">The request adapter to use to execute the requests.</param>
@@ -26,40 +26,40 @@ namespace ToDo.ToDoClient.Refresh
         {
         }
         /// <summary>
-        /// Instantiates a new <see cref="global::ToDo.ToDoClient.Refresh.RefreshRequestBuilder"/> and sets the default values.
+        /// Instantiates a new <see cref="global::ToDo.WebClient.ToDoClient.Refresh.RefreshRequestBuilder"/> and sets the default values.
         /// </summary>
         /// <param name="rawUrl">The raw URL to use for the request builder.</param>
         /// <param name="requestAdapter">The request adapter to use to execute the requests.</param>
         public RefreshRequestBuilder(string rawUrl, IRequestAdapter requestAdapter) : base(requestAdapter, "{+baseurl}/refresh", rawUrl)
         {
         }
-        /// <returns>A <see cref="global::ToDo.ToDoClient.Models.AccessTokenResponse"/></returns>
+        /// <returns>A <see cref="global::ToDo.WebClient.ToDoClient.Models.AccessTokenResponse"/></returns>
         /// <param name="body">The request body</param>
         /// <param name="cancellationToken">Cancellation token to use when cancelling requests</param>
         /// <param name="requestConfiguration">Configuration for the request such as headers, query parameters, and middleware options.</param>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
-        public async Task<global::ToDo.ToDoClient.Models.AccessTokenResponse?> PostAsync(global::ToDo.ToDoClient.Models.RefreshRequest body, Action<RequestConfiguration<DefaultQueryParameters>>? requestConfiguration = default, CancellationToken cancellationToken = default)
+        public async Task<global::ToDo.WebClient.ToDoClient.Models.AccessTokenResponse?> PostAsync(global::ToDo.WebClient.ToDoClient.Models.RefreshRequest body, Action<RequestConfiguration<DefaultQueryParameters>>? requestConfiguration = default, CancellationToken cancellationToken = default)
         {
 #nullable restore
 #else
-        public async Task<global::ToDo.ToDoClient.Models.AccessTokenResponse> PostAsync(global::ToDo.ToDoClient.Models.RefreshRequest body, Action<RequestConfiguration<DefaultQueryParameters>> requestConfiguration = default, CancellationToken cancellationToken = default)
+        public async Task<global::ToDo.WebClient.ToDoClient.Models.AccessTokenResponse> PostAsync(global::ToDo.WebClient.ToDoClient.Models.RefreshRequest body, Action<RequestConfiguration<DefaultQueryParameters>> requestConfiguration = default, CancellationToken cancellationToken = default)
         {
 #endif
             _ = body ?? throw new ArgumentNullException(nameof(body));
             var requestInfo = ToPostRequestInformation(body, requestConfiguration);
-            return await RequestAdapter.SendAsync<global::ToDo.ToDoClient.Models.AccessTokenResponse>(requestInfo, global::ToDo.ToDoClient.Models.AccessTokenResponse.CreateFromDiscriminatorValue, default, cancellationToken).ConfigureAwait(false);
+            return await RequestAdapter.SendAsync<global::ToDo.WebClient.ToDoClient.Models.AccessTokenResponse>(requestInfo, global::ToDo.WebClient.ToDoClient.Models.AccessTokenResponse.CreateFromDiscriminatorValue, default, cancellationToken).ConfigureAwait(false);
         }
         /// <returns>A <see cref="RequestInformation"/></returns>
         /// <param name="body">The request body</param>
         /// <param name="requestConfiguration">Configuration for the request such as headers, query parameters, and middleware options.</param>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
-        public RequestInformation ToPostRequestInformation(global::ToDo.ToDoClient.Models.RefreshRequest body, Action<RequestConfiguration<DefaultQueryParameters>>? requestConfiguration = default)
+        public RequestInformation ToPostRequestInformation(global::ToDo.WebClient.ToDoClient.Models.RefreshRequest body, Action<RequestConfiguration<DefaultQueryParameters>>? requestConfiguration = default)
         {
 #nullable restore
 #else
-        public RequestInformation ToPostRequestInformation(global::ToDo.ToDoClient.Models.RefreshRequest body, Action<RequestConfiguration<DefaultQueryParameters>> requestConfiguration = default)
+        public RequestInformation ToPostRequestInformation(global::ToDo.WebClient.ToDoClient.Models.RefreshRequest body, Action<RequestConfiguration<DefaultQueryParameters>> requestConfiguration = default)
         {
 #endif
             _ = body ?? throw new ArgumentNullException(nameof(body));
@@ -72,11 +72,11 @@ namespace ToDo.ToDoClient.Refresh
         /// <summary>
         /// Returns a request builder with the provided arbitrary URL. Using this method means any other path or query parameters are ignored.
         /// </summary>
-        /// <returns>A <see cref="global::ToDo.ToDoClient.Refresh.RefreshRequestBuilder"/></returns>
+        /// <returns>A <see cref="global::ToDo.WebClient.ToDoClient.Refresh.RefreshRequestBuilder"/></returns>
         /// <param name="rawUrl">The raw URL to use for the request builder.</param>
-        public global::ToDo.ToDoClient.Refresh.RefreshRequestBuilder WithUrl(string rawUrl)
+        public global::ToDo.WebClient.ToDoClient.Refresh.RefreshRequestBuilder WithUrl(string rawUrl)
         {
-            return new global::ToDo.ToDoClient.Refresh.RefreshRequestBuilder(rawUrl, RequestAdapter);
+            return new global::ToDo.WebClient.ToDoClient.Refresh.RefreshRequestBuilder(rawUrl, RequestAdapter);
         }
         /// <summary>
         /// Configuration for the request such as headers, query parameters, and middleware options.

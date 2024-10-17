@@ -8,8 +8,8 @@ using System.IO;
 using System.Threading.Tasks;
 using System.Threading;
 using System;
-using ToDo.ToDoClient.Models;
-namespace ToDo.ToDoClient.Manage.Info
+using ToDo.WebClient.ToDoClient.Models;
+namespace ToDo.WebClient.ToDoClient.Manage.Info
 {
     /// <summary>
     /// Builds and executes requests for operations under \manage\info
@@ -18,7 +18,7 @@ namespace ToDo.ToDoClient.Manage.Info
     public partial class InfoRequestBuilder : BaseRequestBuilder
     {
         /// <summary>
-        /// Instantiates a new <see cref="global::ToDo.ToDoClient.Manage.Info.InfoRequestBuilder"/> and sets the default values.
+        /// Instantiates a new <see cref="global::ToDo.WebClient.ToDoClient.Manage.Info.InfoRequestBuilder"/> and sets the default values.
         /// </summary>
         /// <param name="pathParameters">Path parameters for the request</param>
         /// <param name="requestAdapter">The request adapter to use to execute the requests.</param>
@@ -26,54 +26,54 @@ namespace ToDo.ToDoClient.Manage.Info
         {
         }
         /// <summary>
-        /// Instantiates a new <see cref="global::ToDo.ToDoClient.Manage.Info.InfoRequestBuilder"/> and sets the default values.
+        /// Instantiates a new <see cref="global::ToDo.WebClient.ToDoClient.Manage.Info.InfoRequestBuilder"/> and sets the default values.
         /// </summary>
         /// <param name="rawUrl">The raw URL to use for the request builder.</param>
         /// <param name="requestAdapter">The request adapter to use to execute the requests.</param>
         public InfoRequestBuilder(string rawUrl, IRequestAdapter requestAdapter) : base(requestAdapter, "{+baseurl}/manage/info", rawUrl)
         {
         }
-        /// <returns>A <see cref="global::ToDo.ToDoClient.Models.InfoResponse"/></returns>
+        /// <returns>A <see cref="global::ToDo.WebClient.ToDoClient.Models.InfoResponse"/></returns>
         /// <param name="cancellationToken">Cancellation token to use when cancelling requests</param>
         /// <param name="requestConfiguration">Configuration for the request such as headers, query parameters, and middleware options.</param>
-        /// <exception cref="global::ToDo.ToDoClient.Models.HttpValidationProblemDetails">When receiving a 400 status code</exception>
+        /// <exception cref="global::ToDo.WebClient.ToDoClient.Models.HttpValidationProblemDetails">When receiving a 400 status code</exception>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
-        public async Task<global::ToDo.ToDoClient.Models.InfoResponse?> GetAsync(Action<RequestConfiguration<DefaultQueryParameters>>? requestConfiguration = default, CancellationToken cancellationToken = default)
+        public async Task<global::ToDo.WebClient.ToDoClient.Models.InfoResponse?> GetAsync(Action<RequestConfiguration<DefaultQueryParameters>>? requestConfiguration = default, CancellationToken cancellationToken = default)
         {
 #nullable restore
 #else
-        public async Task<global::ToDo.ToDoClient.Models.InfoResponse> GetAsync(Action<RequestConfiguration<DefaultQueryParameters>> requestConfiguration = default, CancellationToken cancellationToken = default)
+        public async Task<global::ToDo.WebClient.ToDoClient.Models.InfoResponse> GetAsync(Action<RequestConfiguration<DefaultQueryParameters>> requestConfiguration = default, CancellationToken cancellationToken = default)
         {
 #endif
             var requestInfo = ToGetRequestInformation(requestConfiguration);
             var errorMapping = new Dictionary<string, ParsableFactory<IParsable>>
             {
-                { "400", global::ToDo.ToDoClient.Models.HttpValidationProblemDetails.CreateFromDiscriminatorValue },
+                { "400", global::ToDo.WebClient.ToDoClient.Models.HttpValidationProblemDetails.CreateFromDiscriminatorValue },
             };
-            return await RequestAdapter.SendAsync<global::ToDo.ToDoClient.Models.InfoResponse>(requestInfo, global::ToDo.ToDoClient.Models.InfoResponse.CreateFromDiscriminatorValue, errorMapping, cancellationToken).ConfigureAwait(false);
+            return await RequestAdapter.SendAsync<global::ToDo.WebClient.ToDoClient.Models.InfoResponse>(requestInfo, global::ToDo.WebClient.ToDoClient.Models.InfoResponse.CreateFromDiscriminatorValue, errorMapping, cancellationToken).ConfigureAwait(false);
         }
-        /// <returns>A <see cref="global::ToDo.ToDoClient.Models.InfoResponse"/></returns>
+        /// <returns>A <see cref="global::ToDo.WebClient.ToDoClient.Models.InfoResponse"/></returns>
         /// <param name="body">The request body</param>
         /// <param name="cancellationToken">Cancellation token to use when cancelling requests</param>
         /// <param name="requestConfiguration">Configuration for the request such as headers, query parameters, and middleware options.</param>
-        /// <exception cref="global::ToDo.ToDoClient.Models.HttpValidationProblemDetails">When receiving a 400 status code</exception>
+        /// <exception cref="global::ToDo.WebClient.ToDoClient.Models.HttpValidationProblemDetails">When receiving a 400 status code</exception>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
-        public async Task<global::ToDo.ToDoClient.Models.InfoResponse?> PostAsync(global::ToDo.ToDoClient.Models.InfoRequest body, Action<RequestConfiguration<DefaultQueryParameters>>? requestConfiguration = default, CancellationToken cancellationToken = default)
+        public async Task<global::ToDo.WebClient.ToDoClient.Models.InfoResponse?> PostAsync(global::ToDo.WebClient.ToDoClient.Models.InfoRequest body, Action<RequestConfiguration<DefaultQueryParameters>>? requestConfiguration = default, CancellationToken cancellationToken = default)
         {
 #nullable restore
 #else
-        public async Task<global::ToDo.ToDoClient.Models.InfoResponse> PostAsync(global::ToDo.ToDoClient.Models.InfoRequest body, Action<RequestConfiguration<DefaultQueryParameters>> requestConfiguration = default, CancellationToken cancellationToken = default)
+        public async Task<global::ToDo.WebClient.ToDoClient.Models.InfoResponse> PostAsync(global::ToDo.WebClient.ToDoClient.Models.InfoRequest body, Action<RequestConfiguration<DefaultQueryParameters>> requestConfiguration = default, CancellationToken cancellationToken = default)
         {
 #endif
             _ = body ?? throw new ArgumentNullException(nameof(body));
             var requestInfo = ToPostRequestInformation(body, requestConfiguration);
             var errorMapping = new Dictionary<string, ParsableFactory<IParsable>>
             {
-                { "400", global::ToDo.ToDoClient.Models.HttpValidationProblemDetails.CreateFromDiscriminatorValue },
+                { "400", global::ToDo.WebClient.ToDoClient.Models.HttpValidationProblemDetails.CreateFromDiscriminatorValue },
             };
-            return await RequestAdapter.SendAsync<global::ToDo.ToDoClient.Models.InfoResponse>(requestInfo, global::ToDo.ToDoClient.Models.InfoResponse.CreateFromDiscriminatorValue, errorMapping, cancellationToken).ConfigureAwait(false);
+            return await RequestAdapter.SendAsync<global::ToDo.WebClient.ToDoClient.Models.InfoResponse>(requestInfo, global::ToDo.WebClient.ToDoClient.Models.InfoResponse.CreateFromDiscriminatorValue, errorMapping, cancellationToken).ConfigureAwait(false);
         }
         /// <returns>A <see cref="RequestInformation"/></returns>
         /// <param name="requestConfiguration">Configuration for the request such as headers, query parameters, and middleware options.</param>
@@ -96,11 +96,11 @@ namespace ToDo.ToDoClient.Manage.Info
         /// <param name="requestConfiguration">Configuration for the request such as headers, query parameters, and middleware options.</param>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
-        public RequestInformation ToPostRequestInformation(global::ToDo.ToDoClient.Models.InfoRequest body, Action<RequestConfiguration<DefaultQueryParameters>>? requestConfiguration = default)
+        public RequestInformation ToPostRequestInformation(global::ToDo.WebClient.ToDoClient.Models.InfoRequest body, Action<RequestConfiguration<DefaultQueryParameters>>? requestConfiguration = default)
         {
 #nullable restore
 #else
-        public RequestInformation ToPostRequestInformation(global::ToDo.ToDoClient.Models.InfoRequest body, Action<RequestConfiguration<DefaultQueryParameters>> requestConfiguration = default)
+        public RequestInformation ToPostRequestInformation(global::ToDo.WebClient.ToDoClient.Models.InfoRequest body, Action<RequestConfiguration<DefaultQueryParameters>> requestConfiguration = default)
         {
 #endif
             _ = body ?? throw new ArgumentNullException(nameof(body));
@@ -113,11 +113,11 @@ namespace ToDo.ToDoClient.Manage.Info
         /// <summary>
         /// Returns a request builder with the provided arbitrary URL. Using this method means any other path or query parameters are ignored.
         /// </summary>
-        /// <returns>A <see cref="global::ToDo.ToDoClient.Manage.Info.InfoRequestBuilder"/></returns>
+        /// <returns>A <see cref="global::ToDo.WebClient.ToDoClient.Manage.Info.InfoRequestBuilder"/></returns>
         /// <param name="rawUrl">The raw URL to use for the request builder.</param>
-        public global::ToDo.ToDoClient.Manage.Info.InfoRequestBuilder WithUrl(string rawUrl)
+        public global::ToDo.WebClient.ToDoClient.Manage.Info.InfoRequestBuilder WithUrl(string rawUrl)
         {
-            return new global::ToDo.ToDoClient.Manage.Info.InfoRequestBuilder(rawUrl, RequestAdapter);
+            return new global::ToDo.WebClient.ToDoClient.Manage.Info.InfoRequestBuilder(rawUrl, RequestAdapter);
         }
         /// <summary>
         /// Configuration for the request such as headers, query parameters, and middleware options.

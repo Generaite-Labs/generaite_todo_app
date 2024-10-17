@@ -6,8 +6,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using System;
-using ToDo.ToDoClient.Api.TodoItems;
-namespace ToDo.ToDoClient.Api
+using ToDo.WebClient.ToDoClient.Api.TodoItems;
+namespace ToDo.WebClient.ToDoClient.Api
 {
     /// <summary>
     /// Builds and executes requests for operations under \api
@@ -16,12 +16,12 @@ namespace ToDo.ToDoClient.Api
     public partial class ApiRequestBuilder : BaseRequestBuilder
     {
         /// <summary>The TodoItems property</summary>
-        public global::ToDo.ToDoClient.Api.TodoItems.TodoItemsRequestBuilder TodoItems
+        public global::ToDo.WebClient.ToDoClient.Api.TodoItems.TodoItemsRequestBuilder TodoItems
         {
-            get => new global::ToDo.ToDoClient.Api.TodoItems.TodoItemsRequestBuilder(PathParameters, RequestAdapter);
+            get => new global::ToDo.WebClient.ToDoClient.Api.TodoItems.TodoItemsRequestBuilder(PathParameters, RequestAdapter);
         }
         /// <summary>
-        /// Instantiates a new <see cref="global::ToDo.ToDoClient.Api.ApiRequestBuilder"/> and sets the default values.
+        /// Instantiates a new <see cref="global::ToDo.WebClient.ToDoClient.Api.ApiRequestBuilder"/> and sets the default values.
         /// </summary>
         /// <param name="pathParameters">Path parameters for the request</param>
         /// <param name="requestAdapter">The request adapter to use to execute the requests.</param>
@@ -29,7 +29,7 @@ namespace ToDo.ToDoClient.Api
         {
         }
         /// <summary>
-        /// Instantiates a new <see cref="global::ToDo.ToDoClient.Api.ApiRequestBuilder"/> and sets the default values.
+        /// Instantiates a new <see cref="global::ToDo.WebClient.ToDoClient.Api.ApiRequestBuilder"/> and sets the default values.
         /// </summary>
         /// <param name="rawUrl">The raw URL to use for the request builder.</param>
         /// <param name="requestAdapter">The request adapter to use to execute the requests.</param>

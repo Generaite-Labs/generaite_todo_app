@@ -1,11 +1,11 @@
 {
-  "descriptionHash": "B98E94E894AFE59FF8DEFB16703E0B3EA0A02D22308DCC1598AB1E3FD1E31D4DA646301F6900ABA4BB2C9D9705FEDB13B5FA6BC68764DFAA54D73903821ECE6E",
+  "descriptionHash": "09A5FAF3EA336C99DD4794635739FE8784E108B5C3A522AA3416D9E0D45D37F5AE5F40367772B03674A0AF29A75343B70605220C7C99E2A3533C2A4F5AC9A3AA",
   "descriptionLocation": "https://localhost:7197/swagger/v1/swagger.json",
   "lockFileVersion": "1.0.0",
   "kiotaVersion": "1.19.1",
   "clientClassName": "ApiClient",
   "typeAccessModifier": "Public",
-  "clientNamespaceName": "ToDo.ToDoClient",
+  "clientNamespaceName": "ToDo.WebClient.ToDoClient",
   "language": "CSharp",
   "usesBackingStore": false,
   "excludeBackwardCompatible": false,

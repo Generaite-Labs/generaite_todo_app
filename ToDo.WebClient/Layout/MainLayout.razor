@@ -1,29 +1,37 @@
 ﻿@inherits LayoutComponentBase
+@using ToDo.WebClient.Components
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
 
-<RadzenLayout>
-    <RadzenHeader>
-        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="1rem">
-            <RadzenSidebarToggle Click="@ToggleSidebar" />
-            <RadzenLabel Text="ToDo.WebClient" />
-        </RadzenStack>
-    </RadzenHeader>
+<CascadingAuthenticationState>
+    <RadzenLayout>
+        <RadzenHeader>
+            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="1rem" JustifyContent="JustifyContent.SpaceBetween">
+                <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="1rem">
+                    <RadzenSidebarToggle Click="@ToggleSidebar" />
+                    <RadzenLabel Text="ToDo.WebClient" />
+                </RadzenStack>
+                <UserMenu />
+            </RadzenStack>
+        </RadzenHeader>
 
-    <RadzenSidebar @bind-Expanded="@sidebarExpanded">
-        <NavMenu />
-    </RadzenSidebar>
+        <RadzenSidebar @bind-Expanded="@sidebarExpanded">
+            <NavMenu />
+        </RadzenSidebar>
 
-    <RadzenBody>
-        <div class="rz-p-4">
-            @Body
-        </div>
-    </RadzenBody>
+        <RadzenBody>
+            <div class="rz-p-4">
+                @Body
+            </div>
+        </RadzenBody>
 
-    <RadzenFooter>
-        <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.Center" Gap="1rem">
-            <RadzenLink Text="About" Path="https://generaitelabs.com" Target="_blank" />
-        </RadzenStack>
-    </RadzenFooter>
-</RadzenLayout>
+        <RadzenFooter>
+            <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.Center" Gap="1rem">
+                <RadzenLink Text="About" Path="https://generaitelabs.com" Target="_blank" />
+            </RadzenStack>
+        </RadzenFooter>
+    </RadzenLayout>
+</CascadingAuthenticationState>
 
 @code {
     bool sidebarExpanded = true;

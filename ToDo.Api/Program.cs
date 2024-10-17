@@ -6,18 +6,17 @@ using Serilog.Events;
 using ToDo.Application.Mappers;
 using Microsoft.AspNetCore.Identity;
 using ToDo.Domain.Interfaces;
-using ToDo.Application.Interfaces;
 using ToDo.Application.Services;
 using ToDo.Application.EventHandlers;
 using ToDo.Domain.Events;
 using ToDo.Infrastructure.Services;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
-using System.Text;
 using ToDo.Domain.Entities;
 using ToDo.Infrastructure.Configuration;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.OpenApi.Models;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.DataProtection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -41,10 +40,14 @@ try
                          .AddJsonFile(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, $"appsettings.{builder.Environment.EnvironmentName}.json"), optional: true)
                          .AddEnvironmentVariables("TODO_");
 
-    // Add Identity configuration
-    builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
-        .AddEntityFrameworkStores<TodoDbContext>()
-        .AddDefaultTokenProviders();
+    // Configure ApplicationSettings
+    var applicationSettings = new ApplicationSettings();
+    builder.Configuration.GetSection(ApplicationSettings.Application).Bind(applicationSettings);
+    builder.Services.Configure<ApplicationSettings>(
+        builder.Configuration.GetSection(ApplicationSettings.Application));
+
+    // Add infrastructure services
+    builder.Services.AddInfrastructureServices(builder.Configuration);
 
     builder.Services.AddSingleton<IConfiguration>(builder.Configuration);
 
@@ -60,65 +63,17 @@ try
         builder.Services.AddTransient<IEmailSender<ApplicationUser>, EmailSender>();
     }
 
-    builder.Services.AddAuthentication(options =>
-    {
-        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-    }).AddJwtBearer(options =>
-    {
-        options.TokenValidationParameters = new TokenValidationParameters
-        {
-            ValidateIssuer = true,
-            ValidateAudience = true,
-            ValidateLifetime = true,
-            ValidateIssuerSigningKey = true,
-            ValidIssuer = builder.Configuration["Jwt:Issuer"],
-            ValidAudience = builder.Configuration["Jwt:Audience"],
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"] ?? throw new InvalidOperationException("Jwt:Key is not configured")))
-        };
-    });
-
-    builder.Services.Configure<IdentityOptions>(options =>
-    {
-        // Password settings
-        options.Password.RequireDigit = true;
-        options.Password.RequireLowercase = true;
-        options.Password.RequireNonAlphanumeric = true;
-        options.Password.RequireUppercase = true;
-        options.Password.RequiredLength = 6;
-        options.Password.RequiredUniqueChars = 1;
-
-        // Lockout settings
-        options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
-        options.Lockout.MaxFailedAccessAttempts = 5;
-        options.Lockout.AllowedForNewUsers = true;
-
-        // User settings
-        options.User.AllowedUserNameCharacters =
-                "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
-        options.User.RequireUniqueEmail = false;
-    });
-
-    // Add application configuration
-    builder.Services.AddOptions<DatabaseOptions>()
-        .Bind(builder.Configuration.GetSection(DatabaseOptions.Database))
-        .ValidateDataAnnotations()
-        .ValidateOnStart();
-
-    // Add infrastructure services
-    builder.Services.AddInfrastructureServices(builder.Configuration);
-    builder.Services.AddScoped<ITodoItemService, TodoItemService>();
-
     builder.Services.AddControllers();
     builder.Services.AddSignalR();
 
     builder.Services.AddCors(options =>
     {
         options.AddPolicy("AllowBlazorOrigin",
-                    builder => builder.WithOrigins("http://localhost:5090")
-                                      .AllowAnyMethod()
-                                      .AllowAnyHeader()
-                                      .AllowCredentials());
+            builder => builder
+                .WithOrigins(applicationSettings.FrontendUrl)
+                .AllowAnyMethod()
+                .AllowAnyHeader()
+                .AllowCredentials());
     });
 
     builder.Services.AddAutoMapper(typeof(TodoItemMappingProfile));
@@ -161,6 +116,25 @@ try
         });
     });
 
+    // Add these lines to register TimeProvider and IDataProtectionProvider
+    builder.Services.TryAddSingleton(TimeProvider.System);
+    builder.Services.AddDataProtection();
+
+    // Configure Identity
+    builder.Services
+        .AddAuthentication(IdentityConstants.ApplicationScheme)
+        .AddCookie("Identity.Bearer");
+
+    builder.Services.AddIdentityCore<ApplicationUser>(options => {
+        options.SignIn.RequireConfirmedAccount = true;
+    })
+        .AddEntityFrameworkStores<TodoDbContext>()
+        .AddSignInManager()
+        .AddDefaultTokenProviders();
+
+    builder.Services.AddAuthorizationBuilder();
+
+    // Build the application
     var app = builder.Build();
 
     // Add global exception handling middleware
@@ -180,12 +154,25 @@ try
     }
 
     app.UseHttpsRedirection();
-    app.UseAuthentication();
-    app.UseAuthorization();
-    app.MapControllers();
     app.UseCors("AllowBlazorOrigin");
 
-    app.MapIdentityApi<ApplicationUser>();
+    // Ensure these are in the correct order
+    app.UseAuthentication();
+    app.UseAuthorization();
+
+    // Map the logout endpoint
+    app.MapPost("/logout", async (SignInManager<ApplicationUser> signInManager) =>
+    {
+        await signInManager.SignOutAsync();
+        return Results.Ok();
+    })
+    .RequireAuthorization();
+
+    app.MapControllers();
+
+    // Map Identity endpoints
+    app.MapIdentityApi<ApplicationUser>()
+        .RequireCors("AllowBlazorOrigin");
 
     app.Run();
 }

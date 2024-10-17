@@ -6,9 +6,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using System;
-using ToDo.ToDoClient.Manage.Info;
-using ToDo.ToDoClient.Manage.Twofa;
-namespace ToDo.ToDoClient.Manage
+using ToDo.WebClient.ToDoClient.Manage.Info;
+using ToDo.WebClient.ToDoClient.Manage.Twofa;
+namespace ToDo.WebClient.ToDoClient.Manage
 {
     /// <summary>
     /// Builds and executes requests for operations under \manage
@@ -17,17 +17,17 @@ namespace ToDo.ToDoClient.Manage
     public partial class ManageRequestBuilder : BaseRequestBuilder
     {
         /// <summary>The info property</summary>
-        public global::ToDo.ToDoClient.Manage.Info.InfoRequestBuilder Info
+        public global::ToDo.WebClient.ToDoClient.Manage.Info.InfoRequestBuilder Info
         {
-            get => new global::ToDo.ToDoClient.Manage.Info.InfoRequestBuilder(PathParameters, RequestAdapter);
+            get => new global::ToDo.WebClient.ToDoClient.Manage.Info.InfoRequestBuilder(PathParameters, RequestAdapter);
         }
         /// <summary>The Twofa property</summary>
-        public global::ToDo.ToDoClient.Manage.Twofa.TwofaRequestBuilder Twofa
+        public global::ToDo.WebClient.ToDoClient.Manage.Twofa.TwofaRequestBuilder Twofa
         {
-            get => new global::ToDo.ToDoClient.Manage.Twofa.TwofaRequestBuilder(PathParameters, RequestAdapter);
+            get => new global::ToDo.WebClient.ToDoClient.Manage.Twofa.TwofaRequestBuilder(PathParameters, RequestAdapter);
         }
         /// <summary>
-        /// Instantiates a new <see cref="global::ToDo.ToDoClient.Manage.ManageRequestBuilder"/> and sets the default values.
+        /// Instantiates a new <see cref="global::ToDo.WebClient.ToDoClient.Manage.ManageRequestBuilder"/> and sets the default values.
         /// </summary>
         /// <param name="pathParameters">Path parameters for the request</param>
         /// <param name="requestAdapter">The request adapter to use to execute the requests.</param>
@@ -35,7 +35,7 @@ namespace ToDo.ToDoClient.Manage
         {
         }
         /// <summary>
-        /// Instantiates a new <see cref="global::ToDo.ToDoClient.Manage.ManageRequestBuilder"/> and sets the default values.
+        /// Instantiates a new <see cref="global::ToDo.WebClient.ToDoClient.Manage.ManageRequestBuilder"/> and sets the default values.
         /// </summary>
         /// <param name="rawUrl">The raw URL to use for the request builder.</param>
         /// <param name="requestAdapter">The request adapter to use to execute the requests.</param>

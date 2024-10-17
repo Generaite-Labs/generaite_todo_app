@@ -8,8 +8,8 @@ using System.IO;
 using System.Threading.Tasks;
 using System.Threading;
 using System;
-using ToDo.ToDoClient.Models;
-namespace ToDo.ToDoClient.Login
+using ToDo.WebClient.ToDoClient.Models;
+namespace ToDo.WebClient.ToDoClient.Login
 {
     /// <summary>
     /// Builds and executes requests for operations under \login
@@ -18,7 +18,7 @@ namespace ToDo.ToDoClient.Login
     public partial class LoginRequestBuilder : BaseRequestBuilder
     {
         /// <summary>
-        /// Instantiates a new <see cref="global::ToDo.ToDoClient.Login.LoginRequestBuilder"/> and sets the default values.
+        /// Instantiates a new <see cref="global::ToDo.WebClient.ToDoClient.Login.LoginRequestBuilder"/> and sets the default values.
         /// </summary>
         /// <param name="pathParameters">Path parameters for the request</param>
         /// <param name="requestAdapter">The request adapter to use to execute the requests.</param>
@@ -26,40 +26,40 @@ namespace ToDo.ToDoClient.Login
         {
         }
         /// <summary>
-        /// Instantiates a new <see cref="global::ToDo.ToDoClient.Login.LoginRequestBuilder"/> and sets the default values.
+        /// Instantiates a new <see cref="global::ToDo.WebClient.ToDoClient.Login.LoginRequestBuilder"/> and sets the default values.
         /// </summary>
         /// <param name="rawUrl">The raw URL to use for the request builder.</param>
         /// <param name="requestAdapter">The request adapter to use to execute the requests.</param>
         public LoginRequestBuilder(string rawUrl, IRequestAdapter requestAdapter) : base(requestAdapter, "{+baseurl}/login{?useCookies*,useSessionCookies*}", rawUrl)
         {
         }
-        /// <returns>A <see cref="global::ToDo.ToDoClient.Models.AccessTokenResponse"/></returns>
+        /// <returns>A <see cref="global::ToDo.WebClient.ToDoClient.Models.AccessTokenResponse"/></returns>
         /// <param name="body">The request body</param>
         /// <param name="cancellationToken">Cancellation token to use when cancelling requests</param>
         /// <param name="requestConfiguration">Configuration for the request such as headers, query parameters, and middleware options.</param>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
-        public async Task<global::ToDo.ToDoClient.Models.AccessTokenResponse?> PostAsync(global::ToDo.ToDoClient.Models.LoginRequest body, Action<RequestConfiguration<global::ToDo.ToDoClient.Login.LoginRequestBuilder.LoginRequestBuilderPostQueryParameters>>? requestConfiguration = default, CancellationToken cancellationToken = default)
+        public async Task<global::ToDo.WebClient.ToDoClient.Models.AccessTokenResponse?> PostAsync(global::ToDo.WebClient.ToDoClient.Models.LoginRequest body, Action<RequestConfiguration<global::ToDo.WebClient.ToDoClient.Login.LoginRequestBuilder.LoginRequestBuilderPostQueryParameters>>? requestConfiguration = default, CancellationToken cancellationToken = default)
         {
 #nullable restore
 #else
-        public async Task<global::ToDo.ToDoClient.Models.AccessTokenResponse> PostAsync(global::ToDo.ToDoClient.Models.LoginRequest body, Action<RequestConfiguration<global::ToDo.ToDoClient.Login.LoginRequestBuilder.LoginRequestBuilderPostQueryParameters>> requestConfiguration = default, CancellationToken cancellationToken = default)
+        public async Task<global::ToDo.WebClient.ToDoClient.Models.AccessTokenResponse> PostAsync(global::ToDo.WebClient.ToDoClient.Models.LoginRequest body, Action<RequestConfiguration<global::ToDo.WebClient.ToDoClient.Login.LoginRequestBuilder.LoginRequestBuilderPostQueryParameters>> requestConfiguration = default, CancellationToken cancellationToken = default)
         {
 #endif
             _ = body ?? throw new ArgumentNullException(nameof(body));
             var requestInfo = ToPostRequestInformation(body, requestConfiguration);
-            return await RequestAdapter.SendAsync<global::ToDo.ToDoClient.Models.AccessTokenResponse>(requestInfo, global::ToDo.ToDoClient.Models.AccessTokenResponse.CreateFromDiscriminatorValue, default, cancellationToken).ConfigureAwait(false);
+            return await RequestAdapter.SendAsync<global::ToDo.WebClient.ToDoClient.Models.AccessTokenResponse>(requestInfo, global::ToDo.WebClient.ToDoClient.Models.AccessTokenResponse.CreateFromDiscriminatorValue, default, cancellationToken).ConfigureAwait(false);
         }
         /// <returns>A <see cref="RequestInformation"/></returns>
         /// <param name="body">The request body</param>
         /// <param name="requestConfiguration">Configuration for the request such as headers, query parameters, and middleware options.</param>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
-        public RequestInformation ToPostRequestInformation(global::ToDo.ToDoClient.Models.LoginRequest body, Action<RequestConfiguration<global::ToDo.ToDoClient.Login.LoginRequestBuilder.LoginRequestBuilderPostQueryParameters>>? requestConfiguration = default)
+        public RequestInformation ToPostRequestInformation(global::ToDo.WebClient.ToDoClient.Models.LoginRequest body, Action<RequestConfiguration<global::ToDo.WebClient.ToDoClient.Login.LoginRequestBuilder.LoginRequestBuilderPostQueryParameters>>? requestConfiguration = default)
         {
 #nullable restore
 #else
-        public RequestInformation ToPostRequestInformation(global::ToDo.ToDoClient.Models.LoginRequest body, Action<RequestConfiguration<global::ToDo.ToDoClient.Login.LoginRequestBuilder.LoginRequestBuilderPostQueryParameters>> requestConfiguration = default)
+        public RequestInformation ToPostRequestInformation(global::ToDo.WebClient.ToDoClient.Models.LoginRequest body, Action<RequestConfiguration<global::ToDo.WebClient.ToDoClient.Login.LoginRequestBuilder.LoginRequestBuilderPostQueryParameters>> requestConfiguration = default)
         {
 #endif
             _ = body ?? throw new ArgumentNullException(nameof(body));
@@ -72,11 +72,11 @@ namespace ToDo.ToDoClient.Login
         /// <summary>
         /// Returns a request builder with the provided arbitrary URL. Using this method means any other path or query parameters are ignored.
         /// </summary>
-        /// <returns>A <see cref="global::ToDo.ToDoClient.Login.LoginRequestBuilder"/></returns>
+        /// <returns>A <see cref="global::ToDo.WebClient.ToDoClient.Login.LoginRequestBuilder"/></returns>
         /// <param name="rawUrl">The raw URL to use for the request builder.</param>
-        public global::ToDo.ToDoClient.Login.LoginRequestBuilder WithUrl(string rawUrl)
+        public global::ToDo.WebClient.ToDoClient.Login.LoginRequestBuilder WithUrl(string rawUrl)
         {
-            return new global::ToDo.ToDoClient.Login.LoginRequestBuilder(rawUrl, RequestAdapter);
+            return new global::ToDo.WebClient.ToDoClient.Login.LoginRequestBuilder(rawUrl, RequestAdapter);
         }
         [global::System.CodeDom.Compiler.GeneratedCode("Kiota", "1.0.0")]
         #pragma warning disable CS1591
@@ -93,7 +93,7 @@ namespace ToDo.ToDoClient.Login
         /// </summary>
         [Obsolete("This class is deprecated. Please use the generic RequestConfiguration class generated by the generator.")]
         [global::System.CodeDom.Compiler.GeneratedCode("Kiota", "1.0.0")]
-        public partial class LoginRequestBuilderPostRequestConfiguration : RequestConfiguration<global::ToDo.ToDoClient.Login.LoginRequestBuilder.LoginRequestBuilderPostQueryParameters>
+        public partial class LoginRequestBuilderPostRequestConfiguration : RequestConfiguration<global::ToDo.WebClient.ToDoClient.Login.LoginRequestBuilder.LoginRequestBuilderPostQueryParameters>
         {
         }
     }

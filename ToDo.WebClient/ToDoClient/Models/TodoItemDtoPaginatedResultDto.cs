@@ -5,7 +5,7 @@ using Microsoft.Kiota.Abstractions.Serialization;
 using System.Collections.Generic;
 using System.IO;
 using System;
-namespace ToDo.ToDoClient.Models
+namespace ToDo.WebClient.ToDoClient.Models
 {
     [global::System.CodeDom.Compiler.GeneratedCode("Kiota", "1.0.0")]
     #pragma warning disable CS1591
@@ -17,10 +17,10 @@ namespace ToDo.ToDoClient.Models
         /// <summary>The items property</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
-        public List<global::ToDo.ToDoClient.Models.TodoItemDto>? Items { get; set; }
+        public List<global::ToDo.WebClient.ToDoClient.Models.TodoItemDto>? Items { get; set; }
 #nullable restore
 #else
-        public List<global::ToDo.ToDoClient.Models.TodoItemDto> Items { get; set; }
+        public List<global::ToDo.WebClient.ToDoClient.Models.TodoItemDto> Items { get; set; }
 #endif
         /// <summary>The nextCursor property</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
@@ -33,12 +33,12 @@ namespace ToDo.ToDoClient.Models
         /// <summary>
         /// Creates a new instance of the appropriate class based on discriminator value
         /// </summary>
-        /// <returns>A <see cref="global::ToDo.ToDoClient.Models.TodoItemDtoPaginatedResultDto"/></returns>
+        /// <returns>A <see cref="global::ToDo.WebClient.ToDoClient.Models.TodoItemDtoPaginatedResultDto"/></returns>
         /// <param name="parseNode">The parse node to use to read the discriminator value and create the object</param>
-        public static global::ToDo.ToDoClient.Models.TodoItemDtoPaginatedResultDto CreateFromDiscriminatorValue(IParseNode parseNode)
+        public static global::ToDo.WebClient.ToDoClient.Models.TodoItemDtoPaginatedResultDto CreateFromDiscriminatorValue(IParseNode parseNode)
         {
             _ = parseNode ?? throw new ArgumentNullException(nameof(parseNode));
-            return new global::ToDo.ToDoClient.Models.TodoItemDtoPaginatedResultDto();
+            return new global::ToDo.WebClient.ToDoClient.Models.TodoItemDtoPaginatedResultDto();
         }
         /// <summary>
         /// The deserialization information for the current model
@@ -49,7 +49,7 @@ namespace ToDo.ToDoClient.Models
             return new Dictionary<string, Action<IParseNode>>
             {
                 { "hasNextPage", n => { HasNextPage = n.GetBoolValue(); } },
-                { "items", n => { Items = n.GetCollectionOfObjectValues<global::ToDo.ToDoClient.Models.TodoItemDto>(global::ToDo.ToDoClient.Models.TodoItemDto.CreateFromDiscriminatorValue)?.AsList(); } },
+                { "items", n => { Items = n.GetCollectionOfObjectValues<global::ToDo.WebClient.ToDoClient.Models.TodoItemDto>(global::ToDo.WebClient.ToDoClient.Models.TodoItemDto.CreateFromDiscriminatorValue)?.AsList(); } },
                 { "nextCursor", n => { NextCursor = n.GetStringValue(); } },
             };
         }
@@ -60,7 +60,7 @@ namespace ToDo.ToDoClient.Models
         public virtual void Serialize(ISerializationWriter writer)
         {
             _ = writer ?? throw new ArgumentNullException(nameof(writer));
-            writer.WriteCollectionOfObjectValues<global::ToDo.ToDoClient.Models.TodoItemDto>("items", Items);
+            writer.WriteCollectionOfObjectValues<global::ToDo.WebClient.ToDoClient.Models.TodoItemDto>("items", Items);
             writer.WriteStringValue("nextCursor", NextCursor);
         }
     }

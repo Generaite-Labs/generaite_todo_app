@@ -38,4 +38,9 @@ namespace ToDo.Application.DTOs
         public required string UserId { get; set; }
         public required string Email { get; set; }
     }
+
+    public class RegisterResponseDto
+    {
+        public required string Message { get; set; }
+    }
 }
