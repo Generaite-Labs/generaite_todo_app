@@ -27,15 +27,12 @@ public class CookieAuthenticationStateProvider : AuthenticationStateProvider, IA
 
     public override async Task<AuthenticationState> GetAuthenticationStateAsync()
     {
-        Console.WriteLine("CookieAuthenticationStateProvider: GetAuthenticationStateAsync called");
         _authenticated = false;
         var user = _unauthenticated;
 
         try
         {
-            Console.WriteLine("CookieAuthenticationStateProvider: Attempting to get user info");
             var userInfo = await _apiClient.Api.Auth.User.GetAsync();
-            Console.WriteLine($"CookieAuthenticationStateProvider: User info received. IsAuthenticated: {userInfo.IsAuthenticated}");
             if (userInfo.IsAuthenticated ?? false)
             {
                 var claims = new List<Claim>
@@ -51,7 +48,6 @@ public class CookieAuthenticationStateProvider : AuthenticationStateProvider, IA
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"CookieAuthenticationStateProvider: Exception occurred: {ex.Message}");
             // If an exception occurs, we assume the user is not authenticated
         }
 
@@ -60,10 +56,8 @@ public class CookieAuthenticationStateProvider : AuthenticationStateProvider, IA
 
     public async Task<FormResult> LoginAsync(string email, string password)
     {
-        Console.WriteLine("CookieAuthenticationStateProvider: LoginAsync called");
         try
         {
-            Console.WriteLine($"CookieAuthenticationStateProvider: Attempting to login with email: {email}");
             var loginRequest = new LoginRequest
             {
                 Email = email,
@@ -73,13 +67,10 @@ public class CookieAuthenticationStateProvider : AuthenticationStateProvider, IA
             var response = await _apiClient.Login.PostAsync(loginRequest, q => q.QueryParameters.UseCookies = true);
 
             NotifyAuthenticationStateChanged(GetAuthenticationStateAsync());
-            Console.WriteLine("CookieAuthenticationStateProvider: Authentication state changed");
             return new FormResult { Succeeded = true };
         }
         catch (ApiException apiException)
         {
-            Console.WriteLine($"CookieAuthenticationStateProvider: Login failed: {apiException.Message}");
-            Console.WriteLine($"ApiException details: {apiException}");
             return new FormResult
             {
                 Succeeded = false,
@@ -88,8 +79,6 @@ public class CookieAuthenticationStateProvider : AuthenticationStateProvider, IA
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"CookieAuthenticationStateProvider: Exception occurred: {ex.Message}");
-            Console.WriteLine($"Exception details: {ex}");
             return new FormResult
             {
                 Succeeded = false,

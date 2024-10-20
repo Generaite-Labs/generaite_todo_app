@@ -7,8 +7,6 @@ namespace ToDo.Application.EventHandlers
     {
         public async Task HandleAsync(TodoItemCompletedEvent domainEvent)
         {
-            // Handle the event, e.g., send a notification, update statistics, etc.
-            Console.WriteLine($"Todo item {domainEvent.TodoItemId} was completed at {domainEvent.OccurredOn}");
             await Task.CompletedTask;
         }
     }

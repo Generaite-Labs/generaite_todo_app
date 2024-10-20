@@ -47,10 +47,6 @@ try
 
     AuthConfig.ConfigureAuthenticationAndIdentity(builder);
 
-    // Debug: Print ApplicationSettings
-    Console.WriteLine($"ApplicationSettings.FrontendUrl: {applicationSettings.FrontendUrl}");
-    Console.WriteLine($"ApplicationSettings.ApiBaseUrl: {applicationSettings.ApiBaseUrl}");
-
     // Add infrastructure services
     builder.Services.AddInfrastructureServices(builder.Configuration);
 

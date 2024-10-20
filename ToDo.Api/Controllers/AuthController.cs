@@ -8,7 +8,6 @@ public class AuthController : ControllerBase
     [HttpGet("user")]
     public ActionResult<UserInfo> GetUserInfo()
     {
-        Console.WriteLine(User.Identity?.IsAuthenticated);
         if (User.Identity?.IsAuthenticated == true)
         {
             return new UserInfo

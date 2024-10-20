@@ -32,7 +32,6 @@ public class ToDoClientFactory
 
         var adapter = new HttpClientRequestAdapter(_cookieHandler, httpClient: httpClient);
         adapter.BaseUrl = httpClient.BaseAddress?.ToString() ?? string.Empty;
-        Console.WriteLine($"ToDoClientFactory: Created ApiClient with BaseUrl: {adapter.BaseUrl}");
         return new ApiClient(adapter);
     }
 }

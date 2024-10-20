@@ -54,10 +54,6 @@ public static class AuthConfig
         // Configure authorization
         builder.Services.AddAuthorizationBuilder();
 
-        Console.WriteLine("Debugging Configuration:");
-        Console.WriteLine($"Application:FrontendUrl: {builder.Configuration["Application:FrontendUrl"]}");
-        Console.WriteLine($"Application:ApiBaseUrl: {builder.Configuration["Application:ApiBaseUrl"]}");
-
         builder.Services.AddCors(options =>
         {
             options.AddPolicy("AllowBlazorOrigin",

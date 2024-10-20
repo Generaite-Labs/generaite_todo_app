@@ -25,7 +25,6 @@ public static class InfrastructureModule
     services.AddDbContext<TodoDbContext>((serviceProvider, options) =>
     {
       var databaseOptions = serviceProvider.GetRequiredService<IOptions<DatabaseOptions>>().Value;
-      Console.WriteLine($"Connection string: {databaseOptions.ConnectionString}"); // Temporary logging
       options.UseNpgsql(databaseOptions.ConnectionString);
     });
 
