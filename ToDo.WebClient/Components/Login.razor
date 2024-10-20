@@ -2,11 +2,12 @@
 @using ToDo.WebClient.Identity
 @using ToDo.WebClient.Identity.Models
 @using ToDo.WebClient.ToDoClient.Models
+@using System.Web
 @inject IAccountManagement Acct
 @inject NavigationManager NavigationManager
 @inject NotificationService NotificationService
 
-<PageTitle>Logina</PageTitle>
+<PageTitle>Login</PageTitle>
 
 <RadzenCard Style="max-width: 400px; margin: auto; margin-top: 50px;">
     <RadzenText TextStyle="TextStyle.H3" TagName="TagName.H1" Class="mb-4">Login</RadzenText>
@@ -40,7 +41,21 @@
 @code {
     private LoginModel loginModel = new LoginModel();
 
-    [Parameter] public string? ReturnUrl { get; set; }
+    [Parameter]
+    [SupplyParameterFromQuery(Name = "email")]
+    public string? Email { get; set; }
+
+    [Parameter]
+    [SupplyParameterFromQuery]
+    public string? ReturnUrl { get; set; }
+
+    protected override void OnInitialized()
+    {
+        if (!string.IsNullOrEmpty(Email))
+        {
+            loginModel.Email = Email;
+        }
+    }
 
     private async Task DoLoginAsync()
     {
