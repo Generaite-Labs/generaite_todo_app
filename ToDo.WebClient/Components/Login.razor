@@ -4,86 +4,68 @@
 @using ToDo.WebClient.ToDoClient.Models
 @inject IAccountManagement Acct
 @inject NavigationManager NavigationManager
+@inject NotificationService NotificationService
 
 <PageTitle>Login</PageTitle>
 
-<h1>Login</h1>
+<RadzenCard Style="max-width: 400px; margin: auto; margin-top: 50px;">
+    <RadzenText TextStyle="TextStyle.H3" TagName="TagName.H1" Class="mb-4">Login</RadzenText>
 
-<AuthorizeView>
-    <Authorized>
-        <div class="alert alert-success">You're logged in.</div>
-    </Authorized>
-    <NotAuthorized>
-        @if (errors)
-        {
-            <div class="alert alert-danger">@errorMessage</div>
-        }
-        <div class="flex-outer">
-            <div>
-                <label for="email">
-                    Email:
-                </label>
-                <input required id="email" name="emailInput" placeholder="Enter your email address" type="email" @bind-value="email" />
-            </div>
-            <div>
-                <label for="password">
-                    Password:
-                </label>
-                <input required id="password" name="passwordInput" placeholder="Enter your password" type="password" @bind-value="password" />
-            </div>
-            <div>
-                <button class="btn btn-primary" @onclick="DoLoginAsync">Login</button>
-            </div>
-        </div>
-    </NotAuthorized>
-</AuthorizeView>
+    <AuthorizeView>
+        <Authorized>
+            <RadzenAlert AlertStyle="AlertStyle.Success" ShowIcon="true" AllowClose="false">
+                You're logged in.
+            </RadzenAlert>
+        </Authorized>
+        <NotAuthorized>
+            <RadzenTemplateForm TItem="LoginModel" Data="@loginModel" Submit="@DoLoginAsync" Context="formContext">
+                <RadzenStack Gap="1rem" Class="rz-p-4">
+                    <RadzenFormField Text="Email" Variant="Variant.Outlined">
+                        <RadzenTextBox Name="Email" @bind-Value="@loginModel.Email" Style="width: 100%;" />
+                        <RadzenRequiredValidator Component="Email" Text="Email is required" Popup="true" />
+                        <RadzenEmailValidator Component="Email" Text="Provide a valid email address" Popup="true" />
+                    </RadzenFormField>
+                    <RadzenFormField Text="Password" Variant="Variant.Outlined">
+                        <RadzenPassword Name="Password" @bind-Value="@loginModel.Password" Style="width: 100%;" />
+                        <RadzenRequiredValidator Component="Password" Text="Password is required" Popup="true" />
+                    </RadzenFormField>
+                    <RadzenButton ButtonType="ButtonType.Submit" Text="Login" ButtonStyle="ButtonStyle.Primary" Class="w-100" />
+                </RadzenStack>
+            </RadzenTemplateForm>
+        </NotAuthorized>
+    </AuthorizeView>
+</RadzenCard>
 
 @code {
-    private bool errors;
-    private string email = string.Empty;
-    private string password = string.Empty;
-    private string errorMessage = string.Empty;
+    private LoginModel loginModel = new LoginModel();
 
     [Parameter] public string? ReturnUrl { get; set; }
 
     private async Task DoLoginAsync()
     {
-        errors = false;
-        errorMessage = string.Empty;
-
-        if (string.IsNullOrWhiteSpace(email))
-        {
-            errors = true;
-            errorMessage = "Email is required.";
-            return;
-        }
-
-        if (string.IsNullOrWhiteSpace(password))
-        {
-            errors = true;
-            errorMessage = "Password is required.";
-            return;
-        }
-
         try
         {
-            FormResult result = await Acct.LoginAsync(email, password);
+            FormResult result = await Acct.LoginAsync(loginModel.Email, loginModel.Password);
 
             if (result.Succeeded == true)
             {
-                email = password = string.Empty;
+                loginModel = new LoginModel();
                 NavigationManager.NavigateTo(ReturnUrl ?? "/");
             }
             else
             {
-                errors = true;
-                errorMessage = "Login failed. Please check your credentials and try again.";
+                NotificationService.Notify(NotificationSeverity.Error, "Login Failed", "Please check your credentials and try again.");
             }
         }
         catch (Exception ex)
         {
-            errors = true;
-            errorMessage = $"An error occurred: {ex.Message}";
+            NotificationService.Notify(NotificationSeverity.Error, "Error", $"An error occurred: {ex.Message}");
         }
+    }
+
+    private class LoginModel
+    {
+        public string Email { get; set; } = string.Empty;
+        public string Password { get; set; } = string.Empty;
     }
 }
