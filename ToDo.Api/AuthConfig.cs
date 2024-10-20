@@ -36,6 +36,19 @@ public static class AuthConfig
             options.ExpireTimeSpan = TimeSpan.FromMinutes(60);
             options.SlidingExpiration = true;
             options.LoginPath = "/login";
+            
+            // Apply SameSite settings only in development
+            if (builder.Environment.IsDevelopment())
+            {
+                options.Cookie.SameSite = SameSiteMode.None;
+                options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+            }
+            else
+            {
+                // For production, use more secure defaults
+                options.Cookie.SameSite = SameSiteMode.Lax;
+                options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+            }
         });
 
         // Configure authorization

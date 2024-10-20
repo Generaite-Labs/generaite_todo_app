@@ -19,14 +19,20 @@ builder.RootComponents.Add<HeadOutlet>("head::after");
 var configuration = ApplicationConfig.BuildConfiguration();
 builder.Services.AddApplicationConfiguration(configuration);
 
-// Register ToDoClientFactory
-builder.Services.AddHttpClient<ToDoClientFactory>((sp, client) => 
+// Register CookieHandler
+builder.Services.AddScoped<CookieHandler>();
+
+// Update the ToDoClientFactory registration
+builder.Services.AddScoped<ToDoClientFactory>();
+
+// Replace the existing HttpClient registration with this:
+builder.Services.AddHttpClient("API", client =>
 {
-    var appSettings = sp.GetRequiredService<ApplicationSettings>();
+    var appSettings = builder.Services.BuildServiceProvider().GetRequiredService<ApplicationSettings>();
     client.BaseAddress = new Uri(appSettings.ApiBaseUrl);
 });
 
-// Register ApiClient using the factory
+// Keep the existing ApiClient registration
 builder.Services.AddScoped<ApiClient>(sp => 
 {
     var factory = sp.GetRequiredService<ToDoClientFactory>();
@@ -35,16 +41,13 @@ builder.Services.AddScoped<ApiClient>(sp =>
 
 builder.Services.AddRadzenComponents();
 
-// register the cookie handler
-builder.Services.AddTransient<CookieHandler>();
-
-// set up authorization
+// Set up authorization
 builder.Services.AddAuthorizationCore();
 
-// register the custom state provider
+// Register the custom state provider
 builder.Services.AddScoped<AuthenticationStateProvider, CookieAuthenticationStateProvider>();
 
-// register the account management interface
+// Register the account management interface
 builder.Services.AddScoped(
     sp => (IAccountManagement)sp.GetRequiredService<AuthenticationStateProvider>());
 
