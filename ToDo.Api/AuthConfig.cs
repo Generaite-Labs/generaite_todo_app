@@ -58,7 +58,7 @@ public static class AuthConfig
         {
             options.AddPolicy("AllowBlazorOrigin",
                 corsBuilder => corsBuilder
-                    .WithOrigins(builder.Configuration["Application:FrontendUrl"])
+                    .WithOrigins(builder.Configuration["Application:FrontendUrl"] ?? throw new InvalidOperationException("FrontendUrl is not configured"))
                     .AllowAnyMethod()
                     .AllowAnyHeader()
                     .AllowCredentials());

@@ -33,12 +33,12 @@ public class CookieAuthenticationStateProvider : AuthenticationStateProvider, IA
         try
         {
             var userInfo = await _apiClient.Api.Auth.User.GetAsync();
-            if (userInfo.IsAuthenticated ?? false)
+            if (userInfo?.IsAuthenticated ?? false)
             {
                 var claims = new List<Claim>
                 {
-                    new(ClaimTypes.Name, userInfo.Email),
-                    new(ClaimTypes.Email, userInfo.Email),
+                    new(ClaimTypes.Name, userInfo.UserName ?? string.Empty),
+                    new(ClaimTypes.Email, userInfo.Email ?? string.Empty),
                 };
 
                 var id = new ClaimsIdentity(claims, nameof(CookieAuthenticationStateProvider));

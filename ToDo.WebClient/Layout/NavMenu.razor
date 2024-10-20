@@ -4,14 +4,14 @@
 @inject AuthenticationStateProvider AuthenticationStateProvider
 
 <RadzenPanelMenu>
-    <RadzenPanelMenuItem Text="Home" Icon="home" Path="" />
-    <RadzenPanelMenuItem Text="Counter" Icon="add" Path="counter" />
-    <RadzenPanelMenuItem Text="Weather" Icon="list" Path="weather" />
     <AuthorizeView>
         <Authorized>
+            <RadzenPanelMenuItem Text="Home" Icon="home" Path="" />
+            <RadzenPanelMenuItem Text="Counter" Icon="add" Path="counter" />
+            <RadzenPanelMenuItem Text="Weather" Icon="list" Path="weather" />
             <div class="user-info">
                 <span>Welcome, @context.User.Identity?.Name!</span>
-                @* <RadzenButton Text="Logout" Click="Logout" ButtonStyle="ButtonStyle.Secondary" /> *@
+                <RadzenButton Text="Logout" Click="Logout" ButtonStyle="ButtonStyle.Secondary" />
             </div>
         </Authorized>
         <NotAuthorized>
@@ -35,12 +35,12 @@
         NavigationManager.NavigateTo("/register");
     }
 
-    @* private async Task Logout()
+    private async Task Logout()
     {
         if (AuthenticationStateProvider is IAccountManagement accountManagement)
         {
-            await accountManagement.Logout();
+            await accountManagement.LogoutAsync();
             NavigationManager.NavigateTo("/");
         }
-    } *@
+    }
 }
