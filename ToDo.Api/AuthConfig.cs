@@ -99,15 +99,11 @@ public static class AuthConfig
         // Map Identity API endpoints
         app.MapIdentityApi<ApplicationUser>();
 
-        // Provide an endpoint to clear the cookie for logout
-        app.MapPost("/logout", async (SignInManager<ApplicationUser> signInManager, [FromBody] object empty) =>
+        // Update the logout endpoint
+        app.MapPost("/logout", async (SignInManager<ApplicationUser> signInManager) =>
         {
-            if (empty is not null)
-            {
-                await signInManager.SignOutAsync();
-                return Results.Ok();
-            }
-            return Results.Unauthorized();
+            await signInManager.SignOutAsync();
+            return Results.Ok();
         }).RequireAuthorization();
 
         // Provide an endpoint for user roles
