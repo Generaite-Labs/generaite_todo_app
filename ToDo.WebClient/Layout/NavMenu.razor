@@ -1,9 +1,46 @@
-﻿<RadzenPanelMenu>
+﻿@using Microsoft.AspNetCore.Components.Authorization
+@using ToDo.WebClient.Identity
+@inject NavigationManager NavigationManager
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
+<RadzenPanelMenu>
     <RadzenPanelMenuItem Text="Home" Icon="home" Path="" />
     <RadzenPanelMenuItem Text="Counter" Icon="add" Path="counter" />
     <RadzenPanelMenuItem Text="Weather" Icon="list" Path="weather" />
+    <AuthorizeView>
+        <Authorized>
+            <div class="user-info">
+                <span>Welcome, @context.User.Identity?.Name!</span>
+                @* <RadzenButton Text="Logout" Click="Logout" ButtonStyle="ButtonStyle.Secondary" /> *@
+            </div>
+        </Authorized>
+        <NotAuthorized>
+            <div class="auth-buttons">
+                <RadzenButton Text="Login" Click="Login" ButtonStyle="ButtonStyle.Primary" />
+                <RadzenButton Text="Register" Click="Register" ButtonStyle="ButtonStyle.Secondary" />
+            </div>
+        </NotAuthorized>
+    </AuthorizeView>
 </RadzenPanelMenu>
 
+
 @code {
-    // We can remove the existing code block as it's no longer needed
+    private void Login()
+    {
+        NavigationManager.NavigateTo("/authentication/login");
+    }
+
+    private void Register()
+    {
+        NavigationManager.NavigateTo("/register");
+    }
+
+    @* private async Task Logout()
+    {
+        if (AuthenticationStateProvider is IAccountManagement accountManagement)
+        {
+            await accountManagement.Logout();
+            NavigationManager.NavigateTo("/");
+        }
+    } *@
 }

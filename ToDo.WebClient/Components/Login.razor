@@ -1,37 +1,89 @@
 @page "/login"
+@using ToDo.WebClient.Identity
+@using ToDo.WebClient.Identity.Models
 @using ToDo.WebClient.ToDoClient.Models
-@using ToDo.WebClient.Services
-@inject AuthService AuthService
+@inject IAccountManagement Acct
 @inject NavigationManager NavigationManager
-@using ToDo.Application.DTOs
 
-<h3>Login</h3>
+<PageTitle>Login</PageTitle>
 
-<EditForm Model="@loginModel" OnValidSubmit="HandleLogin">
-    <DataAnnotationsValidator />
-    <ValidationSummary />
+<h1>Login</h1>
 
-    <div>
-        <label for="email">Email:</label>
-        <InputText id="email" @bind-Value="loginModel.Email" />
-    </div>
-    <div>
-        <label for="password">Password:</label>
-        <InputText id="password" @bind-Value="loginModel.Password" type="password" />
-    </div>
-
-    <button type="submit">Log in</button>
-</EditForm>
+<AuthorizeView>
+    <Authorized>
+        <div class="alert alert-success">You're logged in.</div>
+    </Authorized>
+    <NotAuthorized>
+        @if (errors)
+        {
+            <div class="alert alert-danger">@errorMessage</div>
+        }
+        <div class="flex-outer">
+            <div>
+                <label for="email">
+                    Email:
+                </label>
+                <input required id="email" name="emailInput" placeholder="Enter your email address" type="email" @bind-value="email" />
+            </div>
+            <div>
+                <label for="password">
+                    Password:
+                </label>
+                <input required id="password" name="passwordInput" placeholder="Enter your password" type="password" @bind-value="password" />
+            </div>
+            <div>
+                <button class="btn btn-primary" @onclick="DoLoginAsync">Login</button>
+            </div>
+        </div>
+    </NotAuthorized>
+</AuthorizeView>
 
 @code {
-    private LoginRequest loginModel = new LoginRequest();
+    private bool errors;
+    private string email = string.Empty;
+    private string password = string.Empty;
+    private string errorMessage = string.Empty;
 
-    private async Task HandleLogin()
+    [Parameter] public string? ReturnUrl { get; set; }
+
+    private async Task DoLoginAsync()
     {
-        var result = await AuthService.LoginAsync(loginModel);
-        if (result)
+        errors = false;
+        errorMessage = string.Empty;
+
+        if (string.IsNullOrWhiteSpace(email))
         {
-            NavigationManager.NavigateTo("/");
+            errors = true;
+            errorMessage = "Email is required.";
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(password))
+        {
+            errors = true;
+            errorMessage = "Password is required.";
+            return;
+        }
+
+        try
+        {
+            FormResult result = await Acct.LoginAsync(email, password);
+
+            if (result.Succeeded == true)
+            {
+                email = password = string.Empty;
+                NavigationManager.NavigateTo(ReturnUrl ?? "/");
+            }
+            else
+            {
+                errors = true;
+                errorMessage = "Login failed. Please check your credentials and try again.";
+            }
+        }
+        catch (Exception ex)
+        {
+            errors = true;
+            errorMessage = $"An error occurred: {ex.Message}";
         }
     }
 }

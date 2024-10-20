@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using System;
+using ToDo.WebClient.ToDoClient.Api.Auth;
 using ToDo.WebClient.ToDoClient.Api.TodoItems;
 namespace ToDo.WebClient.ToDoClient.Api
 {
@@ -15,6 +16,11 @@ namespace ToDo.WebClient.ToDoClient.Api
     [global::System.CodeDom.Compiler.GeneratedCode("Kiota", "1.0.0")]
     public partial class ApiRequestBuilder : BaseRequestBuilder
     {
+        /// <summary>The Auth property</summary>
+        public global::ToDo.WebClient.ToDoClient.Api.Auth.AuthRequestBuilder Auth
+        {
+            get => new global::ToDo.WebClient.ToDoClient.Api.Auth.AuthRequestBuilder(PathParameters, RequestAdapter);
+        }
         /// <summary>The TodoItems property</summary>
         public global::ToDo.WebClient.ToDoClient.Api.TodoItems.TodoItemsRequestBuilder TodoItems
         {

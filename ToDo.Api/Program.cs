@@ -14,8 +14,6 @@ using ToDo.Domain.Entities;
 using ToDo.Infrastructure.Configuration;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.OpenApi.Models;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.DataProtection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -46,6 +44,13 @@ try
     builder.Services.Configure<ApplicationSettings>(
         builder.Configuration.GetSection(ApplicationSettings.Application));
 
+
+    AuthConfig.ConfigureAuthenticationAndIdentity(builder);
+
+    // Debug: Print ApplicationSettings
+    Console.WriteLine($"ApplicationSettings.FrontendUrl: {applicationSettings.FrontendUrl}");
+    Console.WriteLine($"ApplicationSettings.ApiBaseUrl: {applicationSettings.ApiBaseUrl}");
+
     // Add infrastructure services
     builder.Services.AddInfrastructureServices(builder.Configuration);
 
@@ -66,16 +71,6 @@ try
     builder.Services.AddControllers();
     builder.Services.AddSignalR();
 
-    builder.Services.AddCors(options =>
-    {
-        options.AddPolicy("AllowBlazorOrigin",
-            builder => builder
-                .WithOrigins(applicationSettings.FrontendUrl)
-                .AllowAnyMethod()
-                .AllowAnyHeader()
-                .AllowCredentials());
-    });
-
     builder.Services.AddAutoMapper(typeof(TodoItemMappingProfile));
 
     // Register domain event handler
@@ -87,53 +82,7 @@ try
     builder.Services.Configure<EmailConfiguration>(builder.Configuration.GetSection("EmailConfiguration"));
 
     builder.Services.AddEndpointsApiExplorer();
-    builder.Services.AddSwaggerGen(c =>
-    {
-        c.SwaggerDoc("v1", new OpenApiInfo { Title = "ToDo API", Version = "v1" });
-        
-        c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-        {
-            Description = "JWT Authorization header using the Bearer scheme. Enter 'Bearer' [space] and then your token in the text input below.",
-            Name = "Authorization",
-            In = ParameterLocation.Header,
-            Type = SecuritySchemeType.ApiKey,
-            Scheme = "Bearer"
-        });
-
-        c.AddSecurityRequirement(new OpenApiSecurityRequirement
-        {
-            {
-                new OpenApiSecurityScheme
-                {
-                    Reference = new OpenApiReference
-                    {
-                        Type = ReferenceType.SecurityScheme,
-                        Id = "Bearer"
-                    }
-                },
-                new string[] {}
-            }
-        });
-    });
-
-    // Add these lines to register TimeProvider and IDataProtectionProvider
-    builder.Services.TryAddSingleton(TimeProvider.System);
-    builder.Services.AddDataProtection();
-
-    // Configure Identity
-    builder.Services
-        .AddAuthentication(IdentityConstants.ApplicationScheme)
-        .AddCookie("Identity.Bearer");
-
-    builder.Services.AddIdentityCore<ApplicationUser>(options => {
-        options.SignIn.RequireConfirmedAccount = true;
-    })
-        .AddEntityFrameworkStores<TodoDbContext>()
-        .AddSignInManager()
-        .AddDefaultTokenProviders();
-
-    builder.Services.AddAuthorizationBuilder();
-
+    
     // Build the application
     var app = builder.Build();
 
@@ -153,26 +102,10 @@ try
         app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "ToDo API v1"));
     }
 
-    app.UseHttpsRedirection();
-    app.UseCors("AllowBlazorOrigin");
-
-    // Ensure these are in the correct order
-    app.UseAuthentication();
-    app.UseAuthorization();
-
-    // Map the logout endpoint
-    app.MapPost("/logout", async (SignInManager<ApplicationUser> signInManager) =>
-    {
-        await signInManager.SignOutAsync();
-        return Results.Ok();
-    })
-    .RequireAuthorization();
+    // Configure authentication and authorization
+    AuthConfig.ConfigureAuth(app);
 
     app.MapControllers();
-
-    // Map Identity endpoints
-    app.MapIdentityApi<ApplicationUser>()
-        .RequireCors("AllowBlazorOrigin");
 
     app.Run();
 }
@@ -183,9 +116,4 @@ catch (Exception ex)
 finally
 {
     Log.CloseAndFlush();
-}
-
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-  public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
 }
