@@ -1,0 +1,98 @@
+@using ToDo.WebClient.ToDoClient
+@using ToDo.WebClient.ToDoClient.Models
+@inject ApiClient ApiClient
+@inject DialogService DialogService
+@inject NotificationService NotificationService
+
+<RadzenTemplateForm TItem="TodoItemDto" Data="@task" Submit="@HandleSubmit">
+    <RadzenStack Gap="1rem" Class="rz-p-4">
+        <RadzenFormField Text="Title">
+            <RadzenTextBox @bind-Value="@task.Title" Name="Title" />
+            <RadzenRequiredValidator Component="Title" Text="Title is required" />
+        </RadzenFormField>
+
+        <RadzenFormField Text="Description">
+            <RadzenTextArea @bind-Value="@task.Description" Name="Description" />
+        </RadzenFormField>
+
+        <RadzenFormField Text="Due Date">
+            <RadzenDatePicker @bind-Value="@task.DueDate" Name="DueDate" />
+        </RadzenFormField>
+
+        <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End" Gap="0.5rem">
+            <RadzenButton ButtonType="ButtonType.Submit" Text="Save" ButtonStyle="ButtonStyle.Primary" />
+            <RadzenButton Text="Cancel" Click="@(() => DialogService.Close(false))" ButtonStyle="ButtonStyle.Light" />
+        </RadzenStack>
+    </RadzenStack>
+</RadzenTemplateForm>
+
+@code {
+    [Parameter] public TodoItemDto? Task { get; set; }
+
+    private TodoItemDto task = new TodoItemDto();
+
+    private List<string> statusValues = new List<string> { "NotStarted", "InProgress", "Completed" };
+
+    private string selectedStatus = "NotStarted";
+
+    protected override void OnInitialized()
+    {
+        if (Task != null)
+        {
+            task = new TodoItemDto
+            {
+                Id = Task.Id,
+                Title = Task.Title,
+                Description = Task.Description,
+                Status = Task.Status,
+                DueDate = Task.DueDate?.ToLocalTime(), // Convert UTC to local time for display
+                UserId = Task.UserId
+            };
+            selectedStatus = Task.Status?.Value ?? "NotStarted";
+        }
+        else
+        {
+            task = new TodoItemDto();
+            selectedStatus = "NotStarted";
+        }
+    }
+
+    private async Task HandleSubmit()
+    {
+        try
+        {
+            // Set the Status based on the selectedStatus
+            task.Status = new TodoItemStatus {};
+
+            if (task.Id == null || task.Id == 0)
+            {
+                var createDto = new CreateTodoItemDto
+                {
+                    Title = task.Title,
+                    Description = task.Description,
+                    DueDate = task.DueDate, // The backend will convert this to UTC
+                    UserId = task.UserId
+                };
+                await ApiClient.Api.TodoItems.PostAsync(createDto);
+                NotificationService.Notify(NotificationSeverity.Success, "Success", "Task added successfully");
+            }
+            else
+            {
+                var updateDto = new UpdateTodoItemDto
+                {
+                    Title = task.Title,
+                    Description = task.Description,
+                    DueDate = task.DueDate, // The backend will convert this to UTC
+                    Status = task.Status
+                };
+                await ApiClient.Api.TodoItems[task.Id.Value].PutAsync(updateDto);
+                NotificationService.Notify(NotificationSeverity.Success, "Success", "Task updated successfully");
+            }
+            DialogService.Close(true);
+        }
+        catch (Exception ex)
+        {
+            NotificationService.Notify(NotificationSeverity.Error, "Error", "Failed to save task: " + ex.Message);
+        }
+    }
+}

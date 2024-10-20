@@ -51,7 +51,7 @@ namespace ToDo.Domain.Entities
         Title = title,
         Description = description,
         UserId = userId,
-        DueDate = dueDate,
+        DueDate = dueDate?.ToUniversalTime(), // Ensure DueDate is in UTC
         Status = TodoItemStatus.NotStarted,
         CreatedAt = DateTime.UtcNow,
         UpdatedAt = DateTime.UtcNow
@@ -90,7 +90,7 @@ namespace ToDo.Domain.Entities
 
       Title = title;
       Description = description;
-      DueDate = dueDate;
+      DueDate = dueDate?.ToUniversalTime(); // Ensure DueDate is in UTC
       UpdatedAt = DateTime.UtcNow;
       _domainEvents.Add(new TodoItemUpdatedEvent(this));
     }

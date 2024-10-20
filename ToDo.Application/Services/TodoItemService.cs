@@ -60,13 +60,12 @@ namespace ToDo.Application.Services
     {
       try
       {
-        var todoItem = _mapper.Map<TodoItem>(createDto);
-        if (todoItem == null)
-        {
-            throw new InvalidTodoItemMappingException("Failed to map TodoItem");
-        }
-
-        todoItem.UserId = userId;
+        var todoItem = TodoItem.CreateTodoItem(
+            createDto.Title,
+            createDto.Description,
+            userId,
+            createDto.DueDate?.ToUniversalTime() // Ensure DueDate is in UTC
+        );
 
         var createdTodoItem = await _repository.AddAsync(todoItem);
 
@@ -94,7 +93,11 @@ namespace ToDo.Application.Services
         throw new UnauthorizedTodoItemAccessException(userId, id);
       }
 
-      existingItem.UpdateTodoItem(updateDto.Title, updateDto.Description, updateDto.DueDate);
+      existingItem.UpdateTodoItem(
+          updateDto.Title,
+          updateDto.Description,
+          updateDto.DueDate?.ToUniversalTime() // Ensure DueDate is in UTC
+      );
 
       try
       {
