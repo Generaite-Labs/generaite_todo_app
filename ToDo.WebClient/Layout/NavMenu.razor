@@ -4,25 +4,23 @@
 @inject AuthenticationStateProvider AuthenticationStateProvider
 
 <RadzenPanelMenu>
+    <RadzenPanelMenuItem Text="Home" Icon="home" Path="" />
     <AuthorizeView>
         <Authorized>
-            <RadzenPanelMenuItem Text="Home" Icon="home" Path="" />
             <RadzenPanelMenuItem Text="Counter" Icon="add" Path="counter" />
             <RadzenPanelMenuItem Text="Weather" Icon="list" Path="weather" />
-            <div class="user-info">
-                <span>Welcome, @context.User.Identity?.Name!</span>
-                <RadzenButton Text="Logout" Click="Logout" ButtonStyle="ButtonStyle.Secondary" />
-            </div>
+            <RadzenPanelMenuItem Text="@GetUserDisplayName(context)" Icon="account_circle">
+                <RadzenPanelMenuItem Text="Logout" Icon="logout" Click="Logout" />
+            </RadzenPanelMenuItem>
         </Authorized>
         <NotAuthorized>
-            <div class="auth-buttons">
-                <RadzenButton Text="Login" Click="Login" ButtonStyle="ButtonStyle.Primary" />
-                <RadzenButton Text="Register" Click="Register" ButtonStyle="ButtonStyle.Secondary" />
-            </div>
+            <RadzenPanelMenuItem Text="Account" Icon="account_circle">
+                <RadzenPanelMenuItem Text="Login" Icon="login" Click="Login" />
+                <RadzenPanelMenuItem Text="Register" Icon="person_add" Click="Register" />
+            </RadzenPanelMenuItem>
         </NotAuthorized>
     </AuthorizeView>
 </RadzenPanelMenu>
-
 
 @code {
     private void Login()
@@ -42,5 +40,22 @@
             await accountManagement.LogoutAsync();
             NavigationManager.NavigateTo("/");
         }
+    }
+
+    private string GetUserDisplayName(AuthenticationState authState)
+    {
+        var name = authState.User.FindFirst(c => c.Type == "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name")?.Value;
+        if (!string.IsNullOrEmpty(name))
+        {
+            return name;
+        }
+        
+        var email = authState.User.FindFirst(c => c.Type == "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress")?.Value;
+        if (!string.IsNullOrEmpty(email))
+        {
+            return email;
+        }
+
+        return "Account";
     }
 }
