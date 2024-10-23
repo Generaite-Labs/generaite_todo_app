@@ -7,6 +7,7 @@ using ToDo.Application.Exceptions;
 using ToDo.Application.Interfaces;
 using Microsoft.Extensions.Logging;
 using System.Diagnostics;
+using System.Linq;
 
 namespace ToDo.Application.Services
 {
@@ -48,11 +49,21 @@ namespace ToDo.Application.Services
     {
       _logger.LogInformation("Getting all TodoItems for user: {UserId}", userId);
       var todoItems = await _repository.GetByUserIdAsync(userId);
+      
+      if (todoItems == null || !todoItems.Any())
+      {
+        _logger.LogInformation("No TodoItems found for user: {UserId}", userId);
+        return Enumerable.Empty<TodoItemDto>();
+      }
+      
       var mappedItems = _mapper.Map<IEnumerable<TodoItemDto>>(todoItems);
+      
       if (mappedItems == null || !mappedItems.Any())
       {
-        throw new InvalidTodoItemMappingException("Failed to map TodoItems to DTOs or the result is empty");
+        _logger.LogWarning("Failed to map TodoItems to DTOs for user: {UserId}", userId);
+        throw new InvalidTodoItemMappingException($"Failed to map TodoItems to DTOs for user: {userId}");
       }
+      
       return mappedItems;
     }
 

@@ -355,10 +355,14 @@ namespace ToDo.Tests.Application
     public async Task GetAllAsync_ShouldThrowInvalidTodoItemMappingException_WhenMappingFails()
     {
       // Arrange
-      var todoItems = new List<TodoItem> { TodoItem.CreateTodoItem("Test Item", null, "user123", null) };
-      todoItems[0].GetType().GetProperty("Id")!.SetValue(todoItems[0], 1);
+      var todoItem = TodoItem.CreateTodoItem("Test Item", "Description", ValidUserId, DateTime.UtcNow.AddDays(1));
+      var todoItems = new List<TodoItem> { todoItem };
+      
       _mockRepo.Setup(repo => repo.GetByUserIdAsync(ValidUserId)).ReturnsAsync(todoItems);
-      _mockMapper.Setup(mapper => mapper.Map<IEnumerable<TodoItemDto>>(todoItems)).Returns(Enumerable.Empty<TodoItemDto>());
+      
+      // Setup mapper to return null, simulating a mapping failure
+      _mockMapper.Setup(mapper => mapper.Map<IEnumerable<TodoItemDto>>(It.IsAny<IEnumerable<TodoItem>>()))
+                 .Returns(Enumerable.Empty<TodoItemDto>());
 
       // Act & Assert
       await Assert.ThrowsAsync<InvalidTodoItemMappingException>(() => _service.GetAllAsync(ValidUserId));
@@ -439,6 +443,23 @@ namespace ToDo.Tests.Application
 
       // Act & Assert
       await Assert.ThrowsAsync<InvalidTodoItemMappingException>(() => _service.GetPagedAsync(userId, paginationRequestDto));
+    }
+
+    [Fact]
+    public async Task GetAllAsync_ShouldReturnEmptyList_WhenRepositoryReturnsEmptyList()
+    {
+      // Arrange
+      var emptyList = new List<TodoItem>();
+      _mockRepo.Setup(repo => repo.GetByUserIdAsync(ValidUserId)).ReturnsAsync(emptyList);
+      _mockMapper.Setup(mapper => mapper.Map<IEnumerable<TodoItemDto>>(It.IsAny<IEnumerable<TodoItem>>()))
+                 .Returns(Enumerable.Empty<TodoItemDto>());
+
+      // Act
+      var result = await _service.GetAllAsync(ValidUserId);
+
+      // Assert
+      result.Should().NotBeNull();
+      result.Should().BeEmpty();
     }
   }
 }
