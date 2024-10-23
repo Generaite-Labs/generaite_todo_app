@@ -70,6 +70,20 @@ namespace ToDo.Infrastructure.Tests
     }
 
     [Fact]
+    public async Task GetAllAsync_ReturnsEmptyList_WhenNoTodoItemsExist()
+    {
+      // Arrange
+      // The database is empty by default, so we don't need to add any items
+
+      // Act
+      var result = await _repository.GetAllAsync();
+
+      // Assert
+      Assert.Empty(result);
+      Assert.IsType<List<TodoItem>>(result);
+    }
+
+    [Fact]
     public async Task GetByUserIdAsync_ReturnsCorrectTodoItems()
     {
       // Arrange
