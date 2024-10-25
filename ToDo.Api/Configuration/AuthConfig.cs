@@ -1,11 +1,10 @@
-using Microsoft.AspNetCore.Identity;
+ using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.OpenApi.Models;
 using ToDo.Domain.Entities;
 using ToDo.Infrastructure;
-using Microsoft.AspNetCore.Mvc;
 
-namespace ToDo.Api;
+namespace ToDo.Api.Configuration;
 
 public static class AuthConfig
 {
