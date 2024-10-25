@@ -102,7 +102,7 @@ namespace ToDo.Domain.Entities
 
       AssignedUserId = assignedUserId;
       UpdatedAt = DateTime.UtcNow;
-      _domainEvents.Add(new TodoItemAssignedEvent(this, assignedUserId));
+      _domainEvents.Add(new TodoItemUpdatedEvent(this));
     }
 
     public void ClearDomainEvents()
@@ -115,7 +115,7 @@ namespace ToDo.Domain.Entities
       if (Status != TodoItemStatus.Completed)
       {
         Status = TodoItemStatus.Completed;
-        _domainEvents.Add(new TodoItemCompletedEvent(Id));
+      _domainEvents.Add(new TodoItemUpdatedEvent(this));
       }
     }
   }

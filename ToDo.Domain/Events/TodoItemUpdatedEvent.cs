@@ -6,7 +6,7 @@ namespace ToDo.Domain.Events
     {
         public TodoItem TodoItem { get; }
 
-        public TodoItemUpdatedEvent(TodoItem todoItem) : base()
+        public TodoItemUpdatedEvent(TodoItem todoItem) : base("TodoItemUpdated")
         {
             TodoItem = todoItem;
         }

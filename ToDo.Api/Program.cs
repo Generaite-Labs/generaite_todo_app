@@ -6,7 +6,6 @@ using ToDo.Application.Mappers;
 using Microsoft.AspNetCore.Identity;
 using ToDo.Domain.Interfaces;
 using ToDo.Application.Services;
-using ToDo.Application.EventHandlers;
 using ToDo.Domain.Events;
 using ToDo.Infrastructure.Services;
 using ToDo.Domain.Entities;
@@ -47,7 +46,6 @@ try
     builder.Services.AddSignalR();
     builder.Services.AddAutoMapper(typeof(TodoItemMappingProfile));
     builder.Services.AddScoped<IDomainEventDispatcher, DomainEventDispatcher>();
-    builder.Services.AddScoped<IDomainEventHandler<TodoItemCompletedEvent>, TodoItemCompletedEventHandler>();
     builder.Services.AddScoped<IDomainEventService, DomainEventService>();
     builder.Services.Configure<EmailConfiguration>(builder.Configuration.GetSection("EmailConfiguration"));
     builder.Services.AddEndpointsApiExplorer();
