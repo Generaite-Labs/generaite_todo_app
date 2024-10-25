@@ -20,6 +20,7 @@ using ToDo.WebClient.ToDoClient.Refresh;
 using ToDo.WebClient.ToDoClient.Register;
 using ToDo.WebClient.ToDoClient.ResendConfirmationEmail;
 using ToDo.WebClient.ToDoClient.ResetPassword;
+using ToDo.WebClient.ToDoClient.Roles;
 namespace ToDo.WebClient.ToDoClient
 {
     /// <summary>
@@ -77,6 +78,11 @@ namespace ToDo.WebClient.ToDoClient
         public global::ToDo.WebClient.ToDoClient.ResetPassword.ResetPasswordRequestBuilder ResetPassword
         {
             get => new global::ToDo.WebClient.ToDoClient.ResetPassword.ResetPasswordRequestBuilder(PathParameters, RequestAdapter);
+        }
+        /// <summary>The roles property</summary>
+        public global::ToDo.WebClient.ToDoClient.Roles.RolesRequestBuilder Roles
+        {
+            get => new global::ToDo.WebClient.ToDoClient.Roles.RolesRequestBuilder(PathParameters, RequestAdapter);
         }
         /// <summary>
         /// Instantiates a new <see cref="global::ToDo.WebClient.ToDoClient.ApiClient"/> and sets the default values.
