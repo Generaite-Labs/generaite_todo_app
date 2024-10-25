@@ -23,8 +23,7 @@
         <Columns>
             <RadzenDataGridColumn TItem="TodoItemDto" Property="Status" Title="Status" Width="100px">
                 <Template Context="task">
-                    <RadzenIcon Icon="@GetStatusIcon(task.Status?.Value)" Style="@GetStatusIconStyle(task.Status?.Value)" />
-                    @task.Status?.Value
+                    <RadzenIcon Icon="@GetStatusIcon(task.Status?.Value ?? "NotStarted")" Style="@GetStatusIconStyle(task.Status?.Value ?? "NotStarted")" />
                 </Template>
             </RadzenDataGridColumn>
             <RadzenDataGridColumn TItem="TodoItemDto" Property="Title" Title="Task" />
@@ -58,10 +57,10 @@
         try
         {
             var response = await ApiClient.Api.TodoItems.GetAsync();
-            tasks = response.ToList();
+            tasks = response?.ToList() ?? new List<TodoItemDto>();
             if (!string.IsNullOrEmpty(searchTerm))
             {
-                tasks = tasks.Where(t => t.Title.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)).ToList();
+                tasks = tasks.Where(t => t.Title?.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ?? false).ToList();
             }
         }
         catch (Exception ex)
@@ -108,32 +107,59 @@
 
     private async Task StartTask(TodoItemDto task)
     {
-        await UpdateTaskStatus(task, "InProgress");
+        if (task?.Id.HasValue == true)
+        {
+            await ApiClient.Api.TodoItems[task.Id.Value].Start.PostAsync();
+            await LoadTasks();
+        }
+        else
+        {
+            NotificationService.Notify(NotificationSeverity.Error, "Error", "Task ID is missing");
+        }
     }
 
     private async Task StopTask(TodoItemDto task)
     {
-        await UpdateTaskStatus(task, "NotStarted");
+        if (task?.Id.HasValue == true)
+        {
+            await ApiClient.Api.TodoItems[task.Id.Value].Stop.PostAsync();
+            await LoadTasks();
+        }
+        else
+        {
+            NotificationService.Notify(NotificationSeverity.Error, "Error", "Task ID is missing");
+        }
     }
 
     private async Task CompleteTask(TodoItemDto task)
     {
-        await UpdateTaskStatus(task, "Completed");
+        if (task?.Id.HasValue == true)
+        {
+            await ApiClient.Api.TodoItems[task.Id.Value].Complete.PostAsync();
+            await LoadTasks();
+        }
+        else
+        {
+            NotificationService.Notify(NotificationSeverity.Error, "Error", "Task ID is missing");
+        }
     }
 
     private async Task UpdateTaskStatus(TodoItemDto task, string newStatus)
     {
         try
         {
+            if (task.Id == null)
+            {
+                throw new ArgumentException("Task ID is missing");
+            }
+
             var updateDto = new UpdateTodoItemDto
             {
                 Title = task.Title,
                 Description = task.Description,
-                Status = TodoItemStatus.CreateFromDiscriminatorValue(null),
                 CompletedAt = newStatus == "Completed" ? DateTimeOffset.UtcNow : null,
                 DueDate = task.DueDate
             };
-            updateDto.Status.GetType().GetProperty("Value").SetValue(updateDto.Status, newStatus);
             await ApiClient.Api.TodoItems[task.Id.Value].PutAsync(updateDto);
             task.Status = updateDto.Status;
             NotificationService.Notify(NotificationSeverity.Success, "Success", $"Task status updated to {newStatus}");
