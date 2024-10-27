@@ -9,12 +9,14 @@ namespace ToDo.Domain.Events
         public Guid Id { get; }
         public DateTime OccurredOn { get; }
         public string EventType { get; }
+        public string UserId { get; }
 
-        protected DomainEvent(string eventType)
+        protected DomainEvent(string eventType, string userId)
         {
             Id = Guid.NewGuid();
             OccurredOn = DateTime.UtcNow;
             EventType = eventType;
+            UserId = userId;
         }
     }
 }
