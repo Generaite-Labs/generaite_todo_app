@@ -1,10 +1,10 @@
-using System;
 using System.ComponentModel.DataAnnotations.Schema;
+using ToDo.Domain.Interfaces;
 
 namespace ToDo.Domain.Events
 {
     [NotMapped]
-    public abstract class DomainEvent
+    public abstract class DomainEvent : IDomainEvent
     {
         public Guid Id { get; }
         public DateTime OccurredOn { get; }
