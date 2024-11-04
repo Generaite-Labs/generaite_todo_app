@@ -20,7 +20,6 @@ namespace ToDo.Tests.Application
     private readonly Mock<ITodoItemRepository> _mockRepo;
     private readonly Mock<ILogger<TodoItemService>> _mockLogger;
     private readonly Mock<IMapper> _mockMapper;
-    private readonly Mock<IDomainEventDispatcher> _mockEventDispatcher;
     private readonly Mock<IDomainEventService> _mockDomainEventService;
     private readonly ITodoItemService _service;
     private const string ValidUserId = "user1";
@@ -31,11 +30,9 @@ namespace ToDo.Tests.Application
       _mockRepo = new Mock<ITodoItemRepository>();
       _mockLogger = new Mock<ILogger<TodoItemService>>();
       _mockMapper = new Mock<IMapper>();
-      _mockEventDispatcher = new Mock<IDomainEventDispatcher>();
       _mockDomainEventService = new Mock<IDomainEventService>();
       _service = new TodoItemService(
           _mockRepo.Object,
-          _mockEventDispatcher.Object,
           _mockLogger.Object,
           _mockMapper.Object,
           _mockDomainEventService.Object
@@ -194,7 +191,6 @@ namespace ToDo.Tests.Application
       todoItem.StartedAt.Should().NotBeNull();
       todoItem.StartedAt.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(1));
       _mockRepo.Verify(repo => repo.UpdateAsync(It.IsAny<TodoItem>()), Times.Once);
-      _mockEventDispatcher.Verify(dispatcher => dispatcher.DispatchAsync(It.IsAny<DomainEvent>()), Times.AtLeastOnce);
     }
 
     [Fact]
@@ -212,7 +208,6 @@ namespace ToDo.Tests.Application
       todoItem.CompletedAt.Should().NotBeNull();
       todoItem.CompletedAt.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(1));
       _mockRepo.Verify(repo => repo.UpdateAsync(It.IsAny<TodoItem>()), Times.Once);
-      _mockEventDispatcher.Verify(dispatcher => dispatcher.DispatchAsync(It.IsAny<DomainEvent>()), Times.AtLeastOnce);
     }
 
     [Fact]
@@ -229,7 +224,6 @@ namespace ToDo.Tests.Application
       // Assert
       todoItem.AssignedUserId.Should().Be(newAssignedUserId);
       _mockRepo.Verify(repo => repo.UpdateAsync(It.IsAny<TodoItem>()), Times.Once);
-      _mockEventDispatcher.Verify(dispatcher => dispatcher.DispatchAsync(It.IsAny<DomainEvent>()), Times.AtLeastOnce);
     }
 
     [Fact]

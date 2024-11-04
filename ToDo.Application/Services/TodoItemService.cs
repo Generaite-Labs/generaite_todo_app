@@ -14,15 +14,13 @@ namespace ToDo.Application.Services
   public class TodoItemService : ITodoItemService
   {
     private readonly ITodoItemRepository _repository;
-    private readonly IDomainEventDispatcher _eventDispatcher;
     private readonly ILogger<TodoItemService> _logger;
     private readonly IMapper _mapper;
     private readonly IDomainEventService _domainEventService;
 
-    public TodoItemService(ITodoItemRepository repository, IDomainEventDispatcher eventDispatcher, ILogger<TodoItemService> logger, IMapper mapper, IDomainEventService domainEventService)
+    public TodoItemService(ITodoItemRepository repository, ILogger<TodoItemService> logger, IMapper mapper, IDomainEventService domainEventService)
     {
       _repository = repository;
-      _eventDispatcher = eventDispatcher;
       _logger = logger;
       _mapper = mapper;
       _domainEventService = domainEventService;
@@ -113,7 +111,7 @@ namespace ToDo.Application.Services
       try
       {
         await _repository.UpdateAsync(existingItem);
-        await DispatchDomainEventsAsync(existingItem);
+        await _repository.UpdateAsync(existingItem);
         _logger.LogInformation("Updated TodoItem: {TodoItemId} for user: {UserId}", id, userId);
         return _mapper.Map<TodoItemDto>(existingItem) ?? 
                throw new InvalidTodoItemMappingException("Failed to map updated TodoItem to TodoItemDto");
@@ -128,28 +126,28 @@ namespace ToDo.Application.Services
     {
       var todoItem = await GetAndValidateTodoItemAsync(userId, id);
       todoItem.StartTodoItem();
-      await UpdateAndDispatchEventsAsync(todoItem);
+      await _repository.UpdateAsync(todoItem);
     }
 
     public async Task StopTodoItemAsync(string userId, int id)
     {
       var todoItem = await GetAndValidateTodoItemAsync(userId, id);
       todoItem.StopTodoItem();
-      await UpdateAndDispatchEventsAsync(todoItem);
+      await _repository.UpdateAsync(todoItem);
     }
 
     public async Task CompleteTodoItemAsync(string userId, int id)
     {
       var todoItem = await GetAndValidateTodoItemAsync(userId, id);
       todoItem.CompleteTodoItem();
-      await UpdateAndDispatchEventsAsync(todoItem);
+      await _repository.UpdateAsync(todoItem);
     }
 
     public async Task AssignTodoItemAsync(string userId, int id, string assignedUserId)
     {
       var todoItem = await GetAndValidateTodoItemAsync(userId, id);
       todoItem.AssignTodoItem(assignedUserId);
-      await UpdateAndDispatchEventsAsync(todoItem);
+      await _repository.UpdateAsync(todoItem);
     }
 
     public async Task DeleteAsync(string userId, int id)
@@ -206,21 +204,6 @@ namespace ToDo.Application.Services
         throw new UnauthorizedTodoItemAccessException(userId, id);
       }
       return todoItem;
-    }
-
-    private async Task UpdateAndDispatchEventsAsync(TodoItem todoItem)
-    {
-      await _repository.UpdateAsync(todoItem);
-      await DispatchDomainEventsAsync(todoItem);
-    }
-
-    private async Task DispatchDomainEventsAsync(TodoItem todoItem)
-    {
-      foreach (var domainEvent in todoItem.DomainEvents)
-      {
-        await _eventDispatcher.DispatchAsync(domainEvent);
-      }
-      todoItem.ClearDomainEvents();
     }
   }
 }

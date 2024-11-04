@@ -48,8 +48,6 @@ public static class InfrastructureModule
     // Validators
     services.AddValidatorsFromAssemblyContaining<CreateTodoItemDtoValidator>();
 
-    services.AddScoped<IDomainEventDispatcher, DomainEventDispatcher>();
-
     return services;
   }
 }

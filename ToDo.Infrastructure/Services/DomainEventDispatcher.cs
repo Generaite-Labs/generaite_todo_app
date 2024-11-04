@@ -1,11 +1,9 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using System;
 using System.Reflection;
-using System.Threading.Tasks;
 using ToDo.Domain.Events;
 using ToDo.Domain.Interfaces;
-
+using ToDo.Infrastructure.Interfaces;
 namespace ToDo.Infrastructure.Services
 {
     public class DomainEventDispatcher : IDomainEventDispatcher
@@ -19,7 +17,7 @@ namespace ToDo.Infrastructure.Services
             _logger = logger;
         }
 
-        public async Task DispatchAsync(DomainEvent domainEvent)
+        public async Task DispatchEventAsync(IDomainEvent domainEvent, CancellationToken cancellationToken = default)
         {
             var handlerType = typeof(IDomainEventHandler<>).MakeGenericType(domainEvent.GetType());
             var handlers = _serviceProvider.GetServices(handlerType);
@@ -31,7 +29,7 @@ namespace ToDo.Infrastructure.Services
                     MethodInfo? handleMethod = handlerType.GetMethod("HandleAsync");
                     if (handleMethod != null)
                     {
-                        await (Task)handleMethod.Invoke(handler, new object[] { domainEvent })!;
+                        await (Task)handleMethod.Invoke(handler, new object[] { domainEvent, cancellationToken })!;
                     }
                     else
                     {
@@ -43,6 +41,13 @@ namespace ToDo.Infrastructure.Services
                     _logger.LogError(ex, "Error handling domain event {EventType} with handler {HandlerType}", domainEvent.GetType().Name, handler.GetType().Name);
                     // Decide whether to rethrow the exception or continue with other handlers
                 }
+            }
+        }
+        public async Task DispatchEventsAsync(IEnumerable<IDomainEvent> domainEvents, CancellationToken cancellationToken = default) 
+        {
+            foreach (var domainEvent in domainEvents)
+            {
+                await DispatchEventAsync(domainEvent, cancellationToken);
             }
         }
     }

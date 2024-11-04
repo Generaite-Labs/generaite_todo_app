@@ -42,12 +42,10 @@ namespace ToDo.Tests.Controllers
 
             var logger = new Mock<ILogger<TodoItemService>>().Object;
             var repositoryLogger = new Mock<ILogger<TodoItemRepository>>().Object;
-            var eventDispatcher = new Mock<IDomainEventDispatcher>().Object;
             var domainEventService = new Mock<IDomainEventService>().Object;
 
             var todoItemService = new TodoItemService(
                 new TodoItemRepository(_context, repositoryLogger),
-                eventDispatcher,
                 logger,
                 _mapper,
                 domainEventService
