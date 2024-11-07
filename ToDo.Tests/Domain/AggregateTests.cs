@@ -31,6 +31,9 @@ public class AggregateTests
         public string EventType => throw new NotImplementedException();
 
         public string UserId => throw new NotImplementedException();
+        public long Version => throw new NotImplementedException();
+        public Guid AggregateId => throw new NotImplementedException();
+        public string AggregateType => throw new NotImplementedException();
     }
 
 

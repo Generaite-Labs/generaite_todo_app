@@ -7,6 +7,29 @@ public class DomainEventTests
     private class TestEvent : DomainEvent
     {
         public TestEvent() : base() { }
+        
+        public TestEvent(Guid aggregateId, string aggregateType, long version) 
+            : base(aggregateId, aggregateType, version) { }
+    }
+
+    [Fact]
+    public void Constructor_WithParameters_ShouldSetAllProperties()
+    {
+        // Arrange
+        var aggregateId = Guid.NewGuid();
+        var aggregateType = "TestAggregate";
+        var version = 1L;
+
+        // Act
+        var @event = new TestEvent(aggregateId, aggregateType, version);
+
+        // Assert
+        Assert.Equal(aggregateId, @event.AggregateId);
+        Assert.Equal(aggregateType, @event.AggregateType);
+        Assert.Equal(version, @event.Version);
+        Assert.NotEqual(Guid.Empty, @event.Id);
+        Assert.True(@event.OccurredOn <= DateTime.UtcNow);
+        Assert.True(@event.OccurredOn > DateTime.UtcNow.AddSeconds(-1));
     }
 
     [Fact]
