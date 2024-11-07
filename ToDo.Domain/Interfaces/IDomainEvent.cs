@@ -3,7 +3,5 @@ namespace ToDo.Domain.Interfaces {
     {
         Guid Id { get; }
         DateTime OccurredOn { get; }
-        string EventType { get; }
-        string UserId { get; }
     }
 }

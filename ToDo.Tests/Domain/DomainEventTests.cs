@@ -6,52 +6,26 @@ public class DomainEventTests
 {
     private class TestEvent : DomainEvent
     {
-        public TestEvent(string eventType, string userId) : base(eventType, userId) { }
+        public TestEvent() : base() { }
     }
 
     [Fact]
-    public void Constructor_WithValidParameters_ShouldCreateEvent()
+    public void Constructor_ShouldCreateEventWithValidProperties()
     {
         // Arrange & Act
-        var @event = new TestEvent("TestEvent", "user123");
+        var @event = new TestEvent();
 
         // Assert
         Assert.NotEqual(Guid.Empty, @event.Id);
-        Assert.Equal("TestEvent", @event.EventType);
-        Assert.Equal("user123", @event.UserId);
         Assert.True(@event.OccurredOn <= DateTime.UtcNow);
         Assert.True(@event.OccurredOn > DateTime.UtcNow.AddSeconds(-1));
-    }
-
-    [Theory]
-    [InlineData(null)]
-    [InlineData("")]
-    [InlineData(" ")]
-    public void Constructor_WithInvalidEventType_ShouldThrowArgumentNullException(string eventType)
-    {
-        // Act & Assert
-        var ex = Assert.Throws<ArgumentNullException>(() => 
-            new TestEvent(eventType, "validUserId"));
-        Assert.Equal("eventType", ex.ParamName);
-    }
-
-    [Theory]
-    [InlineData(null)]
-    [InlineData("")]
-    [InlineData(" ")]
-    public void Constructor_WithInvalidUserId_ShouldThrowArgumentNullException(string userId)
-    {
-        // Act & Assert
-        var ex = Assert.Throws<ArgumentNullException>(() => 
-            new TestEvent("validEventType", userId));
-        Assert.Equal("userId", ex.ParamName);
     }
 
     [Fact]
     public void OccurredOn_ShouldBeUtc()
     {
         // Arrange & Act
-        var @event = new TestEvent("TestEvent", "user123");
+        var @event = new TestEvent();
 
         // Assert
         Assert.Equal(DateTimeKind.Utc, @event.OccurredOn.Kind);
@@ -61,8 +35,8 @@ public class DomainEventTests
     public void Id_ShouldBeUnique()
     {
         // Arrange & Act
-        var event1 = new TestEvent("TestEvent", "user123");
-        var event2 = new TestEvent("TestEvent", "user123");
+        var event1 = new TestEvent();
+        var event2 = new TestEvent();
 
         // Assert
         Assert.NotEqual(event1.Id, event2.Id);
@@ -71,16 +45,10 @@ public class DomainEventTests
     [Fact]
     public void Constructor_ShouldSetPropertiesImmutably()
     {
-        // Arrange
-        var eventType = "TestEvent";
-        var userId = "user123";
-
-        // Act
-        var @event = new TestEvent(eventType, userId);
+        // Arrange & Act
+        var @event = new TestEvent();
 
         // Assert
-        Assert.Equal(eventType, @event.EventType);
-        Assert.Equal(userId, @event.UserId);
         // Verify properties are get-only through reflection
         var properties = typeof(DomainEvent).GetProperties();
         foreach (var property in properties)
@@ -93,7 +61,7 @@ public class DomainEventTests
     public void Event_CreatedInThePast_ShouldNotBeAllowed()
     {
         // Arrange & Act
-        var @event = new TestEvent("TestEvent", "user123");
+        var @event = new TestEvent();
 
         // Assert
         Assert.True(@event.OccurredOn <= DateTime.UtcNow);
