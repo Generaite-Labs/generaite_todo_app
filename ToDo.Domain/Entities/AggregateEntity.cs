@@ -11,6 +11,8 @@ public abstract class AggregateEntity<TId, TAggregateId> : Entity<TId>, IEntityB
     where TId : notnull
     where TAggregateId : notnull
 {
+    private AggregateRoot<TAggregateId>? _aggregateRoot;
+
     /// <summary>
     /// Gets the ID of the aggregate root this entity belongs to
     /// </summary>
@@ -24,15 +26,26 @@ public abstract class AggregateEntity<TId, TAggregateId> : Entity<TId>, IEntityB
     }
 
     /// <summary>
-    /// Raises a domain event through the aggregate root
+    /// Sets the aggregate root reference for this entity
     /// </summary>
-    /// <param name="aggregateRoot">The aggregate root to raise the event through</param>
-    /// <param name="domainEvent">The domain event to raise</param>
-    internal protected void RaiseDomainEvent<TAggregateRoot>(TAggregateRoot aggregateRoot, IDomainEvent domainEvent)
-        where TAggregateRoot : AggregateRoot<TAggregateId>
+    internal void SetAggregateRoot(AggregateRoot<TAggregateId> aggregateRoot)
     {
         VerifyBelongsToAggregate(aggregateRoot);
-        aggregateRoot.RaiseDomainEvent(domainEvent);
+        _aggregateRoot = aggregateRoot;
+    }
+
+    /// <summary>
+    /// Raises a domain event through the aggregate root
+    /// </summary>
+    /// <param name="domainEvent">The domain event to raise</param>
+    internal protected void RaiseDomainEvent(IDomainEvent domainEvent)
+    {
+        if (_aggregateRoot == null)
+        {
+            throw new InvalidOperationException(
+                $"Cannot raise domain event: Entity {GetType().Name} is not associated with an aggregate root");
+        }
+        _aggregateRoot.RaiseDomainEvent(domainEvent);
     }
 
     /// <summary>

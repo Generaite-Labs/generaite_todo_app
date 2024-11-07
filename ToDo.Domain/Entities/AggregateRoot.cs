@@ -72,6 +72,17 @@ public abstract class AggregateRoot<TId> : Entity<TId>, IAggregateRoot
                 $"Entity {entity.GetType().Name} does not belong to aggregate {GetType().Name} with ID {Id}");
         }
     }
+
+    /// <summary>
+    /// Associates a child entity with this aggregate root
+    /// </summary>
+    /// <param name="entity">The entity to associate</param>
+    protected void AssociateChild<TChildId>(AggregateEntity<TChildId, TId> entity)
+        where TChildId : notnull
+    {
+        EnsureChildBelongsToAggregate(entity);
+        entity.SetAggregateRoot(this);
+    }
 }
 
 /// <summary>

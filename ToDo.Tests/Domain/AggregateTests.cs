@@ -13,7 +13,7 @@ public class AggregateTests
         
         public void AddTestChild(TestChildEntity child)
         {
-            EnsureChildBelongsToAggregate(child);
+            AssociateChild(child);
         }
     }
 
@@ -90,10 +90,11 @@ public class AggregateTests
         // Arrange
         var aggregate = new TestAggregateRoot(1);
         var child = new TestChildEntity(2, aggregate.Id);
+        aggregate.AddTestChild(child);  // Add this line to properly associate the child
         var initialVersion = aggregate.Version;
 
         // Act
-        child.RaiseDomainEvent(aggregate, new TestDomainEvent());
+        child.RaiseDomainEvent(new TestDomainEvent());
 
         // Assert
         Assert.Equal(initialVersion + 1, aggregate.Version);
@@ -108,6 +109,6 @@ public class AggregateTests
 
         // Act & Assert
         Assert.Throws<InvalidOperationException>(
-            () => child.RaiseDomainEvent(aggregate, new TestDomainEvent()));
+            () => child.RaiseDomainEvent(new TestDomainEvent()));
     }
 } 
