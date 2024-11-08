@@ -7,19 +7,6 @@ using ToDo.Domain.Interfaces;
 namespace ToDo.Domain.Events
 {
     /// <summary>
-    /// Defines a contract for dispatching domain events to their respective handlers.
-    /// </summary>
-    public interface IEventDispatcher
-    {
-        /// <summary>
-        /// Dispatches a collection of domain events to their registered handlers.
-        /// </summary>
-        /// <param name="events">The collection of domain events to dispatch.</param>
-        /// <param name="cancellationToken">Optional cancellation token to cancel the operation.</param>
-        Task DispatchEventsAsync(IEnumerable<DomainEvent> events, CancellationToken cancellationToken = default);
-    }
-
-    /// <summary>
     /// Implements the event dispatcher pattern for domain events, handling the routing of events to their appropriate handlers.
     /// This implementation uses reflection to dynamically find and invoke handlers, with results cached for performance.
     /// </summary>

@@ -23,6 +23,7 @@ ToDo.sln
 │   │   ├── Repositories/
 │   │   ├── Identity/
 │   │   ├── Logging/
+│   │   ├── Persistence/
 │   │   └── ExternalServices/
 │   │
 │   ├── ToDo.API/

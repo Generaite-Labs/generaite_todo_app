@@ -1,23 +1,9 @@
 using Microsoft.EntityFrameworkCore;
 using ToDo.Domain.Events;
 using ToDo.Domain.Interfaces;
-using System.Linq;
 
 namespace ToDo.Infrastructure
 {
-    /// <summary>
-    /// Coordinates database operations and domain event dispatching within a single transaction boundary.
-    /// </summary>
-    public interface IUnitOfWork
-    {
-        /// <summary>
-        /// Saves all changes and dispatches collected domain events within a transaction.
-        /// </summary>
-        /// <param name="cancellationToken">Optional cancellation token.</param>
-        /// <returns>True if any changes were saved, false otherwise.</returns>
-        Task<bool> SaveChangesAsync(CancellationToken cancellationToken = default);
-    }
-
     /// <summary>
     /// Implementation of the Unit of Work pattern that coordinates database operations
     /// and domain event dispatching within a transaction boundary.
