@@ -44,6 +44,7 @@ try
     builder.Services.AddAutoMapper(typeof(TodoItemMappingProfile));
     builder.Services.Configure<EmailConfiguration>(builder.Configuration.GetSection("EmailConfiguration"));
     builder.Services.AddEndpointsApiExplorer();
+    builder.Services.AddDomainEventSystem();
 
     var app = builder.Build();
 
