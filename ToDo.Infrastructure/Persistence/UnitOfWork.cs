@@ -10,12 +10,12 @@ namespace ToDo.Infrastructure
     /// </summary>
     public class UnitOfWork : IUnitOfWork
     {
-        private readonly DbContext _context;
+        private readonly TodoDbContext _context;
         private readonly IEventCollector _eventCollector;
         private readonly IEventDispatcher _eventDispatcher;
         
         public UnitOfWork(
-            DbContext context,
+            TodoDbContext context,
             IEventCollector eventCollector,
             IEventDispatcher eventDispatcher)
         {

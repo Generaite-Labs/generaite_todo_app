@@ -42,13 +42,14 @@ namespace ToDo.Tests.Controllers
 
             var logger = new Mock<ILogger<TodoItemService>>().Object;
             var repositoryLogger = new Mock<ILogger<TodoItemRepository>>().Object;
-            var domainEventService = new Mock<IDomainEventService>().Object;
+            var mockUnitOfWork = new Mock<IUnitOfWork>();
+            mockUnitOfWork.Setup(uow => uow.SaveChangesAsync(It.IsAny<CancellationToken>())).ReturnsAsync(true);
 
             var todoItemService = new TodoItemService(
                 new TodoItemRepository(_context, repositoryLogger),
                 logger,
                 _mapper,
-                domainEventService
+                mockUnitOfWork.Object
             );
 
             _controller = new TodoItemsController(todoItemService);

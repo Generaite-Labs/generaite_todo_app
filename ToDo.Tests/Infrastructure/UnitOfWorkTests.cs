@@ -11,7 +11,7 @@ namespace ToDo.Tests.Infrastructure
 {
     public class UnitOfWorkTests
     {
-        private readonly Mock<DbContext> _mockContext;
+        private readonly Mock<TodoDbContext> _mockContext;
         private readonly Mock<IEventCollector> _mockEventCollector;
         private readonly Mock<IEventDispatcher> _mockEventDispatcher;
         private readonly Mock<DatabaseFacade> _mockDatabase;
@@ -20,7 +20,7 @@ namespace ToDo.Tests.Infrastructure
 
         public UnitOfWorkTests()
         {
-            _mockContext = new Mock<DbContext>();
+            _mockContext = new Mock<TodoDbContext>(new DbContextOptions<TodoDbContext>());
             _mockEventCollector = new Mock<IEventCollector>();
             _mockEventDispatcher = new Mock<IEventDispatcher>();
             _mockDatabase = new Mock<DatabaseFacade>(_mockContext.Object);

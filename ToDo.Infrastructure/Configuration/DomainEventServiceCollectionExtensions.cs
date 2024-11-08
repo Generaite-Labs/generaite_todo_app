@@ -14,11 +14,11 @@ namespace ToDo.Infrastructure.Configuration
         /// <returns>The service collection for chaining.</returns>
         public static IServiceCollection AddDomainEventSystem(this IServiceCollection services)
         {
-            // Validate that required services are registered
-            if (!services.Any(s => s.ServiceType == typeof(DbContext)))
+            // Update the validation to check for TodoDbContext instead of DbContext
+            if (!services.Any(s => s.ServiceType == typeof(TodoDbContext)))
             {
                 throw new InvalidOperationException(
-                    "DbContext must be registered before adding the domain event system.");
+                    "TodoDbContext must be registered before adding the domain event system.");
             }
 
             // Core event system components

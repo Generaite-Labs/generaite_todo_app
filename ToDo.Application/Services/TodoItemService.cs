@@ -16,14 +16,18 @@ namespace ToDo.Application.Services
     private readonly ITodoItemRepository _repository;
     private readonly ILogger<TodoItemService> _logger;
     private readonly IMapper _mapper;
-    private readonly IDomainEventService _domainEventService;
+    private readonly IUnitOfWork _unitOfWork;
 
-    public TodoItemService(ITodoItemRepository repository, ILogger<TodoItemService> logger, IMapper mapper, IDomainEventService domainEventService)
+    public TodoItemService(
+        ITodoItemRepository repository,
+        ILogger<TodoItemService> logger,
+        IMapper mapper,
+        IUnitOfWork unitOfWork)
     {
-      _repository = repository;
-      _logger = logger;
-      _mapper = mapper;
-      _domainEventService = domainEventService;
+        _repository = repository;
+        _logger = logger;
+        _mapper = mapper;
+        _unitOfWork = unitOfWork;
     }
 
     public async Task<TodoItemDto?> GetByIdAsync(string userId, int id)
@@ -73,12 +77,13 @@ namespace ToDo.Application.Services
             createDto.Title,
             createDto.Description,
             userId,
-            createDto.DueDate?.ToUniversalTime() // Ensure DueDate is in UTC
+            createDto.DueDate?.ToUniversalTime()
         );
 
-        var createdTodoItem = await _repository.AddAsync(todoItem);
+        await _repository.AddAsync(todoItem);
+        await _unitOfWork.SaveChangesAsync();
 
-        var todoItemDto = _mapper.Map<TodoItemDto>(createdTodoItem);
+        var todoItemDto = _mapper.Map<TodoItemDto>(todoItem);
         if (todoItemDto == null)
         {
             throw new InvalidTodoItemMappingException("Failed to map created TodoItem to TodoItemDto");
@@ -105,20 +110,21 @@ namespace ToDo.Application.Services
       existingItem.UpdateTodoItem(
           updateDto.Title,
           updateDto.Description,
-          updateDto.DueDate?.ToUniversalTime() // Ensure DueDate is in UTC
+          updateDto.DueDate?.ToUniversalTime()
       );
 
       try
       {
         await _repository.UpdateAsync(existingItem);
-        await _repository.UpdateAsync(existingItem);
-        _logger.LogInformation("Updated TodoItem: {TodoItemId} for user: {UserId}", id, userId);
+        await _unitOfWork.SaveChangesAsync();
+        
         return _mapper.Map<TodoItemDto>(existingItem) ?? 
                throw new InvalidTodoItemMappingException("Failed to map updated TodoItem to TodoItemDto");
       }
       catch (Exception ex)
       {
-        throw new TodoItemOperationException("Update", $"Failed to update TodoItem with ID {id}", ex);
+        throw new TodoItemOperationException("Update", 
+            $"Failed to update TodoItem with ID {id}: {ex.Message}", ex);
       }
     }
 
@@ -127,6 +133,7 @@ namespace ToDo.Application.Services
       var todoItem = await GetAndValidateTodoItemAsync(userId, id);
       todoItem.StartTodoItem();
       await _repository.UpdateAsync(todoItem);
+      await _unitOfWork.SaveChangesAsync();
     }
 
     public async Task StopTodoItemAsync(string userId, int id)
@@ -134,6 +141,7 @@ namespace ToDo.Application.Services
       var todoItem = await GetAndValidateTodoItemAsync(userId, id);
       todoItem.StopTodoItem();
       await _repository.UpdateAsync(todoItem);
+      await _unitOfWork.SaveChangesAsync();
     }
 
     public async Task CompleteTodoItemAsync(string userId, int id)
@@ -141,6 +149,7 @@ namespace ToDo.Application.Services
       var todoItem = await GetAndValidateTodoItemAsync(userId, id);
       todoItem.CompleteTodoItem();
       await _repository.UpdateAsync(todoItem);
+      await _unitOfWork.SaveChangesAsync();
     }
 
     public async Task AssignTodoItemAsync(string userId, int id, string assignedUserId)
@@ -148,6 +157,7 @@ namespace ToDo.Application.Services
       var todoItem = await GetAndValidateTodoItemAsync(userId, id);
       todoItem.AssignTodoItem(assignedUserId);
       await _repository.UpdateAsync(todoItem);
+      await _unitOfWork.SaveChangesAsync();
     }
 
     public async Task DeleteAsync(string userId, int id)
@@ -163,6 +173,7 @@ namespace ToDo.Application.Services
       try
       {
         await _repository.DeleteAsync(id);
+        await _unitOfWork.SaveChangesAsync();
         _logger.LogInformation("Deleted TodoItem: {TodoItemId} for user: {UserId}", id, userId);
       }
       catch (Exception ex)

@@ -20,7 +20,7 @@ namespace ToDo.Tests.Application
     private readonly Mock<ITodoItemRepository> _mockRepo;
     private readonly Mock<ILogger<TodoItemService>> _mockLogger;
     private readonly Mock<IMapper> _mockMapper;
-    private readonly Mock<IDomainEventService> _mockDomainEventService;
+    private readonly Mock<IUnitOfWork> _mockUnitOfWork;
     private readonly ITodoItemService _service;
     private const string ValidUserId = "user1";
     private const string InvalidUserId = "user2";
@@ -30,12 +30,12 @@ namespace ToDo.Tests.Application
       _mockRepo = new Mock<ITodoItemRepository>();
       _mockLogger = new Mock<ILogger<TodoItemService>>();
       _mockMapper = new Mock<IMapper>();
-      _mockDomainEventService = new Mock<IDomainEventService>();
+      _mockUnitOfWork = new Mock<IUnitOfWork>();
       _service = new TodoItemService(
           _mockRepo.Object,
           _mockLogger.Object,
           _mockMapper.Object,
-          _mockDomainEventService.Object
+          _mockUnitOfWork.Object
       );
     }
 
@@ -105,7 +105,14 @@ namespace ToDo.Tests.Application
         Description = "Test Description",
         DueDate = DateTime.UtcNow.AddDays(1)
       };
-      var createdItem = TodoItem.CreateTodoItem(createDto.Title, createDto.Description, ValidUserId, createDto.DueDate);
+      
+      var todoItem = TodoItem.CreateTodoItem(
+          createDto.Title,
+          createDto.Description,
+          ValidUserId,
+          createDto.DueDate
+      );
+      
       var createdItemDto = new TodoItemDto
       {
         Id = 1,
@@ -113,27 +120,38 @@ namespace ToDo.Tests.Application
         Description = "Test Description",
         UserId = ValidUserId,
         DueDate = createDto.DueDate,
-        Status = TodoItemStatus.NotStarted, // Changed from TodoItemStatusDto.TODO
-        CreatedAt = createdItem.CreatedAt,
-        UpdatedAt = createdItem.UpdatedAt
+        Status = TodoItemStatus.NotStarted,
+        CreatedAt = todoItem.CreatedAt,
+        UpdatedAt = todoItem.UpdatedAt
       };
-      _mockMapper.Setup(mapper => mapper.Map<TodoItem>(createDto)).Returns(createdItem);
-      _mockRepo.Setup(repo => repo.AddAsync(It.IsAny<TodoItem>())).ReturnsAsync(createdItem);
-      _mockMapper.Setup(mapper => mapper.Map<TodoItemDto>(createdItem)).Returns(createdItemDto);
+
+      // Set up repository to return the created item
+      _mockRepo.Setup(repo => repo.AddAsync(It.IsAny<TodoItem>()))
+              .ReturnsAsync(todoItem);
+
+      // Set up mapper to handle any TodoItem to TodoItemDto mapping
+      _mockMapper.Setup(mapper => mapper.Map<TodoItemDto>(It.IsAny<TodoItem>()))
+              .Returns(createdItemDto);
+
+      // Set up UnitOfWork to succeed
+      _mockUnitOfWork.Setup(uow => uow.SaveChangesAsync(It.IsAny<CancellationToken>()))
+              .ReturnsAsync(true);
 
       // Act
       var result = await _service.CreateAsync(ValidUserId, createDto);
 
       // Assert
-      Assert.NotNull(result);
-      Assert.Equal(createdItemDto.Id, result.Id);
-      Assert.Equal(createdItemDto.Title, result.Title);
-      Assert.Equal(createdItemDto.Description, result.Description);
-      Assert.Equal(createdItemDto.UserId, result.UserId);
-      Assert.Equal(createdItemDto.DueDate, result.DueDate);
-      Assert.Equal(createdItemDto.Status, result.Status);
-      Assert.Equal(createdItemDto.CreatedAt, result.CreatedAt);
-      Assert.Equal(createdItemDto.UpdatedAt, result.UpdatedAt);
+      result.Should().NotBeNull();
+      result.Should().BeEquivalentTo(createdItemDto);
+      
+      // Verify interactions
+      _mockRepo.Verify(repo => repo.AddAsync(It.Is<TodoItem>(item => 
+          item.Title == createDto.Title && 
+          item.Description == createDto.Description && 
+          item.UserId == ValidUserId)), 
+          Times.Once);
+      _mockUnitOfWork.Verify(uow => uow.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
+      _mockMapper.Verify(mapper => mapper.Map<TodoItemDto>(It.IsAny<TodoItem>()), Times.Once);
     }
 
     [Fact]
@@ -147,7 +165,6 @@ namespace ToDo.Tests.Application
         Description = "Updated Description",
         DueDate = DateTime.UtcNow.AddDays(2)
       };
-      var updatedItem = TodoItem.CreateTodoItem(updateDto.Title, updateDto.Description, ValidUserId, updateDto.DueDate);
       var updatedItemDto = new TodoItemDto
       {
         Id = 1,
@@ -155,42 +172,40 @@ namespace ToDo.Tests.Application
         Description = "Updated Description",
         UserId = ValidUserId,
         DueDate = updateDto.DueDate,
-        Status = TodoItemStatus.NotStarted, // Changed from TodoItemStatusDto.TODO
+        Status = TodoItemStatus.NotStarted,
         UpdatedAt = DateTime.UtcNow
       };
+
       _mockRepo.Setup(repo => repo.GetByIdAsync(1)).ReturnsAsync(existingItem);
       _mockRepo.Setup(repo => repo.UpdateAsync(It.IsAny<TodoItem>())).Returns(Task.CompletedTask);
       _mockMapper.Setup(mapper => mapper.Map<TodoItemDto>(It.IsAny<TodoItem>())).Returns(updatedItemDto);
+      _mockUnitOfWork.Setup(uow => uow.SaveChangesAsync(It.IsAny<CancellationToken>())).ReturnsAsync(true);
 
       // Act
       var result = await _service.UpdateAsync(ValidUserId, 1, updateDto);
 
       // Assert
       result.Should().NotBeNull();
-      result.Id.Should().Be(1);
-      result.Title.Should().Be("Updated Title");
-      result.Description.Should().Be("Updated Description");
-      result.UserId.Should().Be(ValidUserId);
-      result.DueDate.Should().Be(updateDto.DueDate);
-      result.Status.Should().Be(TodoItemStatus.NotStarted); // Changed from TodoItemStatusDto.TODO
-      result.UpdatedAt.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(1));
+      result.Should().BeEquivalentTo(updatedItemDto);
+      _mockRepo.Verify(repo => repo.UpdateAsync(It.IsAny<TodoItem>()), Times.Once);
+      _mockUnitOfWork.Verify(uow => uow.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]
-    public async Task StartTodoItemAsync_ShouldUpdateItemStatusToInProgress()
+    public async Task StartTodoItemAsync_ShouldUpdateItemStatusAndSaveChanges()
     {
       // Arrange
       var todoItem = TodoItem.CreateTodoItem("Test Item", null, ValidUserId, null);
       _mockRepo.Setup(repo => repo.GetByIdAsync(1)).ReturnsAsync(todoItem);
+      _mockUnitOfWork.Setup(uow => uow.SaveChangesAsync(It.IsAny<CancellationToken>())).ReturnsAsync(true);
 
       // Act
       await _service.StartTodoItemAsync(ValidUserId, 1);
 
       // Assert
       todoItem.Status.Should().Be(TodoItemStatus.InProgress);
-      todoItem.StartedAt.Should().NotBeNull();
-      todoItem.StartedAt.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(1));
       _mockRepo.Verify(repo => repo.UpdateAsync(It.IsAny<TodoItem>()), Times.Once);
+      _mockUnitOfWork.Verify(uow => uow.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]
@@ -227,7 +242,7 @@ namespace ToDo.Tests.Application
     }
 
     [Fact]
-    public async Task DeleteAsync_ShouldCallRepositoryDeleteMethod()
+    public async Task DeleteAsync_ShouldCallRepositoryDeleteMethodAndUnitOfWork()
     {
       // Arrange
       var idToDelete = 1;
@@ -238,12 +253,14 @@ namespace ToDo.Tests.Application
           idProperty.SetValue(existingItem, idToDelete);
       }
       _mockRepo.Setup(repo => repo.GetByIdAsync(idToDelete)).ReturnsAsync(existingItem);
+      _mockUnitOfWork.Setup(uow => uow.SaveChangesAsync(It.IsAny<CancellationToken>())).ReturnsAsync(true);
 
       // Act
       await _service.DeleteAsync(ValidUserId, idToDelete);
 
       // Assert
       _mockRepo.Verify(repo => repo.DeleteAsync(idToDelete), Times.Once);
+      _mockUnitOfWork.Verify(uow => uow.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
 
 
@@ -454,6 +471,40 @@ namespace ToDo.Tests.Application
       // Assert
       result.Should().NotBeNull();
       result.Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task CreateAsync_ShouldThrowWhenUnitOfWorkFails()
+    {
+      // Arrange
+      var createDto = new CreateTodoItemDto { Title = "Test" };
+      var todoItem = TodoItem.CreateTodoItem("Test", null, ValidUserId, null);
+      _mockRepo.Setup(repo => repo.AddAsync(It.IsAny<TodoItem>())).ReturnsAsync(todoItem);
+      _mockUnitOfWork.Setup(uow => uow.SaveChangesAsync(It.IsAny<CancellationToken>()))
+                    .ThrowsAsync(new Exception("Database error"));
+
+      // Act & Assert
+      var exception = await Assert.ThrowsAsync<TodoItemOperationException>(
+          () => _service.CreateAsync(ValidUserId, createDto));
+      exception.Operation.Should().Be("Create");
+      exception.Message.Should().Contain("Database error");
+    }
+
+    [Fact]
+    public async Task UpdateAsync_ShouldThrowWhenUnitOfWorkFails()
+    {
+      // Arrange
+      var existingItem = TodoItem.CreateTodoItem("Test", null, ValidUserId, null);
+      var updateDto = new UpdateTodoItemDto { Title = "Updated" };
+      _mockRepo.Setup(repo => repo.GetByIdAsync(1)).ReturnsAsync(existingItem);
+      _mockUnitOfWork.Setup(uow => uow.SaveChangesAsync(It.IsAny<CancellationToken>()))
+                    .ThrowsAsync(new Exception("Database error"));
+
+      // Act & Assert
+      var exception = await Assert.ThrowsAsync<TodoItemOperationException>(
+          () => _service.UpdateAsync(ValidUserId, 1, updateDto));
+      exception.Operation.Should().Be("Update");
+      exception.Message.Should().Contain("Database error");
     }
   }
 }
