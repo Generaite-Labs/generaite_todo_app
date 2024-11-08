@@ -4,11 +4,7 @@ using Serilog;
 using ToDo.Api.Configuration;
 using ToDo.Application.Mappers;
 using Microsoft.AspNetCore.Identity;
-using ToDo.Domain.Interfaces;
-using ToDo.Application.Services;
-using ToDo.Domain.Events;
 using ToDo.Infrastructure.Services;
-using ToDo.Infrastructure.Interfaces;
 using ToDo.Domain.Entities;
 using ToDo.Infrastructure.Configuration;
 using Microsoft.AspNetCore.Identity.UI.Services;
@@ -46,7 +42,6 @@ try
     builder.Services.AddControllers();
     builder.Services.AddSignalR();
     builder.Services.AddAutoMapper(typeof(TodoItemMappingProfile));
-    builder.Services.AddScoped<IDomainEventDispatcher, DomainEventDispatcher>();
     builder.Services.Configure<EmailConfiguration>(builder.Configuration.GetSection("EmailConfiguration"));
     builder.Services.AddEndpointsApiExplorer();
 
