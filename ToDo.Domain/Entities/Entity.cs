@@ -1,6 +1,3 @@
-using System.Collections.Generic;
-using ToDo.Domain.Interfaces;
-
 namespace ToDo.Domain.Entities;
 
 /// <summary>
@@ -65,9 +62,9 @@ public abstract class Entity<TId> : IEquatable<Entity<TId>>
 /// <summary>
 /// Non-generic convenience base class for entities with int IDs
 /// </summary>
-public abstract class Entity : Entity<int>
+public abstract class Entity : Entity<Guid>
 {
-    protected Entity(int id) : base(id)
+    protected Entity(Guid id) : base(id)
     {
     }
 }
