@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using ToDo.Application.DTOs;
+using ToDo.Core.DTOs;
 using ToDo.Application.Interfaces;
 using System.Security.Claims;
 using ToDo.Application.Exceptions;

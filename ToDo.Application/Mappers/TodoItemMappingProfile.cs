@@ -1,6 +1,6 @@
 using AutoMapper;
 using ToDo.Domain.Entities;
-using ToDo.Application.DTOs;
+using ToDo.Core.DTOs;
 using ToDo.Domain.ValueObjects;
 
 namespace ToDo.Application.Mappers

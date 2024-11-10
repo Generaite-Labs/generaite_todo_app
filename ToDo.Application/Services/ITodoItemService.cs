@@ -1,4 +1,4 @@
-using ToDo.Application.DTOs;
+using ToDo.Core.DTOs;
 
 namespace ToDo.Application.Interfaces
 {

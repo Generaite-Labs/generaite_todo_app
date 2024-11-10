@@ -1,6 +1,4 @@
-using System.Collections.Generic;
-
-namespace ToDo.Application.DTOs
+namespace ToDo.Core.DTOs
 {
   public class PaginationRequestDto
   {

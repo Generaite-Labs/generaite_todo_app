@@ -2,12 +2,11 @@ using AutoMapper;
 using ToDo.Domain.Entities;
 using ToDo.Domain.Interfaces;
 using ToDo.Domain.Common;
-using ToDo.Application.DTOs;
+using ToDo.Core.DTOs;
 using ToDo.Application.Exceptions;
 using ToDo.Application.Interfaces;
 using Microsoft.Extensions.Logging;
 using System.Diagnostics;
-using System.Linq;
 
 namespace ToDo.Application.Services
 {

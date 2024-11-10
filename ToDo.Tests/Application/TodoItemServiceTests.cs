@@ -2,16 +2,14 @@ using Moq;
 using FluentAssertions;
 using ToDo.Domain.Entities;
 using ToDo.Domain.Interfaces;
-using ToDo.Domain.Events;
 using ToDo.Application.Services;
-using ToDo.Application.DTOs;
+using ToDo.Core.DTOs;
 using ToDo.Application.Exceptions;
 using ToDo.Application.Interfaces;
 using Microsoft.Extensions.Logging;
 using ToDo.Domain.Common;
 using AutoMapper;
-using System.Linq;
-using ToDo.Domain.ValueObjects; // Add this line to import TodoItemStatus
+using ToDo.Domain.ValueObjects;
 
 namespace ToDo.Tests.Application
 {
@@ -120,7 +118,7 @@ namespace ToDo.Tests.Application
         Description = "Test Description",
         UserId = ValidUserId,
         DueDate = createDto.DueDate,
-        Status = TodoItemStatus.NotStarted,
+        Status = TodoItemStatus.NotStarted.ToString(),
         CreatedAt = todoItem.CreatedAt,
         UpdatedAt = todoItem.UpdatedAt
       };
@@ -172,7 +170,7 @@ namespace ToDo.Tests.Application
         Description = "Updated Description",
         UserId = ValidUserId,
         DueDate = updateDto.DueDate,
-        Status = TodoItemStatus.NotStarted,
+        Status = TodoItemStatus.NotStarted.ToString(),
         UpdatedAt = DateTime.UtcNow
       };
 

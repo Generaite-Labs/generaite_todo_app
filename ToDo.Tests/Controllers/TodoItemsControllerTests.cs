@@ -3,19 +3,16 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 using ToDo.Api.Controllers;
-using ToDo.Application.DTOs;
+using ToDo.Core.DTOs;
 using ToDo.Application.Services;
 using ToDo.Domain.Entities;
 using ToDo.Infrastructure;
-using Xunit;
-using System.Threading.Tasks;
 using AutoMapper;
 using ToDo.Application.Mappers;
 using Microsoft.Extensions.Logging;
 using Moq;
 using ToDo.Domain.Interfaces;
 using ToDo.Infrastructure.Repositories;
-using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace ToDo.Tests.Controllers
 {
