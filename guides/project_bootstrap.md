@@ -72,15 +72,15 @@
         public required string ConnectionString { get; set; }
       }
      ```
-   - Create TodoDbContext.cs in ToDo.Infrastructure:
+   - Create ApplicationDbContext.cs in ToDo.Infrastructure:
      ```csharp
       using Microsoft.EntityFrameworkCore;
 
       namespace ToDo.Infrastructure;
 
-      public class TodoDbContext : DbContext
+      public class ApplicationDbContext : DbContext
       {
-        public TodoDbContext(DbContextOptions<TodoDbContext> options) : base(options) { }
+        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options) { }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -102,14 +102,14 @@
              services.Configure<DatabaseConfig>(options => 
                  options.ConnectionString = configuration.GetConnectionString("DefaultConnection"));
              
-             services.AddDbContext<TodoDbContext>((serviceProvider, options) =>
+             services.AddDbContext<ApplicationDbContext>((serviceProvider, options) =>
              {
                  var dbConfig = serviceProvider.GetRequiredService<IOptions<DatabaseConfig>>();
                  options.UseNpgsql(dbConfig.Value.ConnectionString);
              });
 
              services.AddIdentity<ApplicationUser, IdentityRole>()
-                 .AddEntityFrameworkStores<TodoDbContext>()
+                 .AddEntityFrameworkStores<ApplicationDbContext>()
                  .AddDefaultTokenProviders();
 
              // Register other infrastructure services...
@@ -161,7 +161,7 @@
     using ToDo.Domain.Entities;
     ...
     services.AddIdentity<ApplicationUser, IdentityRole>()
-        .AddEntityFrameworkStores<TodoDbContext>()
+        .AddEntityFrameworkStores<ApplicationDbContext>()
         .AddDefaultTokenProviders();
 
     services.Configure<IdentityOptions>(options =>
@@ -185,7 +185,7 @@
       options.User.RequireUniqueEmail = false;
     });
     ```
-  - Make ToDoDbContext depend on IdentityDbContext
+  - Make ApplicationDbContext depend on IdentityDbContext
     ```csharp
     using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore;
@@ -193,9 +193,9 @@
 
     namespace ToDo.Infrastructure;
 
-    public class TodoDbContext : IdentityDbContext<ApplicationUser>
+    public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     {
-      public TodoDbContext(DbContextOptions<TodoDbContext> options) : base(options) { }
+      public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options) { }
     }
     ```
 

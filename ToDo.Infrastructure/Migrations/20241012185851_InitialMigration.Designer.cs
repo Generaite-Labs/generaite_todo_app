@@ -11,7 +11,7 @@ using ToDo.Infrastructure;
 
 namespace ToDo.Infrastructure.Migrations
 {
-    [DbContext(typeof(TodoDbContext))]
+    [DbContext(typeof(ApplicationDbContext))]
     [Migration("20241012185851_InitialMigration")]
     partial class InitialMigration
     {

@@ -19,17 +19,17 @@ namespace ToDo.Tests.Controllers
     public class TodoItemsControllerTests : IDisposable
     {
         private readonly TodoItemsController _controller;
-        private readonly TodoDbContext _context;
+        private readonly ApplicationDbContext _context;
         private readonly IMapper _mapper;
         private readonly string _userId = "test-user-id";
 
         public TodoItemsControllerTests()
         {
-            var options = new DbContextOptionsBuilder<TodoDbContext>()
+            var options = new DbContextOptionsBuilder<ApplicationDbContext>()
                 .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
                 .Options;
 
-            _context = new TodoDbContext(options);
+            _context = new ApplicationDbContext(options);
 
             var mapperConfig = new MapperConfiguration(cfg =>
             {

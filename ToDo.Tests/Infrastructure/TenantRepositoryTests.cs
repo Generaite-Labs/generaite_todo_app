@@ -7,16 +7,16 @@ namespace ToDo.Infrastructure.Tests.Repositories
 {
     public class TenantRepositoryTests : IDisposable
     {
-        private readonly TodoDbContext _context;
+        private readonly ApplicationDbContext _context;
         private readonly TenantRepository _repository;
 
         public TenantRepositoryTests()
         {
-            var options = new DbContextOptionsBuilder<TodoDbContext>()
+            var options = new DbContextOptionsBuilder<ApplicationDbContext>()
                 .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
                 .Options;
 
-            _context = new TodoDbContext(options);
+            _context = new ApplicationDbContext(options);
             _repository = new TenantRepository(_context);
         }
 

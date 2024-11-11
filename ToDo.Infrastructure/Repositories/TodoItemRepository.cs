@@ -11,7 +11,7 @@ namespace ToDo.Infrastructure.Repositories
   {
     private readonly ILogger<TodoItemRepository> _logger;
 
-    public TodoItemRepository(TodoDbContext context, ILogger<TodoItemRepository> logger) : base(context)
+    public TodoItemRepository(ApplicationDbContext context, ILogger<TodoItemRepository> logger) : base(context)
     {
       _logger = logger;
     }

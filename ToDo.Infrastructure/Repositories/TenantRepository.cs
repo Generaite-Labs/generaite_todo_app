@@ -6,9 +6,9 @@ namespace ToDo.Infrastructure.Repositories
 {
     public class TenantRepository : BaseRepository<Tenant>, ITenantRepository
     {
-        private readonly TodoDbContext _todoContext;
+        private readonly ApplicationDbContext _todoContext;
 
-        public TenantRepository(TodoDbContext context) : base(context)
+        public TenantRepository(ApplicationDbContext context) : base(context)
         {
             _todoContext = context;
         }

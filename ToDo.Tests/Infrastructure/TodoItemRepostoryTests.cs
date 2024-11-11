@@ -9,17 +9,17 @@ namespace ToDo.Infrastructure.Tests
 {
   public class TodoItemRepositoryTests : IDisposable
   {
-    private readonly TodoDbContext _context;
+    private readonly ApplicationDbContext _context;
     private readonly TodoItemRepository _repository;
     private readonly Mock<ILogger<TodoItemRepository>> _mockLogger;
 
     public TodoItemRepositoryTests()
     {
-      var options = new DbContextOptionsBuilder<TodoDbContext>()
+      var options = new DbContextOptionsBuilder<ApplicationDbContext>()
           .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
           .Options;
 
-      _context = new TodoDbContext(options);
+      _context = new ApplicationDbContext(options);
       _mockLogger = new Mock<ILogger<TodoItemRepository>>();
       _repository = new TodoItemRepository(_context, _mockLogger.Object);
     }
@@ -159,11 +159,11 @@ namespace ToDo.Infrastructure.Tests
     public async Task GetPagedAsync_ReturnsCorrectItemsAndNextCursor()
     {
       // Arrange
-      var options = new DbContextOptionsBuilder<TodoDbContext>()
+      var options = new DbContextOptionsBuilder<ApplicationDbContext>()
           .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
           .Options;
 
-      using (var context = new TodoDbContext(options))
+      using (var context = new ApplicationDbContext(options))
       {
         var userId = "testUser";
         var items = new List<TodoItem>
@@ -178,7 +178,7 @@ namespace ToDo.Infrastructure.Tests
         context.SaveChanges();
       }
 
-      using (var context = new TodoDbContext(options))
+      using (var context = new ApplicationDbContext(options))
       {
         var mockLogger = new Mock<ILogger<TodoItemRepository>>();
         var repository = new TodoItemRepository(context, mockLogger.Object);
@@ -227,11 +227,11 @@ namespace ToDo.Infrastructure.Tests
     public async Task GetPagedAsync_WithNonExistentUser_ReturnsEmptyResult()
     {
       // Arrange
-      var options = new DbContextOptionsBuilder<TodoDbContext>()
+      var options = new DbContextOptionsBuilder<ApplicationDbContext>()
           .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
           .Options;
 
-      using (var context = new TodoDbContext(options))
+      using (var context = new ApplicationDbContext(options))
       {
         var mockLogger = new Mock<ILogger<TodoItemRepository>>();
         var repository = new TodoItemRepository(context, mockLogger.Object);

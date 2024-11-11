@@ -8,9 +8,9 @@ using System;
 
 namespace ToDo.Infrastructure
 {
-  public class DesignTimeDbContextFactory : IDesignTimeDbContextFactory<TodoDbContext>
+  public class DesignTimeDbContextFactory : IDesignTimeDbContextFactory<ApplicationDbContext>
   {
-    public TodoDbContext CreateDbContext(string[] args)
+    public ApplicationDbContext CreateDbContext(string[] args)
     {
       var configuration = ApplicationConfig.BuildConfiguration();
 
@@ -27,10 +27,10 @@ namespace ToDo.Infrastructure
         throw new InvalidOperationException("Connection string not found in DatabaseOptions.");
       }
 
-      var optionsBuilder = new DbContextOptionsBuilder<TodoDbContext>();
+      var optionsBuilder = new DbContextOptionsBuilder<ApplicationDbContext>();
       optionsBuilder.UseNpgsql(databaseOptions.ConnectionString);
 
-      return new TodoDbContext(optionsBuilder.Options);
+      return new ApplicationDbContext(optionsBuilder.Options);
     }
   }
 }

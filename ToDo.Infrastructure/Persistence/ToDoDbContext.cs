@@ -5,9 +5,9 @@ using ToDo.Infrastructure.Persistence.Configurations;
 
 namespace ToDo.Infrastructure
 {
-	public class TodoDbContext : IdentityDbContext<ApplicationUser>
+	public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
 	{
-		public TodoDbContext(DbContextOptions<TodoDbContext> options) 
+		public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) 
 			: base(options)
 		{
 		}

@@ -22,7 +22,7 @@ public static class InfrastructureModule
     // Add this line to configure DatabaseOptions
     services.Configure<DatabaseOptions>(configuration.GetSection(DatabaseOptions.Database));
 
-    services.AddDbContext<TodoDbContext>((serviceProvider, options) =>
+    services.AddDbContext<ApplicationDbContext>((serviceProvider, options) =>
     {
       var databaseOptions = serviceProvider.GetRequiredService<IOptions<DatabaseOptions>>().Value;
       options.UseNpgsql(databaseOptions.ConnectionString);
@@ -32,7 +32,7 @@ public static class InfrastructureModule
     services.AddIdentityCore<ApplicationUser>(options => {
       options.SignIn.RequireConfirmedAccount = true;
     })
-    .AddEntityFrameworkStores<TodoDbContext>()
+    .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddApiEndpoints()
     .AddDefaultTokenProviders();
 

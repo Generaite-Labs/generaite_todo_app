@@ -23,7 +23,7 @@ public static class AuthConfig
             options.SignIn.RequireConfirmedAccount = true;
         })
         .AddRoles<IdentityRole>()
-        .AddEntityFrameworkStores<TodoDbContext>()
+        .AddEntityFrameworkStores<ApplicationDbContext>()
         .AddSignInManager()
         .AddDefaultTokenProviders()
         .AddApiEndpoints();
