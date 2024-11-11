@@ -4,6 +4,6 @@ namespace ToDo.Application.Exceptions
 {
     public class TodoItemNotFoundException : TodoItemServiceException
     {
-        public TodoItemNotFoundException(int id) : base($"TodoItem with id {id} was not found.") { }
+        public TodoItemNotFoundException(Guid id) : base($"TodoItem with id {id} was not found.") { }
     }
 }

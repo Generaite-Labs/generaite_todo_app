@@ -29,7 +29,7 @@ namespace ToDo.Application.Services
         _unitOfWork = unitOfWork;
     }
 
-    public async Task<TodoItemDto?> GetByIdAsync(string userId, int id)
+    public async Task<TodoItemDto?> GetByIdAsync(string userId, Guid id)
     {
       _logger.LogInformation("Getting TodoItem by ID: {TodoItemId} for user: {UserId}", id, userId);
       var todoItem = await _repository.GetByIdAsync(id);
@@ -96,7 +96,7 @@ namespace ToDo.Application.Services
       }
     }
 
-    public async Task<TodoItemDto> UpdateAsync(string userId, int id, UpdateTodoItemDto updateDto)
+    public async Task<TodoItemDto> UpdateAsync(string userId, Guid id, UpdateTodoItemDto updateDto)
     {
       _logger.LogInformation("Updating TodoItem: {TodoItemId} for user: {UserId}, {@UpdateTodoItemDto}", id, userId, updateDto);
       var existingItem = await _repository.GetByIdAsync(id);
@@ -127,7 +127,7 @@ namespace ToDo.Application.Services
       }
     }
 
-    public async Task StartTodoItemAsync(string userId, int id)
+    public async Task StartTodoItemAsync(string userId, Guid id)
     {
       var todoItem = await GetAndValidateTodoItemAsync(userId, id);
       todoItem.StartTodoItem();
@@ -135,7 +135,7 @@ namespace ToDo.Application.Services
       await _unitOfWork.SaveChangesAsync();
     }
 
-    public async Task StopTodoItemAsync(string userId, int id)
+    public async Task StopTodoItemAsync(string userId, Guid id)
     {
       var todoItem = await GetAndValidateTodoItemAsync(userId, id);
       todoItem.StopTodoItem();
@@ -143,7 +143,7 @@ namespace ToDo.Application.Services
       await _unitOfWork.SaveChangesAsync();
     }
 
-    public async Task CompleteTodoItemAsync(string userId, int id)
+    public async Task CompleteTodoItemAsync(string userId, Guid id)
     {
       var todoItem = await GetAndValidateTodoItemAsync(userId, id);
       todoItem.CompleteTodoItem();
@@ -151,7 +151,7 @@ namespace ToDo.Application.Services
       await _unitOfWork.SaveChangesAsync();
     }
 
-    public async Task AssignTodoItemAsync(string userId, int id, string assignedUserId)
+    public async Task AssignTodoItemAsync(string userId, Guid id, string assignedUserId)
     {
       var todoItem = await GetAndValidateTodoItemAsync(userId, id);
       todoItem.AssignTodoItem(assignedUserId);
@@ -159,7 +159,7 @@ namespace ToDo.Application.Services
       await _unitOfWork.SaveChangesAsync();
     }
 
-    public async Task DeleteAsync(string userId, int id)
+    public async Task DeleteAsync(string userId, Guid id)
     {
       _logger.LogInformation("Deleting TodoItem: {TodoItemId} for user: {UserId}", id, userId);
       var existingItem = await _repository.GetByIdAsync(id);
@@ -205,7 +205,7 @@ namespace ToDo.Application.Services
       };
     }
 
-    private async Task<TodoItem> GetAndValidateTodoItemAsync(string userId, int id)
+    private async Task<TodoItem> GetAndValidateTodoItemAsync(string userId, Guid id)
     {
       var todoItem = await _repository.GetByIdAsync(id);
       if (todoItem == null || todoItem.UserId != userId)

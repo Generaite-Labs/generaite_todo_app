@@ -14,7 +14,7 @@ public class CompleteTaskUseCase : ICompleteTaskUseCase
         _logger = logger;
     }
 
-    public async Task<TodoItemDto> ExecuteAsync(int taskId, string userId)
+    public async Task<TodoItemDto> ExecuteAsync(Guid taskId, string userId)
     {
         _logger.LogInformation("Completing task {TaskId} for user {UserId}", taskId, userId);
 

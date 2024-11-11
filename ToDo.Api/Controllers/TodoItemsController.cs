@@ -55,7 +55,7 @@ namespace ToDo.Api.Controllers
         [HttpGet("{id}")]
         [ProducesResponseType(typeof(TodoItemDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public Task<ActionResult<TodoItemDto?>> GetById(int id) =>
+        public Task<ActionResult<TodoItemDto?>> GetById(Guid id) =>
             ExecuteServiceMethod(userId => _todoItemService.GetByIdAsync(userId, id));
 
         [HttpGet]
@@ -87,13 +87,13 @@ namespace ToDo.Api.Controllers
         [HttpPut("{id}")]
         [ProducesResponseType(typeof(TodoItemDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public Task<ActionResult<TodoItemDto>> Update(int id, UpdateTodoItemDto updateDto) =>
+        public Task<ActionResult<TodoItemDto>> Update(Guid id, UpdateTodoItemDto updateDto) =>
             ExecuteServiceMethod(userId => _todoItemService.UpdateAsync(userId, id, updateDto));
 
         [HttpPost("{id}/start")]
         [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public Task<ActionResult<string>> Start(int id) =>
+        public Task<ActionResult<string>> Start(Guid id) =>
             ExecuteServiceMethod(async userId => {
                 await _todoItemService.StartTodoItemAsync(userId, id);
                 return "Todo item started successfully.";
@@ -102,7 +102,7 @@ namespace ToDo.Api.Controllers
         [HttpPost("{id}/stop")]
         [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public Task<ActionResult<string>> Stop(int id) =>
+        public Task<ActionResult<string>> Stop(Guid id) =>
             ExecuteServiceMethod(async userId => {
                 await _todoItemService.StopTodoItemAsync(userId, id);
                 return "Todo item stopped successfully.";
@@ -111,7 +111,7 @@ namespace ToDo.Api.Controllers
         [HttpPost("{id}/complete")]
         [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public Task<ActionResult<string>> Complete(int id) =>
+        public Task<ActionResult<string>> Complete(Guid id) =>
             ExecuteServiceMethod(async userId => {
                 await _todoItemService.CompleteTodoItemAsync(userId, id);
                 return "Todo item completed successfully.";
@@ -120,7 +120,7 @@ namespace ToDo.Api.Controllers
         [HttpPost("{id}/assign")]
         [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public Task<ActionResult<string>> Assign(int id, [FromBody] string assignedUserId) =>
+        public Task<ActionResult<string>> Assign(Guid id, [FromBody] string assignedUserId) =>
             ExecuteServiceMethod(async userId => {
                 await _todoItemService.AssignTodoItemAsync(userId, id, assignedUserId);
                 return "Todo item assigned successfully.";
@@ -129,7 +129,7 @@ namespace ToDo.Api.Controllers
         [HttpDelete("{id}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult> Delete(int id)
+        public async Task<ActionResult> Delete(Guid id)
         {
             await ExecuteServiceMethod(async userId => {
                 await _todoItemService.DeleteAsync(userId, id);

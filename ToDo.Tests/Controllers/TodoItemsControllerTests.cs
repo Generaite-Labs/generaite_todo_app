@@ -69,25 +69,42 @@ namespace ToDo.Tests.Controllers
 
         private void SeedDatabase()
         {
-            _context.TodoItems.AddRange(
-                TodoItem.CreateTodoItem("Test Todo 1", "Description 1", _userId, null),
-                TodoItem.CreateTodoItem("Test Todo 2", "Description 2", _userId, null),
-                TodoItem.CreateTodoItem("Test Todo 3", "Description 3", "other-user-id", null)
-            );
+            var item1 = TodoItem.CreateTodoItem("Test Todo 1", "Description 1", _userId, null);
+            var item2 = TodoItem.CreateTodoItem("Test Todo 2", "Description 2", _userId, null);
+            var item3 = TodoItem.CreateTodoItem("Test Todo 3", "Description 3", "other-user-id", null);
+            
+            // Set GUIDs for the items
+            var id1 = Guid.NewGuid();
+            var id2 = Guid.NewGuid();
+            var id3 = Guid.NewGuid();
+            
+            var idProperty = typeof(TodoItem).GetProperty("Id");
+            if (idProperty != null)
+            {
+                idProperty.SetValue(item1, id1);
+                idProperty.SetValue(item2, id2);
+                idProperty.SetValue(item3, id3);
+            }
+
+            _context.TodoItems.AddRange(item1, item2, item3);
             _context.SaveChanges();
         }
 
         [Fact]
         public async Task GetById_ReturnsOkResult_WhenItemExists()
         {
+            // Arrange
+            var item = await _context.TodoItems.FirstAsync();
+            var itemId = item.Id;
+
             // Act
-            var actionResult = await _controller.GetById(1);
+            var actionResult = await _controller.GetById(itemId);
 
             // Assert
             var result = Assert.IsType<ActionResult<TodoItemDto>>(actionResult);
             var okResult = Assert.IsType<OkObjectResult>(result.Result);
             var returnedDto = Assert.IsType<TodoItemDto>(okResult.Value);
-            Assert.Equal(1, returnedDto.Id);
+            Assert.Equal(itemId, returnedDto.Id);
             Assert.Equal("Test Todo 1", returnedDto.Title);
         }
 
@@ -95,7 +112,7 @@ namespace ToDo.Tests.Controllers
         public async Task GetById_ReturnsNotFound_WhenItemDoesNotExist()
         {
             // Act
-            var actionResult = await _controller.GetById(999);
+            var actionResult = await _controller.GetById(Guid.NewGuid());
 
             // Assert
             var result = Assert.IsType<ActionResult<TodoItemDto>>(actionResult);
@@ -136,28 +153,34 @@ namespace ToDo.Tests.Controllers
         public async Task Update_ReturnsOkResult_WhenUpdateSucceeds()
         {
             // Arrange
+            var item = await _context.TodoItems.FirstAsync();
+            var itemId = item.Id;
             var updateDto = new UpdateTodoItemDto { Title = "Updated Todo" };
 
             // Act
-            var actionResult = await _controller.Update(1, updateDto);
+            var actionResult = await _controller.Update(itemId, updateDto);
 
             // Assert
             var result = Assert.IsType<ActionResult<TodoItemDto>>(actionResult);
             var okResult = Assert.IsType<OkObjectResult>(result.Result);
             var returnedDto = Assert.IsType<TodoItemDto>(okResult.Value);
-            Assert.Equal(1, returnedDto.Id);
+            Assert.Equal(itemId, returnedDto.Id);
             Assert.Equal("Updated Todo", returnedDto.Title);
         }
 
         [Fact]
         public async Task Delete_ReturnsNoContent_WhenDeleteSucceeds()
         {
+            // Arrange
+            var item = await _context.TodoItems.FirstAsync();
+            var itemId = item.Id;
+
             // Act
-            var result = await _controller.Delete(1);
+            var result = await _controller.Delete(itemId);
 
             // Assert
             Assert.IsType<NoContentResult>(result);
-            Assert.Null(await _context.TodoItems.FindAsync(1));
+            Assert.Null(await _context.TodoItems.FindAsync(itemId));
         }
 
         [Fact]
@@ -179,8 +202,12 @@ namespace ToDo.Tests.Controllers
         [Fact]
         public async Task Start_ReturnsOkResult_WhenStartSucceeds()
         {
+            // Arrange
+            var item = await _context.TodoItems.FirstAsync();
+            var itemId = item.Id;
+
             // Act
-            var result = await _controller.Start(1);
+            var result = await _controller.Start(itemId);
 
             // Assert
             var okResult = Assert.IsType<OkObjectResult>(result.Result);
@@ -190,8 +217,12 @@ namespace ToDo.Tests.Controllers
         [Fact]
         public async Task Complete_ReturnsOkResult_WhenCompleteSucceeds()
         {
+            // Arrange
+            var item = await _context.TodoItems.FirstAsync();
+            var itemId = item.Id;
+
             // Act
-            var result = await _controller.Complete(1);
+            var result = await _controller.Complete(itemId);
 
             // Assert
             var okResult = Assert.IsType<OkObjectResult>(result.Result);
@@ -202,10 +233,12 @@ namespace ToDo.Tests.Controllers
         public async Task Assign_ReturnsOkResult_WhenAssignSucceeds()
         {
             // Arrange
+            var item = await _context.TodoItems.FirstAsync();
+            var itemId = item.Id;
             string assignedUserId = "assigned-user-id";
 
             // Act
-            var result = await _controller.Assign(1, assignedUserId);
+            var result = await _controller.Assign(itemId, assignedUserId);
 
             // Assert
             var okResult = Assert.IsType<OkObjectResult>(result.Result);
@@ -216,13 +249,15 @@ namespace ToDo.Tests.Controllers
         public async Task GetById_ReturnsUnauthorized_WhenUserIdIsMissing()
         {
             // Arrange
+            var item = await _context.TodoItems.FirstAsync();
+            var itemId = item.Id;
             _controller.ControllerContext = new ControllerContext
             {
                 HttpContext = new DefaultHttpContext { User = new ClaimsPrincipal() }
             };
 
             // Act
-            var result = await _controller.GetById(1);
+            var result = await _controller.GetById(itemId);
 
             // Assert
             var unauthorizedResult = Assert.IsType<UnauthorizedObjectResult>(result.Result);
@@ -232,8 +267,12 @@ namespace ToDo.Tests.Controllers
         [Fact]
         public async Task GetById_ReturnsUnauthorized_WhenAccessingOtherUsersTodo()
         {
+            // Arrange
+            var otherUserItem = await _context.TodoItems.FirstOrDefaultAsync(x => x.UserId != _userId);
+            var itemId = otherUserItem!.Id;
+
             // Act
-            var result = await _controller.GetById(3);
+            var result = await _controller.GetById(itemId);
 
             // Assert
             Assert.IsType<ActionResult<TodoItemDto>>(result);

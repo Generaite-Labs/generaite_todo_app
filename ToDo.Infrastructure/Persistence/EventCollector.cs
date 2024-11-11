@@ -1,5 +1,4 @@
 using ToDo.Domain.Interfaces;
-using System.Collections.Generic;
 
 namespace ToDo.Domain.Events
 {

@@ -7,7 +7,7 @@ namespace ToDo.Domain.Entities
 {
   public class TodoItem
   {
-    public int Id { get; init; }
+    public Guid Id { get; init; }
 
     [Required]
     public required string Title { get; set; }
