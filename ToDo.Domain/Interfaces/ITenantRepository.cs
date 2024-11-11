@@ -1,12 +1,10 @@
-using ToDo.Domain.Entities;
+using ToDo.Domain.Aggregates;
 
 namespace ToDo.Domain.Interfaces
 {
-    public interface ITenantRepository : IBaseRepository<Tenant>
+    public interface ITenantRepository : IBaseRepository<Tenant, Guid>
     {
-        Task<Tenant?> GetByIdAsync(Guid id);
-        Task<Tenant> AddAsync(Tenant tenant);
-        Task UpdateAsync(Tenant tenant);
-        Task DeleteAsync(Tenant tenant);
+        Task<IEnumerable<Tenant>> GetTenantsForUserAsync(string userId);
+        Task<bool> IsUserInTenantAsync(Guid tenantId, string userId);
     }
 } 

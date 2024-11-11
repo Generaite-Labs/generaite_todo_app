@@ -1,42 +1,33 @@
 using Microsoft.EntityFrameworkCore;
-using ToDo.Domain.Entities;
+using ToDo.Domain.Aggregates;
 using ToDo.Domain.Interfaces;
 
 namespace ToDo.Infrastructure.Repositories
 {
-    public class TenantRepository : BaseRepository<Tenant>, ITenantRepository
+    public class TenantRepository : BaseRepository<Tenant, Guid>, ITenantRepository
     {
-        private readonly ApplicationDbContext _todoContext;
+        public TenantRepository(ApplicationDbContext context) : base(context) { }
 
-        public TenantRepository(ApplicationDbContext context) : base(context)
+        public override async Task<Tenant?> GetByIdAsync(Guid id)
         {
-            _todoContext = context;
-        }
-
-        public async Task<Tenant?> GetByIdAsync(Guid id)
-        {
-            return await _todoContext.Tenants
+            return await BaseQuery
                 .Include(t => t.TenantUsers)
-                    .ThenInclude(tu => tu.User)
                 .FirstOrDefaultAsync(t => t.Id == id);
         }
 
-        public async Task<Tenant> AddAsync(Tenant tenant)
+        public async Task<IEnumerable<Tenant>> GetTenantsForUserAsync(string userId)
         {
-            await _todoContext.Tenants.AddAsync(tenant);
-            return tenant;
+            return await BaseQuery
+                .Include(t => t.TenantUsers)
+                .Where(t => t.TenantUsers.Any(tu => tu.UserId == userId))
+                .ToListAsync();
         }
 
-        public Task UpdateAsync(Tenant tenant)
+        public async Task<bool> IsUserInTenantAsync(Guid tenantId, string userId)
         {
-            _todoContext.Entry(tenant).State = EntityState.Modified;
-            return Task.CompletedTask;
-        }
-
-        public Task DeleteAsync(Tenant tenant)
-        {
-            _todoContext.Tenants.Remove(tenant);
-            return Task.CompletedTask;
+            return await BaseQuery
+                .AnyAsync(t => t.Id == tenantId && 
+                              t.TenantUsers.Any(tu => tu.UserId == userId));
         }
     }
 } 
