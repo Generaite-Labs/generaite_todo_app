@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using ToDo.Domain.Entities;
-using ToDo.Domain.ValueObjects;
+using ToDo.Infrastructure.Persistence.Configurations;
 
 namespace ToDo.Infrastructure
 {
@@ -13,28 +13,16 @@ namespace ToDo.Infrastructure
 		}
 
 		public DbSet<TodoItem> TodoItems { get; set; } = null!;
+		public DbSet<Tenant> Tenants { get; set; } = null!;
+		public DbSet<TenantUser> TenantUsers { get; set; } = null!;
 
 		protected override void OnModelCreating(ModelBuilder modelBuilder)
 		{
 			base.OnModelCreating(modelBuilder);
 
-			modelBuilder.Entity<TodoItem>(entity =>
-				{
-					entity.HasOne(t => t.User)
-						  .WithMany(u => u.TodoItems)
-						  .HasForeignKey(t => t.UserId)
-						  .OnDelete(DeleteBehavior.Cascade);
-
-					entity.Property(t => t.Title).HasMaxLength(200);
-					entity.Property(t => t.Description).HasMaxLength(1000);
-
-					entity.Property(t => t.Status)
-						.HasConversion(
-							v => v.Value,
-							v => TodoItemStatus.FromString(v))
-						.HasMaxLength(20)
-						.IsRequired(); 
-				});
+			modelBuilder.ApplyConfiguration(new TodoItemConfiguration());
+			modelBuilder.ApplyConfiguration(new TenantConfiguration());
+			modelBuilder.ApplyConfiguration(new TenantUserConfiguration());
 		}
 	}
 }
