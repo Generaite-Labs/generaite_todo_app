@@ -29,7 +29,15 @@ public class Tenant : AggregateRoot<Guid>, IAggregateRoot
 
     public void AddUser(ApplicationUser user, TenantRole role)
     {
+        if (_tenantUsers.Any(tu => tu.UserId == user.Id))
+            throw new InvalidOperationException("User is already a member of this tenant");
+            
         var tenantUser = new TenantUser(Id, user.Id, role);
         _tenantUsers.Add(tenantUser);
+    }
+
+    public bool HasUser(string userId)
+    {
+        return _tenantUsers.Any(tu => tu.UserId == userId);
     }
 } 
