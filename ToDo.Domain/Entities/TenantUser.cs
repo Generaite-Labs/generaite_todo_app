@@ -1,6 +1,6 @@
 namespace ToDo.Domain.Entities;
 
-public class TenantUser : AggregateEntity<Guid, Guid>, TenantScoped
+public class TenantUser : AggregateEntity<Guid, Guid>, ITenantScoped
 {
     public string UserId { get; private set; }
     public Guid TenantId { get; private set; }
