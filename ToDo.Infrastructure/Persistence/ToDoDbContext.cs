@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using ToDo.Domain.Entities;
+using ToDo.Domain.Aggregates;
 using ToDo.Infrastructure.Persistence.Configurations;
 
 namespace ToDo.Infrastructure

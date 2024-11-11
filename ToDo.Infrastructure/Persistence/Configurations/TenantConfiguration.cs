@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using ToDo.Domain.Entities;
+using ToDo.Domain.Aggregates;
 
 namespace ToDo.Infrastructure.Persistence.Configurations
 {

@@ -83,6 +83,11 @@ public abstract class AggregateRoot<TId> : Entity<TId>, IAggregateRoot
         EnsureChildBelongsToAggregate(entity);
         entity.SetAggregateRoot(this);
     }
+
+    protected void AddDomainEvent(IDomainEvent domainEvent)
+    {
+        _domainEvents.Add(domainEvent);
+    }
 }
 
 /// <summary>

@@ -1,3 +1,5 @@
+using ToDo.Domain.Aggregates;
+
 namespace ToDo.Domain.Entities;
 
 public class TenantUser : AggregateEntity<Guid, Guid>, ITenantScoped
