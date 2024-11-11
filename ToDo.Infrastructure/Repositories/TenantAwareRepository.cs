@@ -3,7 +3,7 @@ using ToDo.Domain.Interfaces;
 
 namespace ToDo.Infrastructure.Repositories;
 
-public abstract class TenantAwareRepository<T> : BaseRepository<T> 
+public abstract class TenantAwareRepository<T> : BaseRepository<T, Guid> 
     where T : class, ITenantScoped
 {
     protected readonly ApplicationDbContext _dbContext;

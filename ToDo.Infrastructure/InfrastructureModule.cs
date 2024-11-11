@@ -41,9 +41,11 @@ public static class InfrastructureModule
 
     // Repositories
     services.AddScoped<ITodoItemRepository, TodoItemRepository>();
+    services.AddScoped<ITenantRepository, TenantRepository>();
 
     // Services
     services.AddScoped<ITodoItemService, TodoItemService>();
+    services.AddScoped<ITenantService, TenantService>();
 
     // Validators
     services.AddValidatorsFromAssemblyContaining<CreateTodoItemDtoValidator>();
