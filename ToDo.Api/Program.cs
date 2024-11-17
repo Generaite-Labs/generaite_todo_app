@@ -1,11 +1,11 @@
-using ToDo.Infrastructure;
-using ToDo.Core.Configuration;
 using Serilog;
-using ToDo.Api.Configuration;
-using ToDo.Application.Mappers;
-using Microsoft.AspNetCore.Identity;
-using ToDo.Infrastructure.Services;
+using ToDo.Infrastructure;
 using ToDo.Domain.Entities;
+using ToDo.Api.Configuration;
+using ToDo.Core.Configuration;
+using ToDo.Application.Mappers;
+using ToDo.Infrastructure.Services;
+using Microsoft.AspNetCore.Identity;
 using ToDo.Infrastructure.Configuration;
 using Microsoft.AspNetCore.Identity.UI.Services;
 

@@ -19,9 +19,7 @@ public static class InfrastructureModule
 {
   public static IServiceCollection AddInfrastructureServices(this IServiceCollection services, IConfiguration configuration)
   {
-    // Add this line to configure DatabaseOptions
     services.Configure<DatabaseOptions>(configuration.GetSection(DatabaseOptions.Database));
-
     services.AddDbContext<ApplicationDbContext>((serviceProvider, options) =>
     {
       var databaseOptions = serviceProvider.GetRequiredService<IOptions<DatabaseOptions>>().Value;
@@ -49,6 +47,9 @@ public static class InfrastructureModule
 
     // Validators
     services.AddValidatorsFromAssemblyContaining<CreateTodoItemDtoValidator>();
+
+    // Register UnitOfWork
+    services.AddScoped<IUnitOfWork, UnitOfWork>();
 
     return services;
   }

@@ -1,7 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using ToDo.Domain.Events;
 using ToDo.Domain.Interfaces;
-using Microsoft.EntityFrameworkCore;
 
 namespace ToDo.Infrastructure.Configuration
 {
