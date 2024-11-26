@@ -1,0 +1,79 @@
+﻿@page "/Account/ConfirmEmailChange"
+
+@using System.Text
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.AspNetCore.WebUtilities
+@using ToDo.Domain.Entities
+@using Radzen
+
+@inject UserManager<ApplicationUser> UserManager
+@inject SignInManager<ApplicationUser> SignInManager
+@inject IdentityRedirectManager RedirectManager
+@inject NotificationService NotificationService
+
+<PageTitle>Confirm email change</PageTitle>
+
+<RadzenCard Class="rz-my-12 rz-mx-auto" Style="max-width: 600px;">
+    <RadzenText TextStyle="TextStyle.H3" TagName="TagName.H1" Class="rz-mb-6">
+        Confirm email change
+    </RadzenText>
+
+    <StatusMessage Message="@message" />
+</RadzenCard>
+
+@code {
+    private string? message;
+
+    [CascadingParameter]
+    private HttpContext HttpContext { get; set; } = default!;
+
+    [SupplyParameterFromQuery]
+    private string? UserId { get; set; }
+
+    [SupplyParameterFromQuery]
+    private string? Email { get; set; }
+
+    [SupplyParameterFromQuery]
+    private string? Code { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (UserId is null || Email is null || Code is null)
+        {
+            RedirectManager.RedirectToWithStatus(
+                "Account/Login", "Error: Invalid email change confirmation link.", HttpContext);
+            return;
+        }
+
+        var user = await UserManager.FindByIdAsync(UserId);
+        if (user is null)
+        {
+            message = $"Error: Unable to find user with Id '{UserId}'";
+            NotificationService.Notify(NotificationSeverity.Error, "Error", message);
+            return;
+        }
+
+        var code = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(Code));
+        var result = await UserManager.ChangeEmailAsync(user, Email, code);
+        if (!result.Succeeded)
+        {
+            message = "Error changing email.";
+            NotificationService.Notify(NotificationSeverity.Error, "Error", message);
+            return;
+        }
+
+        // In our UI email and user name are one and the same, so when we update the email
+        // we need to update the user name.
+        var setUserNameResult = await UserManager.SetUserNameAsync(user, Email);
+        if (!setUserNameResult.Succeeded)
+        {
+            message = "Error changing user name.";
+            NotificationService.Notify(NotificationSeverity.Error, "Error", message);
+            return;
+        }
+
+        await SignInManager.RefreshSignInAsync(user);
+        message = "Thank you for confirming your email change.";
+        NotificationService.Notify(NotificationSeverity.Success, "Success", message);
+    }
+}

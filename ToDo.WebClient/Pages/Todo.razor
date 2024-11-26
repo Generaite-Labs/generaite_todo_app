@@ -11,10 +11,10 @@
 
 <RadzenCard>
     <div class="row mb-3">
-        <div class="col-md-6">
+        <RadzenColumn Size="6">
             <RadzenButton Icon="add" Text="Add Task" Click="@ShowAddTaskDialog" />
         </div>
-        <div class="col-md-6">
+        <RadzenColumn Size="6">
             <RadzenTextBox Placeholder="Search tasks..." @bind-Value="@searchTerm" Change="@(args => LoadTasks())" />
         </div>
     </div>

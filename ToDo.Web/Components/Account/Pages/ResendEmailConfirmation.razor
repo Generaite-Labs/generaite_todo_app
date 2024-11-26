@@ -1,0 +1,74 @@
+﻿@page "/Account/ResendEmailConfirmation"
+
+@using System.ComponentModel.DataAnnotations
+@using System.Text
+@using System.Text.Encodings.Web
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.AspNetCore.WebUtilities
+@using ToDo.Domain.Entities
+
+@inject UserManager<ApplicationUser> UserManager
+@inject IEmailSender<ApplicationUser> EmailSender
+@inject NavigationManager NavigationManager
+@inject IdentityRedirectManager RedirectManager
+
+<PageTitle>Resend email confirmation</PageTitle>
+
+<h1>Resend email confirmation</h1>
+<h2>Enter your email.</h2>
+<hr />
+<StatusMessage Message="@message" />
+<RadzenRow>
+    <RadzenColumn Size="4">
+        <EditForm Model="Input" FormName="resend-email-confirmation" OnValidSubmit="OnValidSubmitAsync" method="post">
+            <DataAnnotationsValidator />
+            <ValidationSummary class="rz-color-danger" role="alert" />
+            <RadzenStack Gap="1rem" Class="rz-mb-3">
+                <RadzenFormField Text="Email" Style="width: 100%;">
+                    <InputText class="rz-textbox" @bind-Value="Input.Email" aria-required="true" placeholder="name@example.com" />
+                </RadzenFormField>
+                <ValidationMessage For="() => Input.Email" class="rz-color-danger" />
+            </RadzenStack>
+            <RadzenButton
+                ButtonType="ButtonType.Submit"
+                Text="Resend"
+                ButtonStyle="ButtonStyle.Primary"
+                Size="ButtonSize.Large"
+                class="rz-w-100" />
+        </EditForm>
+    </RadzenColumn>
+</RadzenRow>
+
+@code {
+    private string? message;
+
+    [SupplyParameterFromForm]
+    private InputModel Input { get; set; } = new();
+
+    private async Task OnValidSubmitAsync()
+    {
+        var user = await UserManager.FindByEmailAsync(Input.Email!);
+        if (user is null)
+        {
+            message = "Verification email sent. Please check your email.";
+            return;
+        }
+
+        var userId = await UserManager.GetUserIdAsync(user);
+        var code = await UserManager.GenerateEmailConfirmationTokenAsync(user);
+        code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
+        var callbackUrl = NavigationManager.GetUriWithQueryParameters(
+            NavigationManager.ToAbsoluteUri("Account/ConfirmEmail").AbsoluteUri,
+            new Dictionary<string, object?> { ["userId"] = userId, ["code"] = code });
+        await EmailSender.SendConfirmationLinkAsync(user, Input.Email, HtmlEncoder.Default.Encode(callbackUrl));
+
+        message = "Verification email sent. Please check your email.";
+    }
+
+    private sealed class InputModel
+    {
+        [Required]
+        [EmailAddress]
+        public string Email { get; set; } = "";
+    }
+}

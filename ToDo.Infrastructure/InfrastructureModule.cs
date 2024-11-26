@@ -12,6 +12,7 @@ using FluentValidation;
 using ToDo.Infrastructure.Services;
 using Microsoft.AspNetCore.Identity;
 using ToDo.Domain.Entities;
+using ToDo.Domain.Events;
 
 namespace ToDo.Infrastructure;
 
@@ -27,7 +28,8 @@ public static class InfrastructureModule
     });
 
     // Add Identity configuration
-    services.AddIdentityCore<ApplicationUser>(options => {
+    services.AddIdentityCore<ApplicationUser>(options =>
+    {
       options.SignIn.RequireConfirmedAccount = true;
     })
     .AddEntityFrameworkStores<ApplicationDbContext>()
@@ -50,6 +52,19 @@ public static class InfrastructureModule
 
     // Register UnitOfWork
     services.AddScoped<IUnitOfWork, UnitOfWork>();
+
+    // Register EventCollector
+    services.AddScoped<IEventCollector, EventCollector>();
+    services.AddScoped<IEventDispatcher, EventDispatcher>();
+
+    // Register AutoMapper
+    services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+
+    // Register CurrentUserService
+    services.AddScoped<ICurrentUserService, CurrentUserService>();
+
+    // Add HttpContextAccessor
+    services.AddHttpContextAccessor();
 
     return services;
   }

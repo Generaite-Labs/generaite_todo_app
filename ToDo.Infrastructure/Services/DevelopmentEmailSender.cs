@@ -26,6 +26,7 @@ namespace ToDo.Infrastructure.Services
         public Task SendPasswordResetLinkAsync(ApplicationUser user, string email, string resetLink)
         {
             // Decode the link to prevent double-encoding
+            Console.WriteLine("sendpassword");
             string decodedLink = HttpUtility.HtmlDecode(resetLink);
             return SendEmailAsync(email, "Reset your password", $"Please reset your password by <a href='{decodedLink}'>clicking here</a>.");
         }

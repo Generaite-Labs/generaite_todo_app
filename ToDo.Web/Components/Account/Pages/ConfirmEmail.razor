@@ -1,0 +1,61 @@
+﻿@page "/Account/ConfirmEmail"
+
+@using System.Text
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.AspNetCore.WebUtilities
+@using ToDo.Domain.Entities
+@using Radzen
+
+@inject UserManager<ApplicationUser> UserManager
+@inject IdentityRedirectManager RedirectManager
+@inject NotificationService NotificationService
+
+<PageTitle>Confirm email</PageTitle>
+
+<RadzenCard Class="rz-my-12 rz-mx-auto" Style="max-width: 600px;">
+    <RadzenText TextStyle="TextStyle.H3" TagName="TagName.H1" Class="rz-mb-6">
+        Confirm email
+    </RadzenText>
+
+    <StatusMessage Message="@statusMessage" />
+</RadzenCard>
+
+@code {
+    private string? statusMessage;
+
+    [CascadingParameter]
+    private HttpContext HttpContext { get; set; } = default!;
+
+    [SupplyParameterFromQuery]
+    private string? UserId { get; set; }
+
+    [SupplyParameterFromQuery]
+    private string? Code { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (UserId is null || Code is null)
+        {
+            RedirectManager.RedirectTo("");
+            return;
+        }
+
+        var user = await UserManager.FindByIdAsync(UserId);
+        if (user is null)
+        {
+            HttpContext.Response.StatusCode = StatusCodes.Status404NotFound;
+            statusMessage = $"Error loading user with ID {UserId}";
+            NotificationService.Notify(NotificationSeverity.Error, "Error", statusMessage);
+        }
+        else
+        {
+            var code = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(Code));
+            var result = await UserManager.ConfirmEmailAsync(user, code);
+            statusMessage = result.Succeeded ? "Thank you for confirming your email." : "Error confirming your email.";
+            NotificationService.Notify(
+                result.Succeeded ? NotificationSeverity.Success : NotificationSeverity.Error,
+                "Email Confirmation",
+                statusMessage);
+        }
+    }
+}

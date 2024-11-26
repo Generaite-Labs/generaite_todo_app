@@ -1,0 +1,90 @@
+﻿@page "/Account/Manage/Profile"
+
+@using System.ComponentModel.DataAnnotations
+@using Microsoft.AspNetCore.Identity
+@using ToDo.Domain.Entities
+
+@inject UserManager<ApplicationUser> UserManager
+@inject SignInManager<ApplicationUser> SignInManager
+@inject IdentityUserAccessor UserAccessor
+@inject IdentityRedirectManager RedirectManager
+
+<PageTitle>Profile</PageTitle>
+
+<RadzenText TextStyle="TextStyle.H3">Profile</RadzenText>
+<StatusMessage />
+
+<RadzenRow>
+    <RadzenColumn Size="6">
+        <EditForm Model="Input" FormName="profile" OnValidSubmit="OnValidSubmitAsync" method="post">
+            <DataAnnotationsValidator />
+            <ValidationSummary class="rz-color-danger" role="alert" />
+
+            <RadzenStack Orientation="Orientation.Vertical" AlignItems="AlignItems.Start">
+                <RadzenFormField Text="Username" style="width: 100%">
+                    <RadzenTextBox 
+                        Name="username"
+                        Value="@username"
+                        Disabled="true" />
+                </RadzenFormField>
+
+                <RadzenFormField Text="Phone number" Style="width: 100%;">
+                    <InputText class="rz-textbox" 
+                        Style="width: 100%;"
+                        @bind-Value="Input.PhoneNumber" 
+                        placeholder="Please enter your phone number." />
+                    <ValidationMessage For="() => Input.PhoneNumber" class="rz-color-danger" />
+                </RadzenFormField>
+            </RadzenStack>
+
+        <RadzenButton 
+                ButtonType="ButtonType.Submit"
+                Text="Save"
+                ButtonStyle="ButtonStyle.Primary"
+                Size="ButtonSize.Large"
+                class="rz-w-100 rz-mt-6" />
+        </EditForm>
+    </RadzenColumn>
+</RadzenRow>
+@code {
+    private ApplicationUser user = default!;
+    private string? username;
+    private string? phoneNumber;
+
+    [CascadingParameter]
+    private HttpContext HttpContext { get; set; } = default!;
+
+    [SupplyParameterFromForm]
+    private InputModel Input { get; set; } = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        user = await UserAccessor.GetRequiredUserAsync(HttpContext);
+        username = await UserManager.GetUserNameAsync(user);
+        phoneNumber = await UserManager.GetPhoneNumberAsync(user);
+
+        Input.PhoneNumber ??= phoneNumber;
+    }
+
+    private async Task OnValidSubmitAsync()
+    {
+        if (Input.PhoneNumber != phoneNumber)
+        {
+            var setPhoneResult = await UserManager.SetPhoneNumberAsync(user, Input.PhoneNumber);
+            if (!setPhoneResult.Succeeded)
+            {
+                RedirectManager.RedirectToCurrentPageWithStatus("Error: Failed to set phone number.", HttpContext);
+            }
+        }
+
+        await SignInManager.RefreshSignInAsync(user);
+        RedirectManager.RedirectToCurrentPageWithStatus("Your profile has been updated", HttpContext);
+    }
+
+    private sealed class InputModel
+    {
+        [Phone]
+        [Display(Name = "Phone number")]
+        public string? PhoneNumber { get; set; }
+    }
+}
