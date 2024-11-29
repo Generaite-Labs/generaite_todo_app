@@ -16,6 +16,6 @@ public abstract class TenantAwareRepository<T> : BaseRepository<T, Guid>
         _tenantContext = tenantContext;
     }
 
-    protected IQueryable<T> BaseQuery => _dbContext.Set<T>()
+    protected override IQueryable<T> BaseQuery => _dbContext.Set<T>()
         .Where(e => e.TenantId == _tenantContext.CurrentTenantId);
 } 

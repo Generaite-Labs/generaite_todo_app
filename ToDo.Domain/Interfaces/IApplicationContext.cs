@@ -13,7 +13,7 @@ namespace ToDo.Domain.Interfaces
         /// <summary>
         /// A unique identifier for correlating related operations
         /// </summary>
-        string CorrelationId { get; }
+        string? CorrelationId { get; }
 
         /// <summary>
         /// The timestamp when this context was created
@@ -23,6 +23,6 @@ namespace ToDo.Domain.Interfaces
         /// <summary>
         /// The culture/locale for the current context
         /// </summary>
-        System.Globalization.CultureInfo Culture { get; }
+        System.Globalization.CultureInfo? Culture { get; }
     }
 } 

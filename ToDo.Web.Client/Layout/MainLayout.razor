@@ -2,63 +2,64 @@
 @using Radzen.Blazor
 
 <div class="page">
-    <main>
-        <script>
-            window.toggleSidebar = () => {
-                element = document.getElementById('sidebar');
-                if(element.classList.contains('rz-sidebar-expanded')) {
-                    element.classList.remove('rz-sidebar-expanded');
-                    element.classList.add('rz-sidebar-collapsed');
-                } 
-                else {
-                    element.classList.remove('rz-sidebar-collapsed');
-                    element.classList.add('rz-sidebar-expanded');
-                }
-            }
-        </script>
-        <RadzenLayout>
-            <RadzenHeader>
-                <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="1rem" JustifyContent="JustifyContent.SpaceBetween">
-                    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="1rem">
-                        <div onclick="window.toggleSidebar()">
-                            <RadzenSidebarToggle />
-                        </div>
-                        <RadzenLabel Text="ToDo.WebClient" />
-                    </RadzenStack>
-                </RadzenStack>
-            </RadzenHeader>
+  <main>
+    <script>
+      window.toggleSidebar = () => {
+        element = document.getElementById('sidebar');
+        if (element.classList.contains('rz-sidebar-expanded')) {
+          element.classList.remove('rz-sidebar-expanded');
+          element.classList.add('rz-sidebar-collapsed');
+        }
+        else {
+          element.classList.remove('rz-sidebar-collapsed');
+          element.classList.add('rz-sidebar-expanded');
+        }
+      }
+    </script>
+    <RadzenLayout>
+      <RadzenHeader>
+        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="1rem"
+          JustifyContent="JustifyContent.SpaceBetween">
+          <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="1rem">
+            <div onclick="window.toggleSidebar()">
+              <RadzenSidebarToggle />
+            </div>
+            <RadzenLabel Text="ToDo.WebClient" />
+          </RadzenStack>
+        </RadzenStack>
+      </RadzenHeader>
 
-            <RadzenSidebar id="sidebar">
-                <NavMenu />
-            </RadzenSidebar>
+      <RadzenSidebar id="sidebar">
+        <NavMenu />
+      </RadzenSidebar>
 
-            <RadzenBody>
-                <div class="rz-p-4">
-                    @Body
-                </div>
-            </RadzenBody>
+      <RadzenBody>
+        <div class="rz-p-4">
+          @Body
+        </div>
+      </RadzenBody>
 
-            <RadzenFooter>
-                <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.Center" Gap="1rem">
-                    <RadzenLink Text="About" Path="https://generaitelabs.com" Target="_blank" />
-                </RadzenStack>
-            </RadzenFooter>
-        </RadzenLayout>
-    </main>
+      <RadzenFooter>
+        <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.Center" Gap="1rem">
+          <RadzenLink Text="About" Path="https://generaitelabs.com" Target="_blank" />
+        </RadzenStack>
+      </RadzenFooter>
+    </RadzenLayout>
+  </main>
 </div>
 
 <div id="blazor-error-ui">
-    An unhandled error has occurred.
-    <a href="" class="reload">Reload</a>
-    <a class="dismiss">🗙</a>
+  An unhandled error has occurred.
+  <a href="" class="reload">Reload</a>
+  <a class="dismiss">🗙</a>
 </div>
 
 
 @code {
-    bool sidebarExpanded = true;
+  bool sidebarExpanded = true;
 
-    void ToggleSidebar()
-    {
-        sidebarExpanded = !sidebarExpanded;
-    }
+  void ToggleSidebar()
+  {
+    sidebarExpanded = !sidebarExpanded;
+  }
 }

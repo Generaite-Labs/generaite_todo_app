@@ -6,14 +6,14 @@ namespace ToDo.Infrastructure.Context
     public class ApplicationContext : IApplicationContext
     {
         public string UserId { get; }
-        public string CorrelationId { get; }
+        public string? CorrelationId { get; }
         public DateTime Timestamp { get; }
-        public CultureInfo Culture { get; }
+        public CultureInfo? Culture { get; }
 
         public ApplicationContext(
             string userId,
-            string correlationId = null,
-            CultureInfo culture = null)
+            string? correlationId = null,
+            CultureInfo? culture = null)
         {
             UserId = userId ?? throw new ArgumentNullException(nameof(userId));
             CorrelationId = correlationId ?? Guid.NewGuid().ToString();

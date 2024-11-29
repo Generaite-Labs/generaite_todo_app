@@ -10,185 +10,195 @@
 <h1>My To-Do List</h1>
 
 <RadzenCard>
-    <div class="row mb-3">
-        <RadzenColumn Size="6">
-            <RadzenButton Icon="add" Text="Add Task" Click="@ShowAddTaskDialog" />
-        </div>
-        <RadzenColumn Size="6">
-            <RadzenTextBox Placeholder="Search tasks..." @bind-Value="@searchTerm" Change="@(args => LoadTasks())" />
-        </div>
-    </div>
+  <RadzenRow class="rz-mb-3">
+    <RadzenColumn Size="6">
+      <RadzenButton Icon="add" Text="Add Task" Click="@ShowAddTaskDialog" />
+    </RadzenColumn>
+    <RadzenColumn Size="6">
+      <RadzenTextBox Placeholder="Search tasks..." @bind-Value="@searchTerm" Change="@(args => LoadTasks())" />
+    </RadzenColumn>
+  </RadzenRow>
 
-    <RadzenDataGrid Data="@tasks" TItem="TodoItemDto" AllowFiltering="true" AllowSorting="true" AllowPaging="true" PageSize="10">
-        <Columns>
-            <RadzenDataGridColumn TItem="TodoItemDto" Property="Status" Title="Status" Width="100px">
-                <Template Context="task">
-                    <RadzenIcon Icon="@GetStatusIcon(task.Status?.Value ?? "NotStarted")" Style="@GetStatusIconStyle(task.Status?.Value ?? "NotStarted")" />
-                </Template>
-            </RadzenDataGridColumn>
-            <RadzenDataGridColumn TItem="TodoItemDto" Property="Title" Title="Task" />
-            <RadzenDataGridColumn TItem="TodoItemDto" Property="DueDate" Title="Due Date" FormatString="{0:d}" />
-            <RadzenDataGridColumn TItem="TodoItemDto" Property="Id" Title="Actions" Width="200px">
-                <Template Context="task">
-                    <RadzenButton Icon="play_arrow" Size="ButtonSize.Small" Click="@(() => StartTask(task))" ButtonStyle="ButtonStyle.Success" Disabled="@(task.Status?.Value == "InProgress" || task.Status?.Value == "Completed")" />
-                    <RadzenButton Icon="stop" Size="ButtonSize.Small" Click="@(() => StopTask(task))" ButtonStyle="ButtonStyle.Warning" Disabled="@(task.Status?.Value != "InProgress")" />
-                    <RadzenButton Icon="check" Size="ButtonSize.Small" Click="@(() => CompleteTask(task))" ButtonStyle="ButtonStyle.Info" Disabled="@(task.Status?.Value == "Completed")" />
-                    <RadzenButton Icon="edit" Size="ButtonSize.Small" Click="@(() => EditTask(task))" />
-                    <RadzenButton Icon="delete" Size="ButtonSize.Small" Click="@(() => DeleteTask(task))" ButtonStyle="ButtonStyle.Danger" />
-                </Template>
-            </RadzenDataGridColumn>
-        </Columns>
-    </RadzenDataGrid>
+  <RadzenDataGrid Data="@tasks" TItem="TodoItemDto" AllowFiltering="true" AllowSorting="true" AllowPaging="true"
+    PageSize="10">
+    <Columns>
+      <RadzenDataGridColumn TItem="TodoItemDto" Property="Status" Title="Status" Width="100px">
+        <Template Context="task">
+          <RadzenIcon Icon="@GetStatusIcon(task.Status?.Value ?? "NotStarted")"
+            Style="@GetStatusIconStyle(task.Status?.Value ?? "NotStarted")" />
+        </Template>
+      </RadzenDataGridColumn>
+      <RadzenDataGridColumn TItem="TodoItemDto" Property="Title" Title="Task" />
+      <RadzenDataGridColumn TItem="TodoItemDto" Property="DueDate" Title="Due Date" FormatString="{0:d}" />
+      <RadzenDataGridColumn TItem="TodoItemDto" Property="Id" Title="Actions" Width="200px">
+        <Template Context="task">
+          <RadzenButton Icon="play_arrow" Size="ButtonSize.Small" Click="@(() => StartTask(task))"
+            ButtonStyle="ButtonStyle.Success"
+            Disabled="@(task.Status?.Value == "InProgress" || task.Status?.Value == "Completed")" />
+          <RadzenButton Icon="stop" Size="ButtonSize.Small" Click="@(() => StopTask(task))"
+            ButtonStyle="ButtonStyle.Warning" Disabled="@(task.Status?.Value != "InProgress")" />
+          <RadzenButton Icon="check" Size="ButtonSize.Small" Click="@(() => CompleteTask(task))"
+            ButtonStyle="ButtonStyle.Info" Disabled="@(task.Status?.Value == "Completed")" />
+          <RadzenButton Icon="edit" Size="ButtonSize.Small" Click="@(() => EditTask(task))" />
+          <RadzenButton Icon="delete" Size="ButtonSize.Small" Click="@(() => DeleteTask(task))"
+            ButtonStyle="ButtonStyle.Danger" />
+        </Template>
+      </RadzenDataGridColumn>
+    </Columns>
+  </RadzenDataGrid>
 </RadzenCard>
 
 <RadzenDialog />
 
 @code {
-    private List<TodoItemDto> tasks = new List<TodoItemDto>();
-    private string searchTerm = "";
+  private List<TodoItemDto> tasks = new List<TodoItemDto>();
+  private string searchTerm = "";
 
-    protected override async Task OnInitializedAsync()
+  protected override async Task OnInitializedAsync()
+  {
+    await LoadTasks();
+  }
+
+  private async Task LoadTasks()
+  {
+    try
     {
+      var response = await ApiClient.Api.TodoItems.GetAsync();
+      tasks = response?.ToList() ?? new List<TodoItemDto>();
+      if (!string.IsNullOrEmpty(searchTerm))
+      {
+        tasks = tasks.Where(t => t.Title?.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ?? false).ToList();
+      }
+    }
+    catch (Exception ex)
+    {
+      NotificationService.Notify(NotificationSeverity.Error, "Error", "Failed to load tasks: " + ex.Message);
+    }
+  }
+
+  private async Task ShowAddTaskDialog()
+  {
+    var result = await DialogService.OpenAsync<AddEditTaskDialog>("Add Task");
+    if (result != null)
+    {
+      await LoadTasks();
+    }
+  }
+
+  private async Task EditTask(TodoItemDto task)
+  {
+    var result = await DialogService.OpenAsync<AddEditTaskDialog>("Edit Task", new Dictionary<string, object> { { "Task",
+task } });
+    if (result != null)
+    {
+      await LoadTasks();
+    }
+  }
+
+  private async Task DeleteTask(TodoItemDto task)
+  {
+    var confirmed = await DialogService.Confirm("Are you sure you want to delete this task?", "Delete Task", new
+    ConfirmOptions()
+      { OkButtonText = "Yes", CancelButtonText = "No" });
+    if (confirmed == true && task.Id.HasValue)
+    {
+      try
+      {
+        await ApiClient.Api.TodoItems[task.Id.Value].DeleteAsync();
         await LoadTasks();
+        NotificationService.Notify(NotificationSeverity.Success, "Success", "Task deleted successfully");
+      }
+      catch (Exception ex)
+      {
+        NotificationService.Notify(NotificationSeverity.Error, "Error", "Failed to delete task: " + ex.Message);
+      }
     }
+  }
 
-    private async Task LoadTasks()
+  private async Task StartTask(TodoItemDto task)
+  {
+    if (task?.Id.HasValue == true)
     {
-        try
-        {
-            var response = await ApiClient.Api.TodoItems.GetAsync();
-            tasks = response?.ToList() ?? new List<TodoItemDto>();
-            if (!string.IsNullOrEmpty(searchTerm))
-            {
-                tasks = tasks.Where(t => t.Title?.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ?? false).ToList();
-            }
-        }
-        catch (Exception ex)
-        {
-            NotificationService.Notify(NotificationSeverity.Error, "Error", "Failed to load tasks: " + ex.Message);
-        }
+      await ApiClient.Api.TodoItems[task.Id.Value].Start.PostAsync();
+      await LoadTasks();
     }
-
-    private async Task ShowAddTaskDialog()
+    else
     {
-        var result = await DialogService.OpenAsync<AddEditTaskDialog>("Add Task");
-        if (result != null)
-        {
-            await LoadTasks();
-        }
+      NotificationService.Notify(NotificationSeverity.Error, "Error", "Task ID is missing");
     }
+  }
 
-    private async Task EditTask(TodoItemDto task)
+  private async Task StopTask(TodoItemDto task)
+  {
+    if (task?.Id.HasValue == true)
     {
-        var result = await DialogService.OpenAsync<AddEditTaskDialog>("Edit Task", new Dictionary<string, object> { { "Task", task } });
-        if (result != null)
-        {
-            await LoadTasks();
-        }
+      await ApiClient.Api.TodoItems[task.Id.Value].Stop.PostAsync();
+      await LoadTasks();
     }
-
-    private async Task DeleteTask(TodoItemDto task)
+    else
     {
-        var confirmed = await DialogService.Confirm("Are you sure you want to delete this task?", "Delete Task", new ConfirmOptions() { OkButtonText = "Yes", CancelButtonText = "No" });
-        if (confirmed == true && task.Id.HasValue)
-        {
-            try
-            {
-                await ApiClient.Api.TodoItems[task.Id.Value].DeleteAsync();
-                await LoadTasks();
-                NotificationService.Notify(NotificationSeverity.Success, "Success", "Task deleted successfully");
-            }
-            catch (Exception ex)
-            {
-                NotificationService.Notify(NotificationSeverity.Error, "Error", "Failed to delete task: " + ex.Message);
-            }
-        }
+      NotificationService.Notify(NotificationSeverity.Error, "Error", "Task ID is missing");
     }
+  }
 
-    private async Task StartTask(TodoItemDto task)
+  private async Task CompleteTask(TodoItemDto task)
+  {
+    if (task?.Id.HasValue == true)
     {
-        if (task?.Id.HasValue == true)
-        {
-            await ApiClient.Api.TodoItems[task.Id.Value].Start.PostAsync();
-            await LoadTasks();
-        }
-        else
-        {
-            NotificationService.Notify(NotificationSeverity.Error, "Error", "Task ID is missing");
-        }
+      await ApiClient.Api.TodoItems[task.Id.Value].Complete.PostAsync();
+      await LoadTasks();
     }
-
-    private async Task StopTask(TodoItemDto task)
+    else
     {
-        if (task?.Id.HasValue == true)
-        {
-            await ApiClient.Api.TodoItems[task.Id.Value].Stop.PostAsync();
-            await LoadTasks();
-        }
-        else
-        {
-            NotificationService.Notify(NotificationSeverity.Error, "Error", "Task ID is missing");
-        }
+      NotificationService.Notify(NotificationSeverity.Error, "Error", "Task ID is missing");
     }
+  }
 
-    private async Task CompleteTask(TodoItemDto task)
+  private async Task UpdateTaskStatus(TodoItemDto task, string newStatus)
+  {
+    try
     {
-        if (task?.Id.HasValue == true)
-        {
-            await ApiClient.Api.TodoItems[task.Id.Value].Complete.PostAsync();
-            await LoadTasks();
-        }
-        else
-        {
-            NotificationService.Notify(NotificationSeverity.Error, "Error", "Task ID is missing");
-        }
-    }
+      if (task.Id == null)
+      {
+        throw new ArgumentException("Task ID is missing");
+      }
 
-    private async Task UpdateTaskStatus(TodoItemDto task, string newStatus)
-    {
-        try
+      var updateDto = new UpdateTodoItemDto
         {
-            if (task.Id == null)
-            {
-                throw new ArgumentException("Task ID is missing");
-            }
-
-            var updateDto = new UpdateTodoItemDto
-            {
-                Title = task.Title,
-                Description = task.Description,
-                CompletedAt = newStatus == "Completed" ? DateTimeOffset.UtcNow : null,
-                DueDate = task.DueDate
-            };
-            await ApiClient.Api.TodoItems[task.Id.Value].PutAsync(updateDto);
-            task.Status = updateDto.Status;
-            NotificationService.Notify(NotificationSeverity.Success, "Success", $"Task status updated to {newStatus}");
-        }
-        catch (Exception ex)
-        {
-            NotificationService.Notify(NotificationSeverity.Error, "Error", "Failed to update task status: " + ex.Message);
-        }
-    }
-
-    private string GetStatusIcon(string status)
-    {
-        return status switch
-        {
-            "NotStarted" => "schedule",
-            "InProgress" => "hourglass_empty",
-            "Completed" => "check_circle",
-            _ => "help"
+          Title = task.Title,
+          Description = task.Description,
+          CompletedAt = newStatus == "Completed" ? DateTimeOffset.UtcNow : null,
+          DueDate = task.DueDate
         };
+      await ApiClient.Api.TodoItems[task.Id.Value].PutAsync(updateDto);
+      task.Status = updateDto.Status;
+      NotificationService.Notify(NotificationSeverity.Success, "Success", $"Task status updated to {newStatus}");
     }
-
-    private string GetStatusIconStyle(string status)
+    catch (Exception ex)
     {
-        return status switch
-        {
-            "NotStarted" => "color: gray;",
-            "InProgress" => "color: orange;",
-            "Completed" => "color: green;",
-            _ => "color: black;"
-        };
+      NotificationService.Notify(NotificationSeverity.Error, "Error", "Failed to update task status: " + ex.Message);
     }
+  }
+
+  private string GetStatusIcon(string status)
+  {
+    return status switch
+    {
+      "NotStarted" => "schedule",
+      "InProgress" => "hourglass_empty",
+      "Completed" => "check_circle",
+      _ => "help"
+    };
+  }
+
+  private string GetStatusIconStyle(string status)
+  {
+    return status switch
+    {
+      "NotStarted" => "color: gray;",
+      "InProgress" => "color: orange;",
+      "Completed" => "color: green;",
+      _ => "color: black;"
+    };
+  }
 }
