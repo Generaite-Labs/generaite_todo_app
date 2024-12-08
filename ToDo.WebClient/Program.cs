@@ -28,15 +28,15 @@ builder.Services.AddScoped<ToDoClientFactory>();
 // Replace the existing HttpClient registration with this:
 builder.Services.AddHttpClient("API", client =>
 {
-    var appSettings = builder.Services.BuildServiceProvider().GetRequiredService<ApplicationSettings>();
-    client.BaseAddress = new Uri(appSettings.ApiBaseUrl);
+  var appSettings = builder.Services.BuildServiceProvider().GetRequiredService<ApplicationSettings>();
+  client.BaseAddress = new Uri(appSettings.ApiBaseUrl);
 });
 
 // Keep the existing ApiClient registration
-builder.Services.AddScoped<ApiClient>(sp => 
+builder.Services.AddScoped<ApiClient>(sp =>
 {
-    var factory = sp.GetRequiredService<ToDoClientFactory>();
-    return factory.GetClient();
+  var factory = sp.GetRequiredService<ToDoClientFactory>();
+  return factory.GetClient();
 });
 
 builder.Services.AddRadzenComponents();

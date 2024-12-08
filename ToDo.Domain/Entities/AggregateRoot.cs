@@ -14,80 +14,80 @@ public interface IAggregateRoot { }
 public abstract class AggregateRoot<TId> : Entity<TId>, IAggregateRoot
     where TId : notnull
 {
-    private int _version;
-    private readonly List<IDomainEvent> _domainEvents = new();
+  private int _version;
+  private readonly List<IDomainEvent> _domainEvents = new();
 
-    /// <summary>
-    /// Gets the version number of this aggregate root, used for optimistic concurrency
-    /// </summary>
-    public int Version => _version;
+  /// <summary>
+  /// Gets the version number of this aggregate root, used for optimistic concurrency
+  /// </summary>
+  public int Version => _version;
 
-    /// <summary>
-    /// Gets the domain events for this aggregate root
-    /// </summary>
-    public IReadOnlyCollection<IDomainEvent> DomainEvents => _domainEvents.AsReadOnly();
+  /// <summary>
+  /// Gets the domain events for this aggregate root
+  /// </summary>
+  public IReadOnlyCollection<IDomainEvent> DomainEvents => _domainEvents.AsReadOnly();
 
-    protected AggregateRoot(TId id) : base(id)
+  protected AggregateRoot(TId id) : base(id)
+  {
+    _version = 0;
+  }
+
+  /// <summary>
+  /// Increments the version of this aggregate root
+  /// </summary>
+  internal void IncrementVersion()
+  {
+    _version++;
+  }
+
+  /// <summary>
+  /// Raises a domain event for this aggregate root or its child entities
+  /// </summary>
+  /// <param name="domainEvent">The domain event to raise</param>
+  public void RaiseDomainEvent(IDomainEvent domainEvent)
+  {
+    _domainEvents.Add(domainEvent);
+    IncrementVersion();
+  }
+
+  /// <summary>
+  /// Clears the domain events for this aggregate root
+  /// </summary>
+  public void ClearDomainEvents()
+  {
+    _domainEvents.Clear();
+  }
+
+  /// <summary>
+  /// Ensures that a child entity belongs to this aggregate root
+  /// </summary>
+  /// <param name="entity">The entity to check</param>
+  /// <exception cref="InvalidOperationException">Thrown when the entity doesn't belong to this aggregate</exception>
+  protected void EnsureChildBelongsToAggregate<TChildId>(AggregateEntity<TChildId, TId> entity)
+      where TChildId : notnull
+  {
+    if (!entity.AggregateRootId.Equals(Id))
     {
-        _version = 0;
+      throw new InvalidOperationException(
+          $"Entity {entity.GetType().Name} does not belong to aggregate {GetType().Name} with ID {Id}");
     }
+  }
 
-    /// <summary>
-    /// Increments the version of this aggregate root
-    /// </summary>
-    internal void IncrementVersion()
-    {
-        _version++;
-    }
+  /// <summary>
+  /// Associates a child entity with this aggregate root
+  /// </summary>
+  /// <param name="entity">The entity to associate</param>
+  protected void AssociateChild<TChildId>(AggregateEntity<TChildId, TId> entity)
+      where TChildId : notnull
+  {
+    EnsureChildBelongsToAggregate(entity);
+    entity.SetAggregateRoot(this);
+  }
 
-    /// <summary>
-    /// Raises a domain event for this aggregate root or its child entities
-    /// </summary>
-    /// <param name="domainEvent">The domain event to raise</param>
-    public void RaiseDomainEvent(IDomainEvent domainEvent)
-    {
-        _domainEvents.Add(domainEvent);
-        IncrementVersion();
-    }
-
-    /// <summary>
-    /// Clears the domain events for this aggregate root
-    /// </summary>
-    public void ClearDomainEvents()
-    {
-        _domainEvents.Clear();
-    }
-
-    /// <summary>
-    /// Ensures that a child entity belongs to this aggregate root
-    /// </summary>
-    /// <param name="entity">The entity to check</param>
-    /// <exception cref="InvalidOperationException">Thrown when the entity doesn't belong to this aggregate</exception>
-    protected void EnsureChildBelongsToAggregate<TChildId>(AggregateEntity<TChildId, TId> entity)
-        where TChildId : notnull
-    {
-        if (!entity.AggregateRootId.Equals(Id))
-        {
-            throw new InvalidOperationException(
-                $"Entity {entity.GetType().Name} does not belong to aggregate {GetType().Name} with ID {Id}");
-        }
-    }
-
-    /// <summary>
-    /// Associates a child entity with this aggregate root
-    /// </summary>
-    /// <param name="entity">The entity to associate</param>
-    protected void AssociateChild<TChildId>(AggregateEntity<TChildId, TId> entity)
-        where TChildId : notnull
-    {
-        EnsureChildBelongsToAggregate(entity);
-        entity.SetAggregateRoot(this);
-    }
-
-    protected void AddDomainEvent(IDomainEvent domainEvent)
-    {
-        _domainEvents.Add(domainEvent);
-    }
+  protected void AddDomainEvent(IDomainEvent domainEvent)
+  {
+    _domainEvents.Add(domainEvent);
+  }
 }
 
 /// <summary>
@@ -95,7 +95,7 @@ public abstract class AggregateRoot<TId> : Entity<TId>, IAggregateRoot
 /// </summary>
 public abstract class AggregateRoot : AggregateRoot<int>
 {
-    protected AggregateRoot(int id) : base(id)
-    {
-    }
-} 
+  protected AggregateRoot(int id) : base(id)
+  {
+  }
+}

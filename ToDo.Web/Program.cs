@@ -43,8 +43,8 @@ builder.Services.AddScoped<AuthenticationStateProvider, PersistingRevalidatingAu
 
 builder.Services.AddAuthentication(options =>
     {
-        options.DefaultScheme = IdentityConstants.ApplicationScheme;
-        options.DefaultSignInScheme = IdentityConstants.ExternalScheme;
+      options.DefaultScheme = IdentityConstants.ApplicationScheme;
+      options.DefaultSignInScheme = IdentityConstants.ExternalScheme;
     })
     .AddIdentityCookies();
 
@@ -53,13 +53,13 @@ builder.Services.AddSingleton<IConfiguration>(builder.Configuration);
 
 if (builder.Environment.IsDevelopment())
 {
-    builder.Services.AddTransient<Microsoft.AspNetCore.Identity.UI.Services.IEmailSender, DevelopmentEmailSender>();
-    builder.Services.AddTransient<IEmailSender<ApplicationUser>, DevelopmentEmailSender>();
+  builder.Services.AddTransient<Microsoft.AspNetCore.Identity.UI.Services.IEmailSender, DevelopmentEmailSender>();
+  builder.Services.AddTransient<IEmailSender<ApplicationUser>, DevelopmentEmailSender>();
 }
 else
 {
-    builder.Services.AddTransient<Microsoft.AspNetCore.Identity.UI.Services.IEmailSender, EmailSender>();
-    builder.Services.AddTransient<IEmailSender<ApplicationUser>, EmailSender>();
+  builder.Services.AddTransient<Microsoft.AspNetCore.Identity.UI.Services.IEmailSender, EmailSender>();
+  builder.Services.AddTransient<IEmailSender<ApplicationUser>, EmailSender>();
 }
 
 builder.Services.AddIdentityCore<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
@@ -74,13 +74,13 @@ var app = builder.Build();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    app.UseWebAssemblyDebugging();
-    app.UseMigrationsEndPoint();
+  app.UseWebAssemblyDebugging();
+  app.UseMigrationsEndPoint();
 }
 else
 {
-    app.UseExceptionHandler("/Error", createScopeForErrors: true);
-    app.UseHsts();
+  app.UseExceptionHandler("/Error", createScopeForErrors: true);
+  app.UseHsts();
 }
 
 app.UseHttpsRedirection();

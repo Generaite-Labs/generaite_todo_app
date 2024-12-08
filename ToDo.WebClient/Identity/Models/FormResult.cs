@@ -1,9 +1,9 @@
 namespace ToDo.WebClient.Identity.Models
 {
-    public class FormResult
-    {
-        public bool Succeeded { get; set; }
+  public class FormResult
+  {
+    public bool Succeeded { get; set; }
 
-        public string[] ErrorList { get; set; } = [];
-    }
+    public string[] ErrorList { get; set; } = [];
+  }
 }

@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using ToDo.Domain.Events; 
+using ToDo.Domain.Events;
 using ToDo.Domain.ValueObjects;
 
 namespace ToDo.Domain.Entities
@@ -19,7 +19,7 @@ namespace ToDo.Domain.Entities
     public DateTime? DueDate { get; private set; }
 
     public DateTime? CompletedAt { get; private set; }
-    
+
     public DateTime? StartedAt { get; private set; }
 
     public required string UserId { get; set; }
@@ -115,7 +115,7 @@ namespace ToDo.Domain.Entities
       if (Status != TodoItemStatus.Completed)
       {
         Status = TodoItemStatus.Completed;
-      _domainEvents.Add(new TodoItemUpdatedEvent(this));
+        _domainEvents.Add(new TodoItemUpdatedEvent(this));
       }
     }
   }

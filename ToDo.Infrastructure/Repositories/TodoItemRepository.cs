@@ -84,14 +84,14 @@ namespace ToDo.Infrastructure.Repositories
     {
       _logger.LogInformation("Getting paged TodoItems for user: {UserId}, {@PaginationRequest}", userId, paginationRequest);
       var stopwatch = Stopwatch.StartNew();
-      
+
       var result = await GetPagedAsync(
           filter: t => t.UserId == userId,
           orderBy: t => t.Id,
           paginationRequest: paginationRequest);
-      
+
       stopwatch.Stop();
-      _logger.LogInformation("Retrieved paged TodoItems for user: {UserId}. Took {ElapsedMilliseconds}ms", 
+      _logger.LogInformation("Retrieved paged TodoItems for user: {UserId}. Took {ElapsedMilliseconds}ms",
           userId, stopwatch.ElapsedMilliseconds);
       return result;
     }

@@ -23,10 +23,10 @@ namespace ToDo.Application.Services
         IMapper mapper,
         IUnitOfWork unitOfWork)
     {
-        _repository = repository;
-        _logger = logger;
-        _mapper = mapper;
-        _unitOfWork = unitOfWork;
+      _repository = repository;
+      _logger = logger;
+      _mapper = mapper;
+      _unitOfWork = unitOfWork;
     }
 
     public async Task<TodoItemDto?> GetByIdAsync(string userId, Guid id)
@@ -50,21 +50,21 @@ namespace ToDo.Application.Services
     {
       _logger.LogInformation("Getting all TodoItems for user: {UserId}", userId);
       var todoItems = await _repository.GetByUserIdAsync(userId);
-      
+
       if (todoItems == null || !todoItems.Any())
       {
         _logger.LogInformation("No TodoItems found for user: {UserId}", userId);
         return Enumerable.Empty<TodoItemDto>();
       }
-      
+
       var mappedItems = _mapper.Map<IEnumerable<TodoItemDto>>(todoItems);
-      
+
       if (mappedItems == null || !mappedItems.Any())
       {
         _logger.LogWarning("Failed to map TodoItems to DTOs for user: {UserId}", userId);
         throw new InvalidTodoItemMappingException($"Failed to map TodoItems to DTOs for user: {userId}");
       }
-      
+
       return mappedItems;
     }
 
@@ -85,7 +85,7 @@ namespace ToDo.Application.Services
         var todoItemDto = _mapper.Map<TodoItemDto>(todoItem);
         if (todoItemDto == null)
         {
-            throw new InvalidTodoItemMappingException("Failed to map created TodoItem to TodoItemDto");
+          throw new InvalidTodoItemMappingException("Failed to map created TodoItem to TodoItemDto");
         }
 
         return todoItemDto;
@@ -116,13 +116,13 @@ namespace ToDo.Application.Services
       {
         await _repository.UpdateAsync(existingItem);
         await _unitOfWork.SaveChangesAsync();
-        
-        return _mapper.Map<TodoItemDto>(existingItem) ?? 
+
+        return _mapper.Map<TodoItemDto>(existingItem) ??
                throw new InvalidTodoItemMappingException("Failed to map updated TodoItem to TodoItemDto");
       }
       catch (Exception ex)
       {
-        throw new TodoItemOperationException("Update", 
+        throw new TodoItemOperationException("Update",
             $"Failed to update TodoItem with ID {id}: {ex.Message}", ex);
       }
     }

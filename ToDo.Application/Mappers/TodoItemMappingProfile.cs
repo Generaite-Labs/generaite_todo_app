@@ -5,19 +5,19 @@ using ToDo.Domain.ValueObjects;
 
 namespace ToDo.Application.Mappers
 {
-    public class TodoItemMappingProfile : Profile
+  public class TodoItemMappingProfile : Profile
+  {
+    public TodoItemMappingProfile()
     {
-        public TodoItemMappingProfile()
-        {
-            CreateMap<TodoItem, TodoItemDto>();
-            CreateMap<CreateTodoItemDto, TodoItem>();
-            CreateMap<UpdateTodoItemDto, TodoItem>()
-                .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
+      CreateMap<TodoItem, TodoItemDto>();
+      CreateMap<CreateTodoItemDto, TodoItem>();
+      CreateMap<UpdateTodoItemDto, TodoItem>()
+          .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
 
-            // Update mappings for TodoItemStatus
-            CreateMap<TodoItemStatus, TodoItemStatus>().ConvertUsing((src, dest) => src);
-            CreateMap<TodoItemStatus?, TodoItemStatus>().ConvertUsing((src, dest) => src ?? dest);
-            CreateMap<TodoItemStatus, TodoItemStatus?>().ConvertUsing((src, dest) => src);
-        }
+      // Update mappings for TodoItemStatus
+      CreateMap<TodoItemStatus, TodoItemStatus>().ConvertUsing((src, dest) => src);
+      CreateMap<TodoItemStatus?, TodoItemStatus>().ConvertUsing((src, dest) => src ?? dest);
+      CreateMap<TodoItemStatus, TodoItemStatus?>().ConvertUsing((src, dest) => src);
     }
+  }
 }

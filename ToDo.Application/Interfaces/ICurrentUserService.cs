@@ -4,5 +4,5 @@ namespace ToDo.Application.Interfaces;
 
 public interface ICurrentUserService
 {
-    Task<ApplicationUser?> GetCurrentUser();
-} 
+  Task<ApplicationUser?> GetCurrentUser();
+}

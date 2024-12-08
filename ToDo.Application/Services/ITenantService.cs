@@ -4,5 +4,5 @@ namespace ToDo.Application.Services;
 
 public interface ITenantService
 {
-    Task<Tenant> CreateTenantAsync(string name);
-} 
+  Task<Tenant> CreateTenantAsync(string name);
+}

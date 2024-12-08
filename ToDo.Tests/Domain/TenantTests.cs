@@ -7,154 +7,154 @@ using ToDo.Domain.Exceptions;
 
 public class TenantTests
 {
-    private readonly ApplicationUser _creator;
+  private readonly ApplicationUser _creator;
 
-    public TenantTests()
-    {
-        _creator = new ApplicationUser { Id = "user-1", UserName = "test@example.com" };
-    }
+  public TenantTests()
+  {
+    _creator = new ApplicationUser { Id = "user-1", UserName = "test@example.com" };
+  }
 
-    [Fact]
-    public void Create_WithValidData_CreatesNewTenant()
-    {
-        // Act
-        var tenant = Tenant.Create("Test Tenant", _creator);
+  [Fact]
+  public void Create_WithValidData_CreatesNewTenant()
+  {
+    // Act
+    var tenant = Tenant.Create("Test Tenant", _creator);
 
-        // Assert
-        Assert.NotEqual(Guid.Empty, tenant.Id);
-        Assert.Equal("Test Tenant", tenant.Name);
-        Assert.Single(tenant.TenantUsers);
-        Assert.Contains(tenant.TenantUsers, tu => 
-            tu.UserId == _creator.Id && 
-            tu.Role == TenantRole.Owner);
+    // Assert
+    Assert.NotEqual(Guid.Empty, tenant.Id);
+    Assert.Equal("Test Tenant", tenant.Name);
+    Assert.Single(tenant.TenantUsers);
+    Assert.Contains(tenant.TenantUsers, tu =>
+        tu.UserId == _creator.Id &&
+        tu.Role == TenantRole.Owner);
 
-        // Verify domain events
-        Assert.Equal(2, tenant.DomainEvents.Count);
-        Assert.Contains(tenant.DomainEvents, e => e is TenantCreatedDomainEvent);
-        Assert.Contains(tenant.DomainEvents, e => e is UserAddedToTenantDomainEvent);
-    }
+    // Verify domain events
+    Assert.Equal(2, tenant.DomainEvents.Count);
+    Assert.Contains(tenant.DomainEvents, e => e is TenantCreatedDomainEvent);
+    Assert.Contains(tenant.DomainEvents, e => e is UserAddedToTenantDomainEvent);
+  }
 
-    [Fact]
-    public void Create_WithNullCreator_ThrowsArgumentNullException()
-    {
-        // Act & Assert
-        var exception = Assert.Throws<ArgumentNullException>(() => 
-            Tenant.Create("Test Tenant", null!));
-        
-        Assert.Equal("creator", exception.ParamName);
-    }
+  [Fact]
+  public void Create_WithNullCreator_ThrowsArgumentNullException()
+  {
+    // Act & Assert
+    var exception = Assert.Throws<ArgumentNullException>(() =>
+        Tenant.Create("Test Tenant", null!));
 
-    [Fact]
-    public void AddUser_WhenUserNotInTenant_AddsUser()
-    {
-        // Arrange
-        var tenant = Tenant.Create("Test Tenant", _creator);
-        var newUser = new ApplicationUser { Id = "user-2" };
-        tenant.ClearDomainEvents(); // Clear events from creation
+    Assert.Equal("creator", exception.ParamName);
+  }
 
-        // Act
-        tenant.AddUser(newUser, TenantRole.Member);
+  [Fact]
+  public void AddUser_WhenUserNotInTenant_AddsUser()
+  {
+    // Arrange
+    var tenant = Tenant.Create("Test Tenant", _creator);
+    var newUser = new ApplicationUser { Id = "user-2" };
+    tenant.ClearDomainEvents(); // Clear events from creation
 
-        // Assert
-        Assert.Equal(2, tenant.TenantUsers.Count);
-        var addedUser = Assert.Single(tenant.TenantUsers, tu => tu.UserId == newUser.Id);
-        Assert.Equal(TenantRole.Member, addedUser.Role);
+    // Act
+    tenant.AddUser(newUser, TenantRole.Member);
 
-        // Verify domain event
-        var @event = Assert.Single(tenant.DomainEvents);
-        var addedEvent = Assert.IsType<UserAddedToTenantDomainEvent>(@event);
-        Assert.Equal(newUser.Id, addedEvent.UserId);
-        Assert.Equal(TenantRole.Member, addedEvent.Role);
-    }
+    // Assert
+    Assert.Equal(2, tenant.TenantUsers.Count);
+    var addedUser = Assert.Single(tenant.TenantUsers, tu => tu.UserId == newUser.Id);
+    Assert.Equal(TenantRole.Member, addedUser.Role);
 
-    [Fact]
-    public void RemoveUser_WhenUserExists_RemovesUser()
-    {
-        // Arrange
-        var tenant = Tenant.Create("Test Tenant", _creator);
-        var member = new ApplicationUser { Id = "user-2" };
-        tenant.AddUser(member, TenantRole.Member);
-        tenant.ClearDomainEvents();
+    // Verify domain event
+    var @event = Assert.Single(tenant.DomainEvents);
+    var addedEvent = Assert.IsType<UserAddedToTenantDomainEvent>(@event);
+    Assert.Equal(newUser.Id, addedEvent.UserId);
+    Assert.Equal(TenantRole.Member, addedEvent.Role);
+  }
 
-        // Act
-        tenant.RemoveUser(member.Id);
+  [Fact]
+  public void RemoveUser_WhenUserExists_RemovesUser()
+  {
+    // Arrange
+    var tenant = Tenant.Create("Test Tenant", _creator);
+    var member = new ApplicationUser { Id = "user-2" };
+    tenant.AddUser(member, TenantRole.Member);
+    tenant.ClearDomainEvents();
 
-        // Assert
-        Assert.Single(tenant.TenantUsers);
-        Assert.DoesNotContain(tenant.TenantUsers, tu => tu.UserId == member.Id);
+    // Act
+    tenant.RemoveUser(member.Id);
 
-        // Verify domain event
-        var @event = Assert.Single(tenant.DomainEvents);
-        var removedEvent = Assert.IsType<UserRemovedFromTenantDomainEvent>(@event);
-        Assert.Equal(member.Id, removedEvent.UserId);
-    }
+    // Assert
+    Assert.Single(tenant.TenantUsers);
+    Assert.DoesNotContain(tenant.TenantUsers, tu => tu.UserId == member.Id);
 
-    [Fact]
-    public void RemoveUser_WhenLastOwner_ThrowsDomainException()
-    {
-        // Arrange
-        var tenant = Tenant.Create("Test Tenant", _creator);
+    // Verify domain event
+    var @event = Assert.Single(tenant.DomainEvents);
+    var removedEvent = Assert.IsType<UserRemovedFromTenantDomainEvent>(@event);
+    Assert.Equal(member.Id, removedEvent.UserId);
+  }
 
-        // Act & Assert
-        var exception = Assert.Throws<DomainException>(() => 
-            tenant.RemoveUser(_creator.Id));
-        
-        Assert.Equal("Cannot remove the last owner", exception.Message);
-    }
+  [Fact]
+  public void RemoveUser_WhenLastOwner_ThrowsDomainException()
+  {
+    // Arrange
+    var tenant = Tenant.Create("Test Tenant", _creator);
 
-    [Fact]
-    public void UpdateUserRole_ChangingLastOwner_ThrowsDomainException()
-    {
-        // Arrange
-        var tenant = Tenant.Create("Test Tenant", _creator);
+    // Act & Assert
+    var exception = Assert.Throws<DomainException>(() =>
+        tenant.RemoveUser(_creator.Id));
 
-        // Act & Assert
-        var exception = Assert.Throws<DomainException>(() => 
-            tenant.UpdateUserRole(_creator.Id, TenantRole.Member));
-        
-        Assert.Equal("Cannot change role of the last owner", exception.Message);
-    }
+    Assert.Equal("Cannot remove the last owner", exception.Message);
+  }
 
-    [Fact]
-    public void UpdateUserRole_WithValidRole_UpdatesRole()
-    {
-        // Arrange
-        var tenant = Tenant.Create("Test Tenant", _creator);
-        var member = new ApplicationUser { Id = "user-2" };
-        tenant.AddUser(member, TenantRole.Member);
-        tenant.ClearDomainEvents();
+  [Fact]
+  public void UpdateUserRole_ChangingLastOwner_ThrowsDomainException()
+  {
+    // Arrange
+    var tenant = Tenant.Create("Test Tenant", _creator);
 
-        // Act
-        tenant.UpdateUserRole(member.Id, TenantRole.Admin);
+    // Act & Assert
+    var exception = Assert.Throws<DomainException>(() =>
+        tenant.UpdateUserRole(_creator.Id, TenantRole.Member));
 
-        // Assert
-        var updatedUser = Assert.Single(tenant.TenantUsers, tu => tu.UserId == member.Id);
-        Assert.Equal(TenantRole.Admin, updatedUser.Role);
+    Assert.Equal("Cannot change role of the last owner", exception.Message);
+  }
 
-        // Verify domain event
-        var @event = Assert.Single(tenant.DomainEvents);
-        var updatedEvent = Assert.IsType<UserRoleUpdatedInTenantDomainEvent>(@event);
-        Assert.Equal(member.Id, updatedEvent.UserId);
-        Assert.Equal(TenantRole.Admin, updatedEvent.NewRole);
-    }
+  [Fact]
+  public void UpdateUserRole_WithValidRole_UpdatesRole()
+  {
+    // Arrange
+    var tenant = Tenant.Create("Test Tenant", _creator);
+    var member = new ApplicationUser { Id = "user-2" };
+    tenant.AddUser(member, TenantRole.Member);
+    tenant.ClearDomainEvents();
 
-    [Fact]
-    public void HasUser_WithExistingUser_ReturnsTrue()
-    {
-        // Arrange
-        var tenant = Tenant.Create("Test Tenant", _creator);
+    // Act
+    tenant.UpdateUserRole(member.Id, TenantRole.Admin);
 
-        // Act & Assert
-        Assert.True(tenant.HasUser(_creator.Id));
-    }
+    // Assert
+    var updatedUser = Assert.Single(tenant.TenantUsers, tu => tu.UserId == member.Id);
+    Assert.Equal(TenantRole.Admin, updatedUser.Role);
 
-    [Fact]
-    public void HasUser_WithNonExistingUser_ReturnsFalse()
-    {
-        // Arrange
-        var tenant = Tenant.Create("Test Tenant", _creator);
+    // Verify domain event
+    var @event = Assert.Single(tenant.DomainEvents);
+    var updatedEvent = Assert.IsType<UserRoleUpdatedInTenantDomainEvent>(@event);
+    Assert.Equal(member.Id, updatedEvent.UserId);
+    Assert.Equal(TenantRole.Admin, updatedEvent.NewRole);
+  }
 
-        // Act & Assert
-        Assert.False(tenant.HasUser("non-existing-user"));
-    }
-} 
+  [Fact]
+  public void HasUser_WithExistingUser_ReturnsTrue()
+  {
+    // Arrange
+    var tenant = Tenant.Create("Test Tenant", _creator);
+
+    // Act & Assert
+    Assert.True(tenant.HasUser(_creator.Id));
+  }
+
+  [Fact]
+  public void HasUser_WithNonExistingUser_ReturnsFalse()
+  {
+    // Arrange
+    var tenant = Tenant.Create("Test Tenant", _creator);
+
+    // Act & Assert
+    Assert.False(tenant.HasUser("non-existing-user"));
+  }
+}

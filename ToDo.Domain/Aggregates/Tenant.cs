@@ -5,84 +5,84 @@ using ToDo.Domain.Exceptions;
 
 public class Tenant : AggregateRoot<Guid>, IAggregateRoot
 {
-    public string Name { get; private set; }
-    public DateTime CreatedAt { get; private set; }
-    public DateTime UpdatedAt { get; private set; }
-    
-    private readonly List<TenantUser> _tenantUsers = new();
-    public IReadOnlyCollection<TenantUser> TenantUsers => _tenantUsers.AsReadOnly();
+  public string Name { get; private set; }
+  public DateTime CreatedAt { get; private set; }
+  public DateTime UpdatedAt { get; private set; }
 
-    private Tenant() : base(Guid.Empty) 
-    { 
-        Name = string.Empty;
-    }
+  private readonly List<TenantUser> _tenantUsers = new();
+  public IReadOnlyCollection<TenantUser> TenantUsers => _tenantUsers.AsReadOnly();
 
-    public static Tenant Create(string name, ApplicationUser creator)
+  private Tenant() : base(Guid.Empty)
+  {
+    Name = string.Empty;
+  }
+
+  public static Tenant Create(string name, ApplicationUser creator)
+  {
+    if (creator == null)
+      throw new ArgumentNullException(nameof(creator));
+
+    var tenant = new Tenant
     {
-        if (creator == null)
-            throw new ArgumentNullException(nameof(creator));
+      Id = Guid.NewGuid(),
+      Name = name,
+      CreatedAt = DateTime.UtcNow,
+      UpdatedAt = DateTime.UtcNow
+    };
 
-        var tenant = new Tenant
-        {
-            Id = Guid.NewGuid(),
-            Name = name,
-            CreatedAt = DateTime.UtcNow,
-            UpdatedAt = DateTime.UtcNow
-        };
+    var tenantUser = new TenantUser(tenant.Id, creator.Id, TenantRole.Owner);
+    tenant._tenantUsers.Add(tenantUser);
 
-        var tenantUser = new TenantUser(tenant.Id, creator.Id, TenantRole.Owner);
-        tenant._tenantUsers.Add(tenantUser);
+    tenant.AddDomainEvent(new TenantCreatedDomainEvent(tenant.Id, name));
+    tenant.AddDomainEvent(new UserAddedToTenantDomainEvent(tenant.Id, creator.Id, TenantRole.Owner));
 
-        tenant.AddDomainEvent(new TenantCreatedDomainEvent(tenant.Id, name));
-        tenant.AddDomainEvent(new UserAddedToTenantDomainEvent(tenant.Id, creator.Id, TenantRole.Owner));
-        
-        return tenant;
-    }
+    return tenant;
+  }
 
-    public void UpdateName(string newName)
-    {
-        Name = newName;
-        UpdatedAt = DateTime.UtcNow;
-    }
+  public void UpdateName(string newName)
+  {
+    Name = newName;
+    UpdatedAt = DateTime.UtcNow;
+  }
 
-    public void AddUser(ApplicationUser user, TenantRole role)
-    {
-        var tenantUser = new TenantUser(Id, user.Id, role);
-        _tenantUsers.Add(tenantUser);
-        
-        AddDomainEvent(new UserAddedToTenantDomainEvent(Id, user.Id, role));
-    }
+  public void AddUser(ApplicationUser user, TenantRole role)
+  {
+    var tenantUser = new TenantUser(Id, user.Id, role);
+    _tenantUsers.Add(tenantUser);
 
-    public void RemoveUser(string userId)
-    {
-        var user = _tenantUsers.FirstOrDefault(u => u.UserId == userId);
-        if (user == null)
-            throw new DomainException("User not found in tenant");
+    AddDomainEvent(new UserAddedToTenantDomainEvent(Id, user.Id, role));
+  }
 
-        if (user.Role == TenantRole.Owner && _tenantUsers.Count(u => u.Role == TenantRole.Owner) == 1)
-            throw new DomainException("Cannot remove the last owner");
+  public void RemoveUser(string userId)
+  {
+    var user = _tenantUsers.FirstOrDefault(u => u.UserId == userId);
+    if (user == null)
+      throw new DomainException("User not found in tenant");
 
-        _tenantUsers.Remove(user);
-        AddDomainEvent(new UserRemovedFromTenantDomainEvent(Id, userId));
-    }
+    if (user.Role == TenantRole.Owner && _tenantUsers.Count(u => u.Role == TenantRole.Owner) == 1)
+      throw new DomainException("Cannot remove the last owner");
 
-    public void UpdateUserRole(string userId, TenantRole newRole)
-    {
-        var user = _tenantUsers.FirstOrDefault(u => u.UserId == userId);
-        if (user == null)
-            throw new DomainException("User not found in tenant");
+    _tenantUsers.Remove(user);
+    AddDomainEvent(new UserRemovedFromTenantDomainEvent(Id, userId));
+  }
 
-        if (user.Role == TenantRole.Owner && 
-            newRole != TenantRole.Owner && 
-            _tenantUsers.Count(u => u.Role == TenantRole.Owner) == 1)
-            throw new DomainException("Cannot change role of the last owner");
+  public void UpdateUserRole(string userId, TenantRole newRole)
+  {
+    var user = _tenantUsers.FirstOrDefault(u => u.UserId == userId);
+    if (user == null)
+      throw new DomainException("User not found in tenant");
 
-        user.UpdateRole(newRole);
-        AddDomainEvent(new UserRoleUpdatedInTenantDomainEvent(Id, userId, newRole));
-    }
+    if (user.Role == TenantRole.Owner &&
+        newRole != TenantRole.Owner &&
+        _tenantUsers.Count(u => u.Role == TenantRole.Owner) == 1)
+      throw new DomainException("Cannot change role of the last owner");
 
-    public bool HasUser(string userId)
-    {
-        return _tenantUsers.Any(tu => tu.UserId == userId);
-    }
+    user.UpdateRole(newRole);
+    AddDomainEvent(new UserRoleUpdatedInTenantDomainEvent(Id, userId, newRole));
+  }
+
+  public bool HasUser(string userId)
+  {
+    return _tenantUsers.Any(tu => tu.UserId == userId);
+  }
 }
