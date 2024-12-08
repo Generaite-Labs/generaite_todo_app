@@ -1,0 +1,29 @@
+﻿@using Microsoft.AspNetCore.Identity
+@using ToDo.Domain.Entities
+@using Radzen
+@using Radzen.Blazor
+
+@inject SignInManager<ApplicationUser> SignInManager
+
+<RadzenPanelMenu Style="width: 100%">
+    <RadzenPanelMenuItem Text="Profile" Path="Account/Manage/Profile" Icon="person" />
+    <RadzenPanelMenuItem Text="Email" Path="Account/Manage/Email" Icon="email" />
+    <RadzenPanelMenuItem Text="Password" Path="Account/Manage/ChangePassword" Icon="password" />
+    @if (hasExternalLogins)
+    {
+        <RadzenPanelMenuItem Text="External logins" Path="Account/Manage/ExternalLogins" Icon="link" />
+    }
+    <RadzenPanelMenuItem Text="Two-factor authentication" 
+                        Path="Account/Manage/TwoFactorAuthentication" 
+                        Icon="security" />
+    <RadzenPanelMenuItem Text="Personal data" Path="Account/Manage/PersonalData" Icon="folder_shared" />
+</RadzenPanelMenu>
+
+@code {
+    private bool hasExternalLogins;
+
+    protected override async Task OnInitializedAsync()
+    {
+        hasExternalLogins = (await SignInManager.GetExternalAuthenticationSchemesAsync()).Any();
+    }
+}

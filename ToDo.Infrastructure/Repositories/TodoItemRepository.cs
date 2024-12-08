@@ -7,16 +7,16 @@ using System.Diagnostics;
 
 namespace ToDo.Infrastructure.Repositories
 {
-  public class TodoItemRepository : BaseRepository<TodoItem>, ITodoItemRepository
+  public class TodoItemRepository : BaseRepository<TodoItem, Guid>, ITodoItemRepository
   {
     private readonly ILogger<TodoItemRepository> _logger;
 
-    public TodoItemRepository(TodoDbContext context, ILogger<TodoItemRepository> logger) : base(context)
+    public TodoItemRepository(ApplicationDbContext context, ILogger<TodoItemRepository> logger) : base(context)
     {
       _logger = logger;
     }
 
-    public async Task<TodoItem?> GetByIdAsync(int id)
+    public override async Task<TodoItem?> GetByIdAsync(Guid id)
     {
       _logger.LogInformation("Getting TodoItem by ID: {TodoItemId}", id);
       var todoItem = await _context.Set<TodoItem>().FindAsync(id);
@@ -27,7 +27,7 @@ namespace ToDo.Infrastructure.Repositories
       return todoItem;
     }
 
-    public async Task<IEnumerable<TodoItem>> GetAllAsync()
+    public override async Task<IEnumerable<TodoItem>> GetAllAsync()
     {
       _logger.LogInformation("Getting all TodoItems");
       var stopwatch = Stopwatch.StartNew();
@@ -47,7 +47,7 @@ namespace ToDo.Infrastructure.Repositories
       return result;
     }
 
-    public async Task<TodoItem> AddAsync(TodoItem todoItem)
+    public override async Task<TodoItem> AddAsync(TodoItem todoItem)
     {
       _logger.LogInformation("Adding new TodoItem: {@TodoItem}", todoItem);
       await _context.Set<TodoItem>().AddAsync(todoItem);
@@ -56,7 +56,7 @@ namespace ToDo.Infrastructure.Repositories
       return todoItem;
     }
 
-    public async Task UpdateAsync(TodoItem todoItem)
+    public override async Task UpdateAsync(TodoItem todoItem)
     {
       _logger.LogInformation("Updating TodoItem: {@TodoItem}", todoItem);
       _context.Set<TodoItem>().Update(todoItem);
@@ -64,7 +64,7 @@ namespace ToDo.Infrastructure.Repositories
       _logger.LogInformation("Updated TodoItem with ID: {TodoItemId}", todoItem.Id);
     }
 
-    public async Task DeleteAsync(int id)
+    public override async Task DeleteAsync(Guid id)
     {
       _logger.LogInformation("Deleting TodoItem with ID: {TodoItemId}", id);
       var todoItem = await _context.Set<TodoItem>().FindAsync(id);
@@ -84,11 +84,15 @@ namespace ToDo.Infrastructure.Repositories
     {
       _logger.LogInformation("Getting paged TodoItems for user: {UserId}, {@PaginationRequest}", userId, paginationRequest);
       var stopwatch = Stopwatch.StartNew();
-      var query = _context.Set<TodoItem>().Where(t => t.UserId == userId);
-      var result = await GetPagedAsync(query, t => t.Id, paginationRequest);
+
+      var result = await GetPagedAsync(
+          filter: t => t.UserId == userId,
+          orderBy: t => t.Id,
+          paginationRequest: paginationRequest);
+
       stopwatch.Stop();
-      _logger.LogInformation("Retrieved paged TodoItems for user: {UserId}. Took {ElapsedMilliseconds}ms", 
-        userId, stopwatch.ElapsedMilliseconds);
+      _logger.LogInformation("Retrieved paged TodoItems for user: {UserId}. Took {ElapsedMilliseconds}ms",
+          userId, stopwatch.ElapsedMilliseconds);
       return result;
     }
   }

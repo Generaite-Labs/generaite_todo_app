@@ -1,0 +1,61 @@
+﻿@using Radzen.Blazor
+@using System.ComponentModel.DataAnnotations
+@implements IDisposable
+@inject NavigationManager NavigationManager
+
+@rendermode InteractiveAuto
+
+<RadzenPanelMenu>
+    <RadzenPanelMenuItem Text="Home" Icon="home" Path="" />
+    <RadzenPanelMenuItem Text="Counter" Icon="add_box" Path="counter" />
+    <RadzenPanelMenuItem Text="Weather" Icon="list" Path="weather" />
+    <RadzenPanelMenuItem Text="Auth Required" Icon="lock" Path="auth" />
+
+    <AuthorizeView>
+        <Authorized>
+            <RadzenPanelMenuItem Text="@context.User.Identity?.Name" Icon="person" Path="Account/Manage/Profile" />
+            <form action="Account/Logout" method="post">
+                <AntiforgeryToken />
+                <input type="hidden" name="ReturnUrl" value="@currentUrl" />
+                <button type="submit" style="border: none; background: none; padding: 0; width: 100%; text-align: left">
+                    <RadzenPanelMenuItem Text="Logout" Icon="logout" />
+                </button>
+            </form>
+        </Authorized>
+        <NotAuthorized>
+            <RadzenPanelMenuItem Text="Register" Icon="person_add" Path="Account/Register" />
+            <RadzenPanelMenuItem Text="Login" Icon="login" Path="Account/Login" />
+        </NotAuthorized>
+    </AuthorizeView>
+</RadzenPanelMenu>
+
+@code {
+    private string? currentUrl;
+    private LogoutModel logoutModel { get; set; } = new();
+
+    protected override void OnInitialized()
+    {
+        currentUrl = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
+        NavigationManager.LocationChanged += OnLocationChanged;
+    }
+
+    private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
+    {
+        currentUrl = NavigationManager.ToBaseRelativePath(e.Location);
+        StateHasChanged();
+    }
+
+    public void Dispose()
+    {
+        NavigationManager.LocationChanged -= OnLocationChanged;
+    }
+
+    private sealed class LogoutModel
+    {
+        [Required]
+        public string __RequestVerificationToken { get; set; } = "";
+
+        public string ReturnUrl { get; set; } = "";
+    }
+}
+

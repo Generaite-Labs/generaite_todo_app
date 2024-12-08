@@ -1,0 +1,17 @@
+﻿@inherits LayoutComponentBase
+@layout AccountLayout
+
+<h1>Manage your account</h1>
+
+<RadzenColumn>
+    <h2>Change your account settings</h2>
+    <hr />
+    <RadzenRow>
+        <RadzenColumn Size="3">
+            <ManageNavMenu />
+        </RadzenColumn>
+        <RadzenColumn Size="9">
+            @Body
+        </RadzenColumn>
+    </RadzenRow>
+</RadzenColumn>

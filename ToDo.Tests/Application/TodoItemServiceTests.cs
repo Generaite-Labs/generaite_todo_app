@@ -41,17 +41,18 @@ namespace ToDo.Tests.Application
     public async Task GetByIdAsync_ShouldReturnTodoItemDto_WhenItemExistsAndUserIsAuthorized()
     {
       // Arrange
+      var itemId = Guid.NewGuid();
       var todoItem = TodoItem.CreateTodoItem("Test Item", null, ValidUserId, null);
-      var todoItemDto = new TodoItemDto { Id = 1, Title = "Test Item", UserId = ValidUserId };
-      _mockRepo.Setup(repo => repo.GetByIdAsync(1)).ReturnsAsync(todoItem);
+      var todoItemDto = new TodoItemDto { Id = itemId, Title = "Test Item", UserId = ValidUserId };
+      _mockRepo.Setup(repo => repo.GetByIdAsync(itemId)).ReturnsAsync(todoItem);
       _mockMapper.Setup(mapper => mapper.Map<TodoItemDto>(todoItem)).Returns(todoItemDto);
 
       // Act
-      var result = await _service.GetByIdAsync(ValidUserId, 1);
+      var result = await _service.GetByIdAsync(ValidUserId, itemId);
 
       // Assert
       result.Should().NotBeNull();
-      result!.Id.Should().Be(1);
+      result!.Id.Should().Be(itemId);
       result.Title.Should().Be("Test Item");
       result.UserId.Should().Be(ValidUserId);
     }
@@ -60,11 +61,13 @@ namespace ToDo.Tests.Application
     public async Task GetByIdAsync_ShouldThrowUnauthorizedTodoItemAccessException_WhenUserIsNotAuthorized()
     {
       // Arrange
+      var itemId = Guid.NewGuid();
       var todoItem = TodoItem.CreateTodoItem("Test Item", null, ValidUserId, null);
-      _mockRepo.Setup(repo => repo.GetByIdAsync(1)).ReturnsAsync(todoItem);
+      _mockRepo.Setup(repo => repo.GetByIdAsync(itemId)).ReturnsAsync(todoItem);
 
       // Act & Assert
-      await Assert.ThrowsAsync<UnauthorizedTodoItemAccessException>(() => _service.GetByIdAsync(InvalidUserId, 1));
+      await Assert.ThrowsAsync<UnauthorizedTodoItemAccessException>(() =>
+          _service.GetByIdAsync(InvalidUserId, itemId));
     }
 
     [Fact]
@@ -78,8 +81,8 @@ namespace ToDo.Tests.Application
       };
       var todoItemDtos = new List<TodoItemDto>
       {
-          new TodoItemDto { Id = 1, Title = "Item 1", UserId = ValidUserId },
-          new TodoItemDto { Id = 2, Title = "Item 2", UserId = ValidUserId }
+          new TodoItemDto { Id = Guid.NewGuid(), Title = "Item 1", UserId = ValidUserId },
+          new TodoItemDto { Id = Guid.NewGuid(), Title = "Item 2", UserId = ValidUserId }
       };
       _mockRepo.Setup(repo => repo.GetByUserIdAsync(ValidUserId)).ReturnsAsync(todoItems);
       _mockMapper.Setup(mapper => mapper.Map<IEnumerable<TodoItemDto>>(todoItems)).Returns(todoItemDtos);
@@ -89,31 +92,32 @@ namespace ToDo.Tests.Application
 
       // Assert
       result.Should().HaveCount(2);
-      result.Should().Contain(dto => dto.Id == 1 && dto.Title == "Item 1" && dto.UserId == ValidUserId);
-      result.Should().Contain(dto => dto.Id == 2 && dto.Title == "Item 2" && dto.UserId == ValidUserId);
+      result.Should().Contain(dto => dto.Title == "Item 1" && dto.UserId == ValidUserId);
+      result.Should().Contain(dto => dto.Title == "Item 2" && dto.UserId == ValidUserId);
     }
 
     [Fact]
     public async Task CreateAsync_ShouldReturnCreatedTodoItemDto()
     {
       // Arrange
+      var itemId = Guid.NewGuid();
       var createDto = new CreateTodoItemDto
       {
         Title = "New Item",
         Description = "Test Description",
         DueDate = DateTime.UtcNow.AddDays(1)
       };
-      
+
       var todoItem = TodoItem.CreateTodoItem(
           createDto.Title,
           createDto.Description,
           ValidUserId,
           createDto.DueDate
       );
-      
+
       var createdItemDto = new TodoItemDto
       {
-        Id = 1,
+        Id = itemId,
         Title = "New Item",
         Description = "Test Description",
         UserId = ValidUserId,
@@ -141,12 +145,12 @@ namespace ToDo.Tests.Application
       // Assert
       result.Should().NotBeNull();
       result.Should().BeEquivalentTo(createdItemDto);
-      
+
       // Verify interactions
-      _mockRepo.Verify(repo => repo.AddAsync(It.Is<TodoItem>(item => 
-          item.Title == createDto.Title && 
-          item.Description == createDto.Description && 
-          item.UserId == ValidUserId)), 
+      _mockRepo.Verify(repo => repo.AddAsync(It.Is<TodoItem>(item =>
+          item.Title == createDto.Title &&
+          item.Description == createDto.Description &&
+          item.UserId == ValidUserId)),
           Times.Once);
       _mockUnitOfWork.Verify(uow => uow.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
       _mockMapper.Verify(mapper => mapper.Map<TodoItemDto>(It.IsAny<TodoItem>()), Times.Once);
@@ -156,6 +160,7 @@ namespace ToDo.Tests.Application
     public async Task UpdateAsync_ShouldReturnUpdatedTodoItemDto()
     {
       // Arrange
+      var itemId = Guid.NewGuid();
       var existingItem = TodoItem.CreateTodoItem("Old Title", "Old Description", ValidUserId, null);
       var updateDto = new UpdateTodoItemDto
       {
@@ -165,7 +170,7 @@ namespace ToDo.Tests.Application
       };
       var updatedItemDto = new TodoItemDto
       {
-        Id = 1,
+        Id = itemId,
         Title = "Updated Title",
         Description = "Updated Description",
         UserId = ValidUserId,
@@ -174,13 +179,13 @@ namespace ToDo.Tests.Application
         UpdatedAt = DateTime.UtcNow
       };
 
-      _mockRepo.Setup(repo => repo.GetByIdAsync(1)).ReturnsAsync(existingItem);
+      _mockRepo.Setup(repo => repo.GetByIdAsync(itemId)).ReturnsAsync(existingItem);
       _mockRepo.Setup(repo => repo.UpdateAsync(It.IsAny<TodoItem>())).Returns(Task.CompletedTask);
       _mockMapper.Setup(mapper => mapper.Map<TodoItemDto>(It.IsAny<TodoItem>())).Returns(updatedItemDto);
       _mockUnitOfWork.Setup(uow => uow.SaveChangesAsync(It.IsAny<CancellationToken>())).ReturnsAsync(true);
 
       // Act
-      var result = await _service.UpdateAsync(ValidUserId, 1, updateDto);
+      var result = await _service.UpdateAsync(ValidUserId, itemId, updateDto);
 
       // Assert
       result.Should().NotBeNull();
@@ -193,12 +198,13 @@ namespace ToDo.Tests.Application
     public async Task StartTodoItemAsync_ShouldUpdateItemStatusAndSaveChanges()
     {
       // Arrange
+      var itemId = Guid.NewGuid();
       var todoItem = TodoItem.CreateTodoItem("Test Item", null, ValidUserId, null);
-      _mockRepo.Setup(repo => repo.GetByIdAsync(1)).ReturnsAsync(todoItem);
+      _mockRepo.Setup(repo => repo.GetByIdAsync(itemId)).ReturnsAsync(todoItem);
       _mockUnitOfWork.Setup(uow => uow.SaveChangesAsync(It.IsAny<CancellationToken>())).ReturnsAsync(true);
 
       // Act
-      await _service.StartTodoItemAsync(ValidUserId, 1);
+      await _service.StartTodoItemAsync(ValidUserId, itemId);
 
       // Assert
       todoItem.Status.Should().Be(TodoItemStatus.InProgress);
@@ -210,11 +216,12 @@ namespace ToDo.Tests.Application
     public async Task CompleteTodoItemAsync_ShouldUpdateItemStatusToCompleted()
     {
       // Arrange
+      var itemId = Guid.NewGuid();
       var todoItem = TodoItem.CreateTodoItem("Test Item", null, ValidUserId, null);
-      _mockRepo.Setup(repo => repo.GetByIdAsync(1)).ReturnsAsync(todoItem);
+      _mockRepo.Setup(repo => repo.GetByIdAsync(itemId)).ReturnsAsync(todoItem);
 
       // Act
-      await _service.CompleteTodoItemAsync(ValidUserId, 1);
+      await _service.CompleteTodoItemAsync(ValidUserId, itemId);
 
       // Assert
       todoItem.Status.Should().Be(TodoItemStatus.Completed);
@@ -227,12 +234,13 @@ namespace ToDo.Tests.Application
     public async Task AssignTodoItemAsync_ShouldUpdateAssignedUserId()
     {
       // Arrange
+      var itemId = Guid.NewGuid();
       var todoItem = TodoItem.CreateTodoItem("Test Item", null, ValidUserId, null);
-      _mockRepo.Setup(repo => repo.GetByIdAsync(1)).ReturnsAsync(todoItem);
+      _mockRepo.Setup(repo => repo.GetByIdAsync(itemId)).ReturnsAsync(todoItem);
       var newAssignedUserId = "newUser";
 
       // Act
-      await _service.AssignTodoItemAsync(ValidUserId, 1, newAssignedUserId);
+      await _service.AssignTodoItemAsync(ValidUserId, itemId, newAssignedUserId);
 
       // Assert
       todoItem.AssignedUserId.Should().Be(newAssignedUserId);
@@ -243,12 +251,12 @@ namespace ToDo.Tests.Application
     public async Task DeleteAsync_ShouldCallRepositoryDeleteMethodAndUnitOfWork()
     {
       // Arrange
-      var idToDelete = 1;
+      var idToDelete = Guid.NewGuid();
       var existingItem = TodoItem.CreateTodoItem("Test Item", null, ValidUserId, null);
       var idProperty = existingItem.GetType().GetProperty("Id");
       if (idProperty != null)
       {
-          idProperty.SetValue(existingItem, idToDelete);
+        idProperty.SetValue(existingItem, idToDelete);
       }
       _mockRepo.Setup(repo => repo.GetByIdAsync(idToDelete)).ReturnsAsync(existingItem);
       _mockUnitOfWork.Setup(uow => uow.SaveChangesAsync(It.IsAny<CancellationToken>())).ReturnsAsync(true);
@@ -275,13 +283,15 @@ namespace ToDo.Tests.Application
                 TodoItem.CreateTodoItem("Task 1", null, userId, null),
                 TodoItem.CreateTodoItem("Task 2", null, userId, null)
             };
-      todoItems[0].GetType().GetProperty("Id")!.SetValue(todoItems[0], 1);
-      todoItems[1].GetType().GetProperty("Id")!.SetValue(todoItems[1], 2);
+      var id1 = Guid.NewGuid();
+      var id2 = Guid.NewGuid();
+      todoItems[0].GetType().GetProperty("Id")!.SetValue(todoItems[0], id1);
+      todoItems[1].GetType().GetProperty("Id")!.SetValue(todoItems[1], id2);
 
       var todoItemDtos = new List<TodoItemDto>
             {
-                new TodoItemDto { Id = 1, Title = "Task 1", UserId = userId },
-                new TodoItemDto { Id = 2, Title = "Task 2", UserId = userId }
+                new TodoItemDto { Id = id1, Title = "Task 1", UserId = userId },
+                new TodoItemDto { Id = id2, Title = "Task 2", UserId = userId }
             };
 
       var domainPaginatedResult = new PaginatedResult<TodoItem>(todoItems, "nextPageCursor");
@@ -317,11 +327,12 @@ namespace ToDo.Tests.Application
             {
                 TodoItem.CreateTodoItem("Task 3", null, userId, null)
             };
-      todoItems[0].GetType().GetProperty("Id")!.SetValue(todoItems[0], 3);
+      var id3 = Guid.NewGuid();
+      todoItems[0].GetType().GetProperty("Id")!.SetValue(todoItems[0], id3);
 
       var todoItemDtos = new List<TodoItemDto>
             {
-                new TodoItemDto { Id = 3, Title = "Task 3", UserId = userId }
+                new TodoItemDto { Id = id3, Title = "Task 3", UserId = userId }
             };
 
       var domainPaginatedResult = new PaginatedResult<TodoItem>(todoItems, null);
@@ -366,9 +377,9 @@ namespace ToDo.Tests.Application
       // Arrange
       var todoItem = TodoItem.CreateTodoItem("Test Item", "Description", ValidUserId, DateTime.UtcNow.AddDays(1));
       var todoItems = new List<TodoItem> { todoItem };
-      
+
       _mockRepo.Setup(repo => repo.GetByUserIdAsync(ValidUserId)).ReturnsAsync(todoItems);
-      
+
       // Setup mapper to return null, simulating a mapping failure
       _mockMapper.Setup(mapper => mapper.Map<IEnumerable<TodoItemDto>>(It.IsAny<IEnumerable<TodoItem>>()))
                  .Returns(Enumerable.Empty<TodoItemDto>());
@@ -408,35 +419,58 @@ namespace ToDo.Tests.Application
     {
       // Arrange
       var updateDto = new UpdateTodoItemDto { Title = "Updated" };
-      _mockRepo.Setup(repo => repo.GetByIdAsync(1)).ReturnsAsync((TodoItem?)null);
+      _mockRepo.Setup(repo => repo.GetByIdAsync(Guid.NewGuid())).ReturnsAsync((TodoItem?)null);
 
       // Act & Assert
-      await Assert.ThrowsAsync<UnauthorizedTodoItemAccessException>(() => _service.UpdateAsync(ValidUserId, 1, updateDto));
+      await Assert.ThrowsAsync<UnauthorizedTodoItemAccessException>(() => _service.UpdateAsync(ValidUserId, Guid.NewGuid(), updateDto));
     }
 
     [Fact]
     public async Task UpdateAsync_ShouldThrowTodoItemOperationException_WhenRepositoryUpdateFails()
     {
       // Arrange
+      var itemId = Guid.NewGuid();
       var existingItem = TodoItem.CreateTodoItem("Old Title", null, ValidUserId, null);
+      // Set the ID on the existing item
+      var idProperty = existingItem.GetType().GetProperty("Id");
+      idProperty?.SetValue(existingItem, itemId);
+
       var updateDto = new UpdateTodoItemDto { Title = "Updated" };
-      _mockRepo.Setup(repo => repo.GetByIdAsync(1)).ReturnsAsync(existingItem);
-      _mockRepo.Setup(repo => repo.UpdateAsync(It.IsAny<TodoItem>())).ThrowsAsync(new Exception("DB error"));
+
+      _mockRepo.Setup(repo => repo.GetByIdAsync(itemId)).ReturnsAsync(existingItem);
+      _mockRepo.Setup(repo => repo.UpdateAsync(It.IsAny<TodoItem>()))
+          .ThrowsAsync(new Exception("DB error"));
 
       // Act & Assert
-      await Assert.ThrowsAsync<TodoItemOperationException>(() => _service.UpdateAsync(ValidUserId, 1, updateDto));
+      var exception = await Assert.ThrowsAsync<TodoItemOperationException>(
+          () => _service.UpdateAsync(ValidUserId, itemId, updateDto));
+
+      Assert.Equal("Update", exception.Operation);
+      Assert.Contains("DB error", exception.Message);
     }
 
     [Fact]
     public async Task DeleteAsync_ShouldThrowTodoItemOperationException_WhenRepositoryDeleteFails()
     {
       // Arrange
+      var itemId = Guid.NewGuid();
       var existingItem = TodoItem.CreateTodoItem("Test Item", null, ValidUserId, null);
-      _mockRepo.Setup(repo => repo.GetByIdAsync(1)).ReturnsAsync(existingItem);
-      _mockRepo.Setup(repo => repo.DeleteAsync(1)).ThrowsAsync(new Exception("DB error"));
+      var idProperty = existingItem.GetType().GetProperty("Id");
+      idProperty?.SetValue(existingItem, itemId);
+
+      _mockRepo.Setup(repo => repo.GetByIdAsync(itemId)).ReturnsAsync(existingItem);
+      _mockRepo.Setup(repo => repo.DeleteAsync(itemId))
+          .ThrowsAsync(new Exception("Failed to delete item"));
 
       // Act & Assert
-      await Assert.ThrowsAsync<TodoItemOperationException>(() => _service.DeleteAsync(ValidUserId, 1));
+      var exception = await Assert.ThrowsAsync<TodoItemOperationException>(
+          () => _service.DeleteAsync(ValidUserId, itemId));
+
+      Assert.Equal("Delete", exception.Operation);
+      Assert.Contains("'Delete' failed", exception.Message);
+
+      // Verify the delete was attempted
+      _mockRepo.Verify(repo => repo.DeleteAsync(itemId), Times.Once);
     }
 
     [Fact]
@@ -448,7 +482,7 @@ namespace ToDo.Tests.Application
       var todoItems = new List<TodoItem> { TodoItem.CreateTodoItem("Test Item", null, "user123", null) };
       var domainPaginatedResult = new PaginatedResult<TodoItem>(todoItems, null);
       _mockRepo.Setup(repo => repo.GetPagedAsync(userId, It.IsAny<PaginationRequest>())).ReturnsAsync(domainPaginatedResult);
-      _mockMapper.Setup(mapper => mapper.Map<List<TodoItemDto>>(It.IsAny<List<TodoItem>>())).Returns((List<TodoItemDto>?)null);
+      _mockMapper.Setup(mapper => mapper.Map<List<TodoItemDto>>(It.IsAny<List<TodoItem>>())).Returns(new List<TodoItemDto>());
 
       // Act & Assert
       await Assert.ThrowsAsync<InvalidTodoItemMappingException>(() => _service.GetPagedAsync(userId, paginationRequestDto));
@@ -492,15 +526,22 @@ namespace ToDo.Tests.Application
     public async Task UpdateAsync_ShouldThrowWhenUnitOfWorkFails()
     {
       // Arrange
+      var itemId = Guid.NewGuid();
       var existingItem = TodoItem.CreateTodoItem("Test", null, ValidUserId, null);
+      // Set the ID on the existing item
+      var idProperty = existingItem.GetType().GetProperty("Id");
+      idProperty?.SetValue(existingItem, itemId);
+
       var updateDto = new UpdateTodoItemDto { Title = "Updated" };
-      _mockRepo.Setup(repo => repo.GetByIdAsync(1)).ReturnsAsync(existingItem);
+
+      _mockRepo.Setup(repo => repo.GetByIdAsync(itemId)).ReturnsAsync(existingItem);
       _mockUnitOfWork.Setup(uow => uow.SaveChangesAsync(It.IsAny<CancellationToken>()))
                     .ThrowsAsync(new Exception("Database error"));
 
       // Act & Assert
       var exception = await Assert.ThrowsAsync<TodoItemOperationException>(
-          () => _service.UpdateAsync(ValidUserId, 1, updateDto));
+          () => _service.UpdateAsync(ValidUserId, itemId, updateDto));
+
       exception.Operation.Should().Be("Update");
       exception.Message.Should().Contain("Database error");
     }

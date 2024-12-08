@@ -5,8 +5,8 @@ namespace ToDo.Domain.Interfaces;
 /// </summary>
 public interface IEntityBelongsToAggregate
 {
-    /// <summary>
-    /// Gets the ID of the aggregate root this entity belongs to
-    /// </summary>
-    object? AggregateRootId { get; }
-} 
+  /// <summary>
+  /// Gets the ID of the aggregate root this entity belongs to
+  /// </summary>
+  object? AggregateRootId { get; }
+}

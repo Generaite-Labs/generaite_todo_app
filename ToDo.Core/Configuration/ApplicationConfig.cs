@@ -49,11 +49,11 @@ namespace ToDo.Core.Configuration
           .ValidateOnStart();
 
       // Register IOptions<T> for dependency injection
-      services.AddSingleton(resolver => 
+      services.AddSingleton(resolver =>
           resolver.GetRequiredService<IOptions<DatabaseOptions>>().Value);
-      services.AddSingleton(resolver => 
+      services.AddSingleton(resolver =>
           resolver.GetRequiredService<IOptions<ApplicationSettings>>().Value);
-      services.AddSingleton(resolver => 
+      services.AddSingleton(resolver =>
           resolver.GetRequiredService<IOptions<JwtOptions>>().Value);
     }
   }

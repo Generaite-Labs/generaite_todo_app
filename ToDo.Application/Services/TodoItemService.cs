@@ -23,13 +23,13 @@ namespace ToDo.Application.Services
         IMapper mapper,
         IUnitOfWork unitOfWork)
     {
-        _repository = repository;
-        _logger = logger;
-        _mapper = mapper;
-        _unitOfWork = unitOfWork;
+      _repository = repository;
+      _logger = logger;
+      _mapper = mapper;
+      _unitOfWork = unitOfWork;
     }
 
-    public async Task<TodoItemDto?> GetByIdAsync(string userId, int id)
+    public async Task<TodoItemDto?> GetByIdAsync(string userId, Guid id)
     {
       _logger.LogInformation("Getting TodoItem by ID: {TodoItemId} for user: {UserId}", id, userId);
       var todoItem = await _repository.GetByIdAsync(id);
@@ -50,21 +50,21 @@ namespace ToDo.Application.Services
     {
       _logger.LogInformation("Getting all TodoItems for user: {UserId}", userId);
       var todoItems = await _repository.GetByUserIdAsync(userId);
-      
+
       if (todoItems == null || !todoItems.Any())
       {
         _logger.LogInformation("No TodoItems found for user: {UserId}", userId);
         return Enumerable.Empty<TodoItemDto>();
       }
-      
+
       var mappedItems = _mapper.Map<IEnumerable<TodoItemDto>>(todoItems);
-      
+
       if (mappedItems == null || !mappedItems.Any())
       {
         _logger.LogWarning("Failed to map TodoItems to DTOs for user: {UserId}", userId);
         throw new InvalidTodoItemMappingException($"Failed to map TodoItems to DTOs for user: {userId}");
       }
-      
+
       return mappedItems;
     }
 
@@ -85,7 +85,7 @@ namespace ToDo.Application.Services
         var todoItemDto = _mapper.Map<TodoItemDto>(todoItem);
         if (todoItemDto == null)
         {
-            throw new InvalidTodoItemMappingException("Failed to map created TodoItem to TodoItemDto");
+          throw new InvalidTodoItemMappingException("Failed to map created TodoItem to TodoItemDto");
         }
 
         return todoItemDto;
@@ -96,7 +96,7 @@ namespace ToDo.Application.Services
       }
     }
 
-    public async Task<TodoItemDto> UpdateAsync(string userId, int id, UpdateTodoItemDto updateDto)
+    public async Task<TodoItemDto> UpdateAsync(string userId, Guid id, UpdateTodoItemDto updateDto)
     {
       _logger.LogInformation("Updating TodoItem: {TodoItemId} for user: {UserId}, {@UpdateTodoItemDto}", id, userId, updateDto);
       var existingItem = await _repository.GetByIdAsync(id);
@@ -116,18 +116,18 @@ namespace ToDo.Application.Services
       {
         await _repository.UpdateAsync(existingItem);
         await _unitOfWork.SaveChangesAsync();
-        
-        return _mapper.Map<TodoItemDto>(existingItem) ?? 
+
+        return _mapper.Map<TodoItemDto>(existingItem) ??
                throw new InvalidTodoItemMappingException("Failed to map updated TodoItem to TodoItemDto");
       }
       catch (Exception ex)
       {
-        throw new TodoItemOperationException("Update", 
+        throw new TodoItemOperationException("Update",
             $"Failed to update TodoItem with ID {id}: {ex.Message}", ex);
       }
     }
 
-    public async Task StartTodoItemAsync(string userId, int id)
+    public async Task StartTodoItemAsync(string userId, Guid id)
     {
       var todoItem = await GetAndValidateTodoItemAsync(userId, id);
       todoItem.StartTodoItem();
@@ -135,7 +135,7 @@ namespace ToDo.Application.Services
       await _unitOfWork.SaveChangesAsync();
     }
 
-    public async Task StopTodoItemAsync(string userId, int id)
+    public async Task StopTodoItemAsync(string userId, Guid id)
     {
       var todoItem = await GetAndValidateTodoItemAsync(userId, id);
       todoItem.StopTodoItem();
@@ -143,7 +143,7 @@ namespace ToDo.Application.Services
       await _unitOfWork.SaveChangesAsync();
     }
 
-    public async Task CompleteTodoItemAsync(string userId, int id)
+    public async Task CompleteTodoItemAsync(string userId, Guid id)
     {
       var todoItem = await GetAndValidateTodoItemAsync(userId, id);
       todoItem.CompleteTodoItem();
@@ -151,7 +151,7 @@ namespace ToDo.Application.Services
       await _unitOfWork.SaveChangesAsync();
     }
 
-    public async Task AssignTodoItemAsync(string userId, int id, string assignedUserId)
+    public async Task AssignTodoItemAsync(string userId, Guid id, string assignedUserId)
     {
       var todoItem = await GetAndValidateTodoItemAsync(userId, id);
       todoItem.AssignTodoItem(assignedUserId);
@@ -159,7 +159,7 @@ namespace ToDo.Application.Services
       await _unitOfWork.SaveChangesAsync();
     }
 
-    public async Task DeleteAsync(string userId, int id)
+    public async Task DeleteAsync(string userId, Guid id)
     {
       _logger.LogInformation("Deleting TodoItem: {TodoItemId} for user: {UserId}", id, userId);
       var existingItem = await _repository.GetByIdAsync(id);
@@ -205,7 +205,7 @@ namespace ToDo.Application.Services
       };
     }
 
-    private async Task<TodoItem> GetAndValidateTodoItemAsync(string userId, int id)
+    private async Task<TodoItem> GetAndValidateTodoItemAsync(string userId, Guid id)
     {
       var todoItem = await _repository.GetByIdAsync(id);
       if (todoItem == null || todoItem.UserId != userId)

@@ -1,0 +1,45 @@
+﻿@page "/Account/Manage/PersonalData"
+
+@inject IdentityUserAccessor UserAccessor
+
+<PageTitle>Personal Data</PageTitle>
+
+<StatusMessage />
+<RadzenText TextStyle="TextStyle.H3">Personal Data</RadzenText>
+
+<RadzenRow>
+    <RadzenColumn Size="6">
+        <p>Your account contains personal data that you have given us. This page allows you to download or delete that data.</p>
+        <p>
+            <strong>Deleting this data will permanently remove your account, and this cannot be recovered.</strong>
+        </p>
+        <form action="Account/Manage/DownloadPersonalData" method="post">
+            <AntiforgeryToken />
+            <RadzenButton
+                ButtonType="ButtonType.Submit"
+                Text="Download"
+                ButtonStyle="ButtonStyle.Primary"
+                Size="ButtonSize.Medium"
+                class="rz-w-100 rz-my-2" />
+        </form>
+        <p>            
+        <RadzenLink Path="Account/Manage/DeletePersonalData">
+            <RadzenButton
+                Text="Delete data and close my account"
+                ButtonStyle="ButtonStyle.Danger"
+                Size="ButtonSize.Medium"
+                class="rz-w-100 rz-my-2" />
+        </RadzenLink>
+        </p>
+    </RadzenColumn>
+</RadzenRow>
+
+@code {
+    [CascadingParameter]
+    private HttpContext HttpContext { get; set; } = default!;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _ = await UserAccessor.GetRequiredUserAsync(HttpContext);
+    }
+}
