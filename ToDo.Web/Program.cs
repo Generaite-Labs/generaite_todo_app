@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
-using ToDo.Web.Client.Pages;
+using ToDo.Web.Endpoints;
 using ToDo.Web.Components;
 using ToDo.Web.Components.Account;
 using ToDo.Domain.Entities;
@@ -95,5 +94,6 @@ app.MapRazorComponents<App>()
 
 // Add additional endpoints required by the Identity /Account Razor components.
 app.MapAdditionalIdentityEndpoints();
+TenantEndpoints.MapTenantEndpoints(app);
 
 app.Run();
